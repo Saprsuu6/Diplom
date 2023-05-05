@@ -1,0 +1,124 @@
+<resources>
+    <string name="logo" translatable="false">logo</string>
+    <string name="changeTheme" translatable="false">changeTheme</string>
+    <string name="direct" translatable="false">direct</string>
+    <string name="home" translatable="false">home</string>
+    <string name="post_context" translatable="false">post_context</string>
+    <string name="img" translatable="false">img</string>
+    <string name="video" translatable="false">video</string>
+    <string name="back" translatable="false">back</string>
+    <string name="send_comment" translatable="false">send_comment</string>
+    <string name="profille_context" translatable="false">settings</string>
+    <string name="validation_error" translatable="false">validation_error</string>
+
+    <string name="search" translatable="false">search</string>
+    <string name="add_post" translatable="false">add_post</string>
+    <string name="notifications" translatable="false">notifications</string>
+
+    <string name="app_name" translatable="false">ClickShot</string>
+    <string name="label" translatable="false">Label</string>
+    <string name="avatar" translatable="false">Avatar</string>
+
+    <!--    Localisation-->
+    <string name="en" translatable="false">English</string>
+    <string name="uk" translatable="false">Українська</string>
+
+    <!--    Country codes-->
+    <string name="code" translatable="false">+38</string>
+
+    <!--    Emails-->
+    <string name="gmail" translatable="false">\@gmail.com</string>
+
+    <string name="remember_me">Remember me</string>
+    <string name="login_hint_phone">Phone number</string>
+    <string name="login_hint_username">Username</string>
+    <string name="login_hint_email">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="password_forgot">Forgot password?</string>
+    <string name="show_password">Show</string>
+    <string name="hide_password">Hide</string>
+    <string name="log_in">Log In</string>
+    <string name="sing_in">Sin In</string>
+    <string name="send_code">Send code</string>
+    <string name="have_an_acc">Have an account?\t</string>
+    <string name="do_not_have_an_acc">Don\'t have an account?\t</string>
+    <string name="phone_reg">Phone</string>
+    <string name="email_reg">Email</string>
+    <string name="sms">You can receive SMS-notifications from us for security and login purposes</string>
+    <string name="create_account">Create new account</string>
+    <string name="get_login_link">Get new password</string>
+    <string name="can_not_login">Unable to login?</string>
+    <string name="or">OR</string>
+    <string name="error_send_password1">You have to let info</string>
+    <string name="let_name">Add you name</string>
+    <string name="next_step">Next</string>
+    <string name="name">Name</string>
+    <string name="let_password">Add password</string>
+    <string name="birthday_hint">Birthday</string>
+    <string name="birthday_borders">Not correct date</string>
+    <string name="let_birthday">Set your birthday</string>
+    <string name="birthday_error">Not correct year</string>
+    <string name="let_name_info">Add you name to let your friends find you</string>
+    <string name="forgot_pass_info">Enter your email address, username or phone number and we will send you a message to restore access to your account</string>
+    <string name="check_receive_news_letters">Receive emails from ClickShot</string>
+    <string name="check_hide_phone">Hide phone number from other users</string>
+    <string name="check_hide_email">Hide email from other users</string>
+    <string name="add_photo_header">Add profile photo</string>
+    <string name="add_photo_info">Add profile photo to your friends able to know you, or add late</string>
+    <string name="add_photo_btn_info">Add photo</string>
+    <string name="add_btn_skip">Skip</string>
+    <string name="add_contacts_header">Subscribe to your contacts</string>
+    <string name="subscribe_btn">Subscribe</string>
+    <string name="unsubscribe_btn">Unsubscribe</string>
+    <string name="amount_likes_title">Like:</string>
+    <string name="hours_ago">hours ago</string>
+    <string name="comments_title">Comments</string>
+    <string name="add_comment">Add comment…</string>
+
+<!--    User page-->
+    <string name="posts">Posts</string>
+    <string name="followings">Followings</string>
+    <string name="followers">Followers</string>
+
+<!--    Post context-->
+    <string name="remove_post">Remove</string>
+    <string name="hide">Hide</string>
+    <string name="copy_link">Copy link</string>
+    <string name="copy_post_qr">Copy QR</string>
+    <string name="complain_post">Complain</string>
+
+    <!--    Permissions-->
+    <string name="phone_book_permission">Allow to phone book permission</string>
+    <string name="media_permission">Allow to media</string>
+    <string name="permission">Permissions</string>
+    <string name="permission_cancel">Deny</string>
+    <string name="permission_ok">OK</string>
+    <string name="choose_theme">Choose theme</string>
+
+<!--    Other context-->
+    <string name="limit_access">Limit access</string>
+    <string name="block">Block user</string>
+    <string name="hide_my_story">Hide my story</string>
+    <string name="copy_profile_url">Copy profile URL</string>
+    <string name="share_profile">Share profile</string>
+    <string name="qr_code">QR code</string>
+    <string name="setting_context">Settings</string>
+    <string name="statistic_context">Statistic</string>
+    <string name="archive_context">Archive</string>
+    <string name="saved_context">Saved</string>
+    <string name="orders_and_payments_context">Orders and payments</string>
+    <string name="favorites_context">Favorites</string>
+    <string name="ur_contacts_context">Your contacts</string>
+
+    <!--    Validation-->
+    <string name="phone_number_error_length">Number has include 12 numbers</string>
+    <string name="phone_number_error_values">Number has include only numbers 0–9</string>
+    <string name="username_error_start_end">Username has start with letters and end only letters or numbers</string>
+    <string name="username_error_length">1–20 symbols</string>
+    <string name="username_error_spec_symbols">Has include spec symbols only .-</string>
+    <string name="email_error_spec_symbols">Email has to include spec symbols only _.- and only one @</string>
+    <string name="password_error_length">Password has to include 8–32 characters</string>
+    <string name="password_error_letters">Password has to include at least one uppercase letter, one lowercase letter one number 0–9</string>
+    <string name="password_error_numbers">Password has to include one number 0–9</string>
+    <string name="password_error_spec_symbols">Password has to include one special character @$!%*?&amp;</string>
+</resources>

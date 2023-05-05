@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remember_me">Запам\'ятати мене</string>
+    <string name="login_hint_phone">Номер телефону</string>
+    <string name="login_hint_username">Ім\'я корисувача</string>
+    <string name="login_hint_email">Email</string>
+    <string name="password_hint">Пароль</string>
+    <string name="password_forgot">Забув пароль?</string>
+    <string name="show_password">Відобразити</string>
+    <string name="hide_password">Сховати</string>
+    <string name="log_in">Вхід</string>
+    <string name="sing_in">Зареєструватися</string>
+    <string name="send_code">Відправити код</string>
+    <string name="have_an_acc">Маєте аккаунт?\t</string>
+    <string name="do_not_have_an_acc">Не маєте аккаунту?\t</string>
+    <string name="phone_reg">Телефон</string>
+    <string name="email_reg">Email</string>
+    <string name="sms">Ви можете отримувати від нас смс повідомлення з метою безпеки та отримання входу</string>
+    <string name="create_account">Створити новий аккаунт</string>
+    <string name="get_login_link">Отримати новий пароль</string>
+    <string name="can_not_login">Не вдається увійти?</string>
+    <string name="or">ЧИ</string>
+    <string name="let_name">Вкажіть своє ім\'я</string>
+    <string name="let_name_info">Додайте своє ім’я, щоб ваші друзі могли вас знайти</string>
+    <string name="next_step">Далі</string>
+    <string name="name">Ім\'я</string>
+    <string name="let_password">Вкажіть пароль</string>
+    <string name="let_birthday">Вкажіть свій день народження</string>
+    <string name="birthday_hint">День народження</string>
+    <string name="birthday_borders">Не коректна дата</string>
+    <string name="birthday_error">Не коректний рік</string>
+    <string name="error_send_password1">Поле дня введення даних обов\'язкове</string>
+    <string name="forgot_pass_info">Введіть свою електронну адресу, ім\'я користувача або номер телефону, і ми надішлемо вам посилання для відновлення доступу до облікового запису</string>
+    <string name="check_receive_news_letters">Отримувати повідомлення на пошту від ClickShot</string>
+    <string name="check_hide_phone">Приховати номер телефону від інших користувачів</string>
+    <string name="check_hide_email">Приховати email від інших користувачів</string>
+    <string name="add_photo_header">Додайте фото сторінки</string>
+    <string name="add_photo_info">Додайте фото сторінки, щоб ваші друзі могли вас впізнати, чи додайде пізніше</string>
+    <string name="add_photo_btn_info">Додайте фото</string>
+    <string name="add_btn_skip">Попустити</string>
+    <string name="add_contacts_header">Підпишіться на контакти</string>
+    <string name="subscribe_btn">Підписатися</string>
+    <string name="unsubscribe_btn">Відписатися</string>
+    <string name="amount_likes_title">Подобається:</string>
+    <string name="hours_ago">часа тому назад</string>
+    <string name="comments_title">Коментарі</string>
+    <string name="add_comment">Додати коментрій…</string>
+
+    <!--    User page-->
+    <string name="posts">Постів</string>
+    <string name="followings">Підписок</string>
+    <string name="followers">Підписників</string>
+
+    <!--    Post context-->
+    <string name="remove_post">Видалити</string>
+    <string name="hide">Сховати</string>
+    <string name="copy_link">Скопіювати посилання на пост</string>
+    <string name="copy_post_qr">Скопіювати QR посилання на пост</string>
+    <string name="complain_post">Поскаржитися</string>
+
+    <!--    Other context-->
+    <string name="limit_access">Обмежити доступ</string>
+    <string name="block">Заблокувати користувача</string>
+    <string name="hide_my_story">Сховати мої історії</string>
+    <string name="copy_profile_url">Копіювати URL профіля</string>
+    <string name="share_profile">Поділитися профілем</string>
+    <string name="qr_code">QR код</string>
+    <string name="setting_context">Налаштування</string>
+    <string name="statistic_context">Статистика</string>
+    <string name="archive_context">Архів</string>
+    <string name="saved_context">Збережене</string>
+    <string name="orders_and_payments_context">Замовлення та платежі</string>
+    <string name="favorites_context">Предпочетаемое</string>
+    <string name="ur_contacts_context">Контактні данні</string>
+
+    <!--    Permissions-->
+    <string name="phone_book_permission">Дозволити доступ до телефонної книги</string>
+    <string name="media_permission">Дозволити доступ до медіа ресурсів</string>
+    <string name="permission">Дозволення</string>
+    <string name="permission_cancel">Відхилити</string>
+    <string name="permission_ok">OK</string>
+    <string name="choose_theme">Оберіть тему</string>
+
+    <!--    Validation-->
+    <string name="phone_number_error_length">Номер телефону потрібен містити 12 чисел</string>
+    <string name="phone_number_error_values">Номер телефону потрібен містити числа 0–9</string>
+    <string name="username_error_start_end">Username потрібен починатися тільки з букв та закінчюватися тільки буквами або числами</string>
+    <string name="username_error_length">1–20 символів</string>
+    <string name="username_error_spec_symbols">Має містити тільки спец-символи .-</string>
+    <string name="email_error_spec_symbols">Email має містити тільки спец-символи _.- та один @</string>
+    <string name="password_error_length">Пароль має містити 8–32 символи</string>
+    <string name="password_error_letters">Пароль має принаймні одну велику, одну малу літери та число 0–9</string>
+    <string name="password_error_numbers">Пароль має містити число 0–9</string>
+    <string name="password_error_spec_symbols">Пароль повинен містити один спеціальний символ @$!%*?&amp;</string>
+</resources>

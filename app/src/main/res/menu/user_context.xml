@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/settings"
+        android:title="@string/setting_context" />
+    <item android:id="@+id/statistic"
+        android:title="@string/statistic_context" />
+    <item android:id="@+id/archive"
+        android:title="@string/archive_context" />
+    <item android:id="@+id/saved"
+        android:title="@string/saved_context" />
+    <item android:id="@+id/payments"
+        android:title="@string/orders_and_payments_context" />
+    <item android:id="@+id/favorites"
+        android:title="@string/favorites_context" />
+    <item android:id="@+id/ur_contacts"
+        android:title="@string/ur_contacts_context" />
+</menu>

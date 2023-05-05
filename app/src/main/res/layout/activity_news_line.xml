@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/news_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_list_main"
+    android:gravity="top|center"
+    android:orientation="vertical"
+    android:theme="@style/Theme.Instagram.System"
+    tools:context=".authentication.Registration">
+
+    <include layout="@layout/languages_spinner" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp"
+            tools:ignore="UselessParent">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/logo"
+                android:src="@drawable/instagram_logo" />
+
+            <LinearLayout
+
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:orientation="horizontal"
+                tools:ignore="RtlHardcoded">
+
+                <ImageView
+                    android:id="@+id/change_main_theme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="5dp"
+                    android:contentDescription="@string/changeTheme" />
+
+                <ImageView
+                    android:id="@+id/change_theme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="5dp"
+                    android:contentDescription="@string/changeTheme"
+                    android:src="@drawable/change_theme" />
+
+                <ImageView
+                    android:id="@+id/direct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="5dp"
+                    android:contentDescription="@string/direct"
+                    android:src="@drawable/direct" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!--        <View-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_marginVertical="10dp"-->
+        <!--            android:layout_height="1dp"-->
+        <!--            android:background="@drawable/separator"/>-->
+
+        <!--        <HorizontalScrollView-->
+        <!--            android:id="@+id/scroll_view"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content">-->
+
+        <!--            <LinearLayout-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:orientation="horizontal">-->
+
+        <!--                <androidx.recyclerview.widget.RecyclerView-->
+        <!--                    android:id="@+id/recycler_view"-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:scrollbars="horizontal"-->
+        <!--                    tools:listitem="@layout/list_stories" />-->
+
+        <!--                <io.supercharge.shimmerlayout.ShimmerLayout-->
+        <!--                    android:id="@+id/skeleton"-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="match_parent"-->
+        <!--                    android:layout_gravity="center_horizontal"-->
+        <!--                    android:visibility="visible"-->
+        <!--                    app:shimmer_animation_duration="1200">-->
+
+        <!--                    <LinearLayout-->
+        <!--                        android:layout_width="wrap_content"-->
+        <!--                        android:layout_height="wrap_content"-->
+        <!--                        android:orientation="horizontal">-->
+
+        <!--                        <include layout="@layout/skeleton_ava_layout" />-->
+
+        <!--                        <include layout="@layout/skeleton_ava_layout" />-->
+
+        <!--                        <include layout="@layout/skeleton_ava_layout" />-->
+
+        <!--                    </LinearLayout>-->
+
+        <!--                </io.supercharge.shimmerlayout.ShimmerLayout>-->
+
+        <!--            </LinearLayout>-->
+
+        <!--        </HorizontalScrollView>-->
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    tools:ignore="RtlSymmetry"
+                    tools:listitem="@layout/list_item_post" />
+
+                <io.supercharge.shimmerlayout.ShimmerLayout
+                    android:id="@+id/skeleton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible"
+                    app:shimmer_animation_duration="1200">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                    </LinearLayout>
+
+                </io.supercharge.shimmerlayout.ShimmerLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <include layout="@layout/bottom_menu" />
+
+    </LinearLayout>
+
+</LinearLayout>

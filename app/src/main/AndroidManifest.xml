@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Instagram.Main_theme"
+        tools:targetApi="31">
+        <activity
+            android:name=".main_process.ChatList"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".main_process.SelfPage"
+            android:exported="true"
+            android:screenOrientation="locked" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".main_process.Comments"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".main_process.NewsLine"
+            android:exported="true"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name=".authentication.after_reg.FindContactsFriends"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".authentication.after_reg.SetAvatar"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".authentication.after_reg.SetBirthday"
+            android:exported="true"
+            android:screenOrientation="locked">
+        </activity>
+        <activity
+            android:name=".authentication.after_reg.SetPassword"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".authentication.after_reg.SetName"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".authentication.ForgotPassword"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".authentication.Registration"
+            android:exported="true"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name=".authentication.Authorisation"
+            android:exported="true"
+            android:screenOrientation="locked">
+
+        </activity>
+    </application>
+
+</manifest>
