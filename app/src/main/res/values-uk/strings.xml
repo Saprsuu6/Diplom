@@ -18,6 +18,8 @@
     <string name="sms">Ви можете отримувати від нас смс повідомлення з метою безпеки та отримання входу</string>
     <string name="create_account">Створити новий аккаунт</string>
     <string name="get_login_link">Отримати новий пароль</string>
+    <string name="mail_code">код</string>
+    <string name="confirm_code">Підтвердити код</string>
     <string name="can_not_login">Не вдається увійти?</string>
     <string name="or">ЧИ</string>
     <string name="let_name">Вкажіть своє ім\'я</string>
@@ -31,6 +33,9 @@
     <string name="birthday_error">Не коректний рік</string>
     <string name="error_send_password1">Поле дня введення даних обов\'язкове</string>
     <string name="forgot_pass_info">Введіть свою електронну адресу, ім\'я користувача або номер телефону, і ми надішлемо вам посилання для відновлення доступу до облікового запису</string>
+    <string name="confirm_code_text">Підтведіть код який ми вам вислали у єлектронному посиланні яку ви вказували прри реєстрації</string>
+    <string name="create_new_password_after_forgot">Створіть новий пароль</string>
+    <string name="create_new_password_after_forgot_info">Схоже, ви забули попередній пароль. Введіть новий пароль</string>
     <string name="check_receive_news_letters">Отримувати повідомлення на пошту від ClickShot</string>
     <string name="check_hide_phone">Приховати номер телефону від інших користувачів</string>
     <string name="check_hide_email">Приховати email від інших користувачів</string>
@@ -80,6 +85,14 @@
     <string name="permission_cancel">Відхилити</string>
     <string name="permission_ok">OK</string>
     <string name="choose_theme">Оберіть тему</string>
+
+    <!-- New post -->
+    <string name="new_post">Новий пост</string>
+    <string name="preview">Прев\'ю</string>
+    <string name="add_description">Додати опис</string>
+    <string name="tag_people">Відмітити людей</string>
+    <string name="add_a_place">Додати місце</string>
+    <string name="postpone_publication">Відкласти публікацію</string>
 
     <!--    Validation-->
     <string name="phone_number_error_length">Номер телефону потрібен містити 12 чисел</string>

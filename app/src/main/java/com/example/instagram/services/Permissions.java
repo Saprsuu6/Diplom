@@ -40,7 +40,7 @@ public class Permissions {
         linearLayout.addView(mediaCheckBox);
 
         return new AlertDialog.Builder(context)
-                .setMessage(resources.getString(R.string.permission_ok)) // set Locale Resources
+                .setMessage(resources.getString(R.string.media_permission)) // set Locale Resources
                 .setCancelable(false)
                 .setView(linearLayout)
                 .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> {

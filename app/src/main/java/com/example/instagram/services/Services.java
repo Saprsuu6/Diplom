@@ -30,6 +30,7 @@ public class Services {
         return bytes;
     }
 
+    // registration user
     public static void addUser(User user) throws IOException, JSONException {
         URL url = new URL(Services.BASE_URL + "/add");
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -48,7 +49,6 @@ public class Services {
 
         body.flush();
         body.close();
-        // endregion
 
         int responseCode = urlConnection.getResponseCode();
         if (responseCode != 200) {
@@ -68,6 +68,7 @@ public class Services {
         // endregion
     }
 
+    // check if user exist
     public static boolean checkExistUser(User user) throws Exception {
         URL url = new URL(Services.BASE_URL + "/authorize");
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -92,5 +93,27 @@ public class Services {
         }
 
         return true;
+    }
+
+    // send login to find user
+    public static void sendToForgotPassword(User user) throws Exception {
+        URL url = new URL(Services.BASE_URL + "/confirm");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+        urlConnection.setDoOutput(true); // connection will be send data (send body)
+        urlConnection.setDoInput(true); // connection will get data (get body)
+        urlConnection.setRequestMethod("GET");
+        urlConnection.setRequestProperty("Content-Type", "application/json");
+        urlConnection.setRequestProperty("Accept", "*/*");
+        urlConnection.setChunkedStreamingMode(0); // not fragment thread
+
+        OutputStream body = urlConnection.getOutputStream();
+        String str = user.getJSONLogin().toString();
+
+        body.write(str.getBytes());
+
+        body.flush();
+        body.close();
+        // endregion
     }
 }

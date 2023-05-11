@@ -10,6 +10,8 @@
     <string name="send_comment" translatable="false">send_comment</string>
     <string name="profille_context" translatable="false">settings</string>
     <string name="validation_error" translatable="false">validation_error</string>
+    <string name="close" translatable="false">close</string>
+    <string name="done" translatable="false">done</string>
 
     <string name="search" translatable="false">search</string>
     <string name="add_post" translatable="false">add_post</string>
@@ -46,7 +48,9 @@
     <string name="email_reg">Email</string>
     <string name="sms">You can receive SMS-notifications from us for security and login purposes</string>
     <string name="create_account">Create new account</string>
+    <string name="mail_code">code</string>
     <string name="get_login_link">Get new password</string>
+    <string name="confirm_code">Confirm code</string>
     <string name="can_not_login">Unable to login?</string>
     <string name="or">OR</string>
     <string name="error_send_password1">You have to let info</string>
@@ -60,6 +64,9 @@
     <string name="birthday_error">Not correct year</string>
     <string name="let_name_info">Add you name to let your friends find you</string>
     <string name="forgot_pass_info">Enter your email address, username or phone number and we will send you a message to restore access to your account</string>
+    <string name="confirm_code_text">Confirm code that we have sent to you in e-mail what you have indicated to registration</string>
+    <string name="create_new_password_after_forgot">Create new password</string>
+    <string name="create_new_password_after_forgot_info">It looks like you forgot your previous password. Enter a new password</string>
     <string name="check_receive_news_letters">Receive emails from ClickShot</string>
     <string name="check_hide_phone">Hide phone number from other users</string>
     <string name="check_hide_email">Hide email from other users</string>
@@ -75,12 +82,12 @@
     <string name="comments_title">Comments</string>
     <string name="add_comment">Add comment…</string>
 
-<!--    User page-->
+    <!--    User page-->
     <string name="posts">Posts</string>
     <string name="followings">Followings</string>
     <string name="followers">Followers</string>
 
-<!--    Post context-->
+    <!--    Post context-->
     <string name="remove_post">Remove</string>
     <string name="hide">Hide</string>
     <string name="copy_link">Copy link</string>
@@ -95,7 +102,7 @@
     <string name="permission_ok">OK</string>
     <string name="choose_theme">Choose theme</string>
 
-<!--    Other context-->
+    <!--    Other context-->
     <string name="limit_access">Limit access</string>
     <string name="block">Block user</string>
     <string name="hide_my_story">Hide my story</string>
@@ -110,6 +117,14 @@
     <string name="favorites_context">Favorites</string>
     <string name="ur_contacts_context">Your contacts</string>
 
+    <!-- New post -->
+    <string name="new_post">New Post</string>
+    <string name="preview">preview</string>
+    <string name="add_description">Add description</string>
+    <string name="tag_people">Tag people</string>
+    <string name="add_a_place">add a place</string>
+    <string name="postpone_publication">Postpone publication</string>
+
     <!--    Validation-->
     <string name="phone_number_error_length">Number has include 12 numbers</string>
     <string name="phone_number_error_values">Number has include only numbers 0–9</string>
@@ -121,4 +136,5 @@
     <string name="password_error_letters">Password has to include at least one uppercase letter, one lowercase letter one number 0–9</string>
     <string name="password_error_numbers">Password has to include one number 0–9</string>
     <string name="password_error_spec_symbols">Password has to include one special character @$!%*?&amp;</string>
+
 </resources>

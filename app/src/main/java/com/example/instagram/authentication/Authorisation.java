@@ -243,13 +243,13 @@ public class Authorisation extends AppCompatActivity {
                     Validations.validatePassword(editTexts[1].getText().toString(), resources);
 
                     String temp = loginTypes.getSelectedItem().toString();
-                    if (loginTypes.getSelectedItem() == "Phone number" || loginTypes.getSelectedItem() == "Номер телефону") {
+                    if (loginTypes.getSelectedItem().equals("Phone number") || loginTypes.getSelectedItem().equals("Номер телефону")) {
                         Validations.validatePhoneNumber(editTexts[0].getText().toString(), textViews[3].getText().toString(), resources);
                         TransitUser.user.setPhoneNumber(editTexts[0].getText().toString());
                     } else if (loginTypes.getSelectedItem().equals("Username") || loginTypes.getSelectedItem().equals("Ім\\'я корисувача")) {
                         Validations.validateUserName(editTexts[0].getText().toString(), resources);
                         TransitUser.user.setNickName(editTexts[0].getText().toString());
-                    } else if (loginTypes.getSelectedItem() == "Email") {
+                    } else if (loginTypes.getSelectedItem().equals("Email")) {
                         Validations.validateEmail(editTexts[0].getText().toString(), textViews[4].getText().toString(), resources);
                         TransitUser.user.setEmail(editTexts[0].getText().toString());
                     }
@@ -288,7 +288,26 @@ public class Authorisation extends AppCompatActivity {
             }
         });
 
-        textViews[0].setOnClickListener(v -> startActivity(Intents.getForgotPassword()));
+        textViews[0].setOnClickListener(v -> {
+            Thread thread = new Thread() {
+                public void run() {
+                    try {
+                        Services.sendToForgotPassword(TransitUser.user);
+                    } catch (Exception ignored) {
+                    }
+                }
+            };
+
+            thread.start();
+
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            startActivity(Intents.getForgotPassword());
+        });
 
         textViews[2].setOnClickListener(v -> startActivity(Intents.getRegistration()));
     }

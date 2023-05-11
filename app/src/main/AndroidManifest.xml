@@ -15,11 +15,7 @@
         android:theme="@style/Theme.Instagram.Main_theme"
         tools:targetApi="31">
         <activity
-            android:name=".main_process.ChatList"
-            android:exported="true"
-            android:screenOrientation="locked" />
-        <activity
-            android:name=".main_process.SelfPage"
+            android:name=".authentication.CreateNewPassword"
             android:exported="true"
             android:screenOrientation="locked" >
             <intent-filter>
@@ -29,15 +25,25 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".main_process.CreatePost"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".main_process.ChatList"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
+            android:name=".main_process.SelfPage"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
             android:name=".main_process.Comments"
             android:exported="true"
             android:screenOrientation="locked" />
         <activity
             android:name=".main_process.NewsLine"
             android:exported="true"
-            android:screenOrientation="locked">
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.after_reg.FindContactsFriends"
             android:exported="true"
@@ -45,12 +51,11 @@
         <activity
             android:name=".authentication.after_reg.SetAvatar"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked"/>
         <activity
             android:name=".authentication.after_reg.SetBirthday"
             android:exported="true"
-            android:screenOrientation="locked">
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.after_reg.SetPassword"
             android:exported="true"
@@ -66,14 +71,11 @@
         <activity
             android:name=".authentication.Registration"
             android:exported="true"
-            android:screenOrientation="locked">
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.Authorisation"
             android:exported="true"
             android:screenOrientation="locked">
-
         </activity>
     </application>
 

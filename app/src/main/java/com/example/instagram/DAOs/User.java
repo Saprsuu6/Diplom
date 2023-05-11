@@ -144,4 +144,11 @@ public class User {
 
         return jsonObject;
     }
+
+    public JSONObject getJSONLogin() throws  JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("login", nickName);
+
+        return jsonObject;
+    }
 }
