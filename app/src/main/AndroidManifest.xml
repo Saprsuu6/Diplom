@@ -18,11 +18,7 @@
             android:name=".authentication.CreateNewPassword"
             android:exported="true"
             android:screenOrientation="locked" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".main_process.CreatePost"
@@ -67,7 +63,10 @@
         <activity
             android:name=".authentication.ForgotPassword"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
+
         <activity
             android:name=".authentication.Registration"
             android:exported="true"
@@ -76,6 +75,11 @@
             android:name=".authentication.Authorisation"
             android:exported="true"
             android:screenOrientation="locked">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

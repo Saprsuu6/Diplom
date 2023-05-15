@@ -1,6 +1,10 @@
 package com.example.instagram.services;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.instagram.DAOs.User;
 
@@ -16,104 +20,79 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class Services {
     private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
 
-    private static ByteArrayOutputStream readResponse(InputStream reader) throws IOException {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        byte[] chunk = new byte[4096];
-        int len;
-        while ((len = reader.read(chunk)) != -1) {
-            bytes.write(chunk, 0, len);
-        }
-
-        return bytes;
-    }
-
     // registration user
-    public static void addUser(User user) throws IOException, JSONException {
-        URL url = new URL(Services.BASE_URL + "/add");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    public static void addUser(Callback<String> callback) throws IOException, JSONException {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-        urlConnection.setDoOutput(true); // connection will be send data (send body)
-        urlConnection.setDoInput(true); // connection will get data (get body)
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setChunkedStreamingMode(0); // not fragment thread
+        // create main interface
+        SendToAddUser mainInterface = retrofit.create(SendToAddUser.class);
 
-        OutputStream body = urlConnection.getOutputStream();
-        String str = user.getJSON().toString();
-
-        body.write(str.getBytes());
-
-        body.flush();
-        body.close();
-
-        int responseCode = urlConnection.getResponseCode();
-        if (responseCode != 200) {
-            Log.d("postChatMessage", "Response code: " + responseCode);
-            return;
-        }
-        // endregion
-
-        // region Response
-        ByteArrayOutputStream byteArrayOutputStreamRead = readResponse(urlConnection.getInputStream());
-
-        Log.d("addUserResponse", new String(byteArrayOutputStreamRead.toByteArray(), StandardCharsets.UTF_8));
-
-        byteArrayOutputStreamRead.close();
-        byteArrayOutputStreamRead.close();
-        urlConnection.disconnect();
-        // endregion
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSON().toString());
+        call.enqueue(callback);
     }
 
-    // check if user exist
-    public static boolean checkExistUser(User user) throws Exception {
-        URL url = new URL(Services.BASE_URL + "/authorize");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    public static void authorizeUser(Callback<String> callback) throws JSONException {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-        urlConnection.setDoOutput(true); // connection will be send data (send body)
-        urlConnection.setDoInput(true); // connection will get data (get body)
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setChunkedStreamingMode(0); // not fragment thread
+        // create main interface
+        SendToCheckExistUser mainInterface = retrofit.create(SendToCheckExistUser.class);
 
-        OutputStream body = urlConnection.getOutputStream();
-        String str = user.getJSONToCheck().toString();
-        body.write(str.getBytes());
-
-        body.flush();
-        body.close();
-
-        int responseCode = urlConnection.getResponseCode();
-        if (responseCode != 200) {
-            throw new Exception("User are not authorized");
-        }
-
-        return true;
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONToCheck().toString());
+        call.enqueue(callback);
     }
 
     // send login to find user
-    public static void sendToForgotPassword(User user) throws Exception {
-        URL url = new URL(Services.BASE_URL + "/confirm");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    public static void sendToForgotPassword(Callback<String> callback) throws Exception {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-        urlConnection.setDoOutput(true); // connection will be send data (send body)
-        urlConnection.setDoInput(true); // connection will get data (get body)
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setChunkedStreamingMode(0); // not fragment thread
+        // create main interface
+        SendToForgotPassword mainInterface = retrofit.create(SendToForgotPassword.class);
 
-        OutputStream body = urlConnection.getOutputStream();
-        String str = user.getJSONLogin().toString();
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONLogin().toString());
+        call.enqueue(callback);
+    }
 
-        body.write(str.getBytes());
+    public static void sendToCheckUsedLickInMail(Callback<String> callback) throws Exception {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-        body.flush();
-        body.close();
-        // endregion
+        // create main interface
+        SendToCheckUsedLinkInMail mainInterface = retrofit.create(SendToCheckUsedLinkInMail.class);
+
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getNickName());
+        call.enqueue(callback);
+    }
+
+    public static void sendToCheckUserCode(Callback<String> callback, String code) {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
+
+        // create main interface
+        SendToCheckUserCode mainInterface = retrofit.create(SendToCheckUserCode.class);
+
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getNickName(), code);
+        call.enqueue(callback);
+    }
+
+    public static void sendNewPasswordAfterForgot(Callback<String> callback) throws JSONException {
+        Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
+
+        // create main interface
+        SendNewPasswordAfterForgot mainInterface = retrofit.create(SendNewPasswordAfterForgot.class);
+
+        // initialize call
+        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONAfterForgotPassword().toString());
+        call.enqueue(callback);
     }
 }

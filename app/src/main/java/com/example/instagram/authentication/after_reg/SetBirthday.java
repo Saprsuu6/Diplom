@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
@@ -36,6 +37,10 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SetBirthday extends AppCompatActivity {
     private Resources resources;
@@ -162,23 +167,42 @@ public class SetBirthday extends AppCompatActivity {
             if (editTexts[0].length() != 0) {
                 TransitUser.user.setBirthday(selectedDate.getTime());
 
-                // region send data to server
-                Thread thread = new Thread(){
-                    public void run(){
-                        try {
-                            Services.addUser(TransitUser.user);
-                        } catch (JSONException exception) {
-                            Log.e("JSONException", exception.getMessage());
-                        } catch (IOException exception) {
-                            Log.e("IOException", exception.getMessage());
+//                // region send data to server
+//                Thread thread = new Thread(){
+//                    public void run(){
+//                        try {
+//                            Services.addUser(TransitUser.user);
+//                        } catch (JSONException exception) {
+//                            Log.e("JSONException", exception.getMessage());
+//                        } catch (IOException exception) {
+//                            Log.e("IOException", exception.getMessage());
+//                        }
+//                    }
+//                };
+//
+//                thread.start();
+//                //endregion
+
+                try {
+                    Services.addUser(new Callback<String>() {
+                        @Override
+                        public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
+                            assert response != null;
+                            if (response.code() == 200) {
+                                startActivity(Intents.getNewsList());
+                            }
                         }
-                    }
-                };
 
-                thread.start();
-                //endregion
+                        @Override
+                        public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
 
-                startActivity(Intents.getSetAvatar());
+                        }
+                    });
+                } catch (IOException | JSONException e) {
+                    System.out.println(e.getMessage());
+                }
+
+                //startActivity(Intents.getSetAvatar());
             } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }

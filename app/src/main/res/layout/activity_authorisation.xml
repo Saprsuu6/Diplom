@@ -125,7 +125,7 @@
                     android:background="@drawable/validation_alert"
                     android:contentDescription="@string/validation_error"
                     android:src="@drawable/validation_error"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/auth_log_in"

@@ -148,11 +148,11 @@ public class Registration extends AppCompatActivity {
                     switch (infoType) {
                         case "phone":
                             Validations.validatePhoneNumber(editTexts[0].getText().toString(), textViews[4].getText().toString(), resources);
-                            TransitUser.user.setPhoneNumber(editTexts[0].getText().toString());
+                            TransitUser.user.setPhoneNumber(textViews[4].getText() + editTexts[0].getText().toString());
                             break;
                         case "email":
                             Validations.validateEmail(editTexts[0].getText().toString(), textViews[5].getText().toString(), resources);
-                            TransitUser.user.setEmail(editTexts[0].getText().toString());
+                            TransitUser.user.setEmail(editTexts[0].getText().toString() + textViews[5].getText());
                             break;
                     }
 

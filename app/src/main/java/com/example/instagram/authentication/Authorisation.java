@@ -3,7 +3,6 @@ package com.example.instagram.authentication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
@@ -11,14 +10,12 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,26 +23,30 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
-import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.main_process.NewsLine;
-import com.example.instagram.services.Services;
-import com.example.instagram.services.Validations;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
+import com.example.instagram.services.SendToCheckExistUser;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
-import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
-import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class Authorisation extends AppCompatActivity {
     private Resources resources;
@@ -62,7 +63,6 @@ public class Authorisation extends AppCompatActivity {
     private CheckBox rememberMe;
     private LinearLayout authorisation;
     private boolean passwordEyeState = false;
-    private boolean userExists = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +71,12 @@ public class Authorisation extends AppCompatActivity {
 
         findViews();
         setIntents();
-        if (setRememberMe())
-            return;
+        try {
+            if (setRememberMe())
+                return;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         setUiVisibility();
 
@@ -93,11 +97,33 @@ public class Authorisation extends AppCompatActivity {
             setPermissions();
     }
 
-    private boolean setRememberMe() {
+    private boolean setRememberMe() throws JSONException {
         boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
 
+
         if (rememberMeFlag) {
-            // TODO check sp to authorisated user
+            TransitUser.user.setNickName(com.example.instagram.services.SharedPreferences.loadStringSP(this, "nickName"));
+            TransitUser.user.setPhoneNumber(com.example.instagram.services.SharedPreferences.loadStringSP(this, "phone"));
+            TransitUser.user.setEmailCode(com.example.instagram.services.SharedPreferences.loadStringSP(this, "email"));
+            TransitUser.user.setPassword(com.example.instagram.services.SharedPreferences.loadStringSP(this, "password"));
+
+            Services.authorizeUser(new Callback<String>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.code() == 200) {
+                        startActivity(Intents.getNewsList());
+                        finish();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    System.out.println(t.getMessage());
+                }
+            });
+
             startActivity(Intents.getNewsList());
             finish();
             return true;
@@ -163,8 +189,6 @@ public class Authorisation extends AppCompatActivity {
             }
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
-        rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked));
 
         AdapterView.OnItemSelectedListener itemLoginTypeSelectedListener = new AdapterView.OnItemSelectedListener() {
             @SuppressLint("UseCompatLoadingForDrawables")
@@ -242,7 +266,6 @@ public class Authorisation extends AppCompatActivity {
                 try {
                     Validations.validatePassword(editTexts[1].getText().toString(), resources);
 
-                    String temp = loginTypes.getSelectedItem().toString();
                     if (loginTypes.getSelectedItem().equals("Phone number") || loginTypes.getSelectedItem().equals("Номер телефону")) {
                         Validations.validatePhoneNumber(editTexts[0].getText().toString(), textViews[3].getText().toString(), resources);
                         TransitUser.user.setPhoneNumber(editTexts[0].getText().toString());
@@ -257,29 +280,31 @@ public class Authorisation extends AppCompatActivity {
                     TransitUser.user.setPassword(editTexts[1].getText().toString());
 
                     setValidationError(false, "");
-                    // TODO if remember me shave user datas in sp
+                    // TODO if remember me shave user data in sp
 
-                    // region send data to server
-                    Thread thread = new Thread() {
-                        public void run() {
-                            try {
-                                userExists = Services.checkExistUser(TransitUser.user);
-                            } catch (Exception e) {
-                                runOnUiThread(() -> {
-                                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
+                    if (rememberMe.isChecked()) {
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", rememberMe.isChecked());
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "nickName", TransitUser.user.getNickName());
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "phone", TransitUser.user.getPhoneNumber());
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "email", TransitUser.user.getEmail());
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "password", TransitUser.user.getPassword());
+                    }
+                    Services.authorizeUser(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.code() == 200) {
+                                startActivity(Intents.getNewsList());
+                                finish();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    };
 
-                    thread.start();
-                    thread.join();
-                    //endregion
-
-                    if (userExists) {
-                        startActivity(Intents.getNewsList());
-                        finish();
-                    }
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            System.out.println(t.getMessage());
+                        }
+                    });
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
@@ -289,24 +314,27 @@ public class Authorisation extends AppCompatActivity {
         });
 
         textViews[0].setOnClickListener(v -> {
-            Thread thread = new Thread() {
-                public void run() {
-                    try {
-                        Services.sendToForgotPassword(TransitUser.user);
-                    } catch (Exception ignored) {
-                    }
+            if (TransitUser.user.getNickName() != null) {
+                try {
+                    Services.sendToForgotPassword(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            System.out.println(response.body());
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            System.out.println(t.getMessage());
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
-            };
 
-            thread.start();
-
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                startActivity(Intents.getForgotPassword());
+            } else {
+                Toast.makeText(getApplicationContext(), resources.getString(R.string.auth_attempt), Toast.LENGTH_SHORT).show();
             }
-
-            startActivity(Intents.getForgotPassword());
         });
 
         textViews[2].setOnClickListener(v -> startActivity(Intents.getRegistration()));

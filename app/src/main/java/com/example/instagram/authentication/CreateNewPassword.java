@@ -1,9 +1,12 @@
 package com.example.instagram.authentication;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
@@ -25,9 +28,16 @@ import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
+
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CreateNewPassword extends AppCompatActivity {
     private Resources resources;
@@ -50,6 +60,7 @@ public class CreateNewPassword extends AppCompatActivity {
 
         resources = getResources();
         findViews();
+        setIntents();
 
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
@@ -58,6 +69,12 @@ public class CreateNewPassword extends AppCompatActivity {
 
         setAnimations(createNewPassword).start();
         setListeners();
+    }
+
+    private void setIntents() {
+        if (Intents.getAuthorisation() == null) {
+            Intents.setAuthorisation(new Intent(this, Authorisation.class));
+        }
     }
 
     @Override
@@ -78,7 +95,8 @@ public class CreateNewPassword extends AppCompatActivity {
         editTexts = new EditText[]{findViewById(R.id.info_for_password)};
         buttons = new Button[]{findViewById(R.id.next), findViewById(R.id.auth_eye)};
         textViews = new TextView[]{findViewById(R.id.create_new_password_title),
-                findViewById(R.id.create_new_password_info)};
+                findViewById(R.id.create_new_password_info), findViewById(R.id.reg_question),
+                findViewById(R.id.link_log_in)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
     }
 
@@ -139,13 +157,36 @@ public class CreateNewPassword extends AppCompatActivity {
                     setValidationError(false, "");
                     TransitUser.user.setPassword(editTexts[0].getText().toString().trim());
 
-                    // TODO sent to the back end new password
+                    Services.sendNewPasswordAfterForgot(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            assert response.body() != null;
+                            if (!response.body().contains("denied")) {
+                                startActivity(Intents.getAuthorisation());
+                                finish();
+                            }
+                            else {
+                                Toast.makeText(getApplicationContext(), resources.getString(R.string.same_password), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            assert t != null;
+                            System.out.println(t.getMessage());
+                        }
+                    });
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
             } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }
+        });
+
+        textViews[3].setOnClickListener(v -> {
+            startActivity(Intents.getAuthorisation());
+            finish();
         });
     }
 
@@ -169,6 +210,8 @@ public class CreateNewPassword extends AppCompatActivity {
 
         textViews[0].setText(resources.getString(R.string.create_new_password_after_forgot));
         textViews[1].setText(resources.getString(R.string.create_new_password_after_forgot_info));
+        textViews[2].setText(resources.getString(R.string.have_an_acc));
+        textViews[3].setText(resources.getString(R.string.log_in));
 
         editTexts[0].setHint(resources.getString(R.string.password_hint));
     }

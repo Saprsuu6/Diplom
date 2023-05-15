@@ -48,6 +48,9 @@ public class User {
         return otherInfo;
     }
 
+    public String getEmailCode() {
+        return emailCode;
+    }
 
     // endregion
     // region setters
@@ -87,9 +90,14 @@ public class User {
         this.otherInfo = otherInfo;
     }
 
+    public void setEmailCode(String emailCode) {
+        this.emailCode = emailCode;
+    }
+
     // endregion
     private String name;
     private String nickName;
+    private String emailCode;
     private String phoneNumber = "NO_PHONE";
     private String password;
     private String email = "empty@i.ua";
@@ -145,9 +153,19 @@ public class User {
         return jsonObject;
     }
 
-    public JSONObject getJSONLogin() throws  JSONException {
+    public JSONObject getJSONLogin() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("login", nickName);
+
+        return jsonObject;
+    }
+
+    public JSONObject getJSONAfterForgotPassword() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("login", nickName);
+        jsonObject.put("code", emailCode);
+        jsonObject.put("newPassword", password);
+        jsonObject.put("repeatPassword", password);
 
         return jsonObject;
     }

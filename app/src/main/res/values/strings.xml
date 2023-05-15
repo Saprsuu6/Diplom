@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_link" translatable="false">asdasd</string>
     <string name="logo" translatable="false">logo</string>
     <string name="changeTheme" translatable="false">changeTheme</string>
     <string name="direct" translatable="false">direct</string>
@@ -81,6 +82,8 @@
     <string name="hours_ago">hours ago</string>
     <string name="comments_title">Comments</string>
     <string name="add_comment">Add comment…</string>
+    <string name="auth_attempt">You must try to authorize at least 1 time</string>
+    <string name="same_password">Passwords can not match previous one</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>

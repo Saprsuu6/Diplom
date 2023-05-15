@@ -3,10 +3,11 @@ package com.example.instagram.services;
 import android.content.Intent;
 
 public class Intents {
+    private static Intent createNewPassword;
     private static Intent authorisation;
     private static Intent registration;
     private static Intent forgotPassword;
-    private static Intent setName;
+    private static Intent setName;    //region getters
     private static Intent setPassword;
     private static Intent setBirthday;
     private static Intent setAvatar;
@@ -17,6 +18,10 @@ public class Intents {
     private static Intent chatList;
 
     //region getters
+    public static Intent getCreateNewPassword() {
+        return createNewPassword;
+    }
+
     public static Intent getChatList() {
         return chatList;
     }
@@ -67,6 +72,9 @@ public class Intents {
 
     //endregion
     // region setters
+    public static void setCreateNewPassword(Intent createNewPassword) {
+        Intents.createNewPassword = createNewPassword;
+    }
     public static void setChatList(Intent chatList) {
         Intents.chatList = chatList;
     }

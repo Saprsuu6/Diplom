@@ -50,6 +50,8 @@
     <string name="hours_ago">часа тому назад</string>
     <string name="comments_title">Коментарі</string>
     <string name="add_comment">Додати коментрій…</string>
+    <string name="auth_attempt">Ви повинні спробувати авторизуватися хоча б 1 раз</string>
+    <string name="same_password">Паролі не можуть збігатися з попереднім</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>

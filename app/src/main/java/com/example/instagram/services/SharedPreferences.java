@@ -18,6 +18,8 @@ public class SharedPreferences {
             editor.putBoolean(key, (Boolean) obj);
         } else if (obj.getClass().equals(Integer.class)) {
             editor.putInt(key, (Integer) obj);
+        } else if (obj.getClass().equals(String.class)) {
+            editor.putString(key, (String) obj);
         }
 
         editor.apply();
@@ -43,5 +45,12 @@ public class SharedPreferences {
                 = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         return sharedPreferences.getInt(key, 0);
+    }
+
+    public static String loadStringSP(Activity activity, String key) {
+        android.content.SharedPreferences sharedPreferences
+                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+
+        return sharedPreferences.getString(key, "empty_string");
     }
 }
