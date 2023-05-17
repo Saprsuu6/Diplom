@@ -139,5 +139,6 @@
     <string name="password_error_letters">Password has to include at least one uppercase letter, one lowercase letter one number 0–9</string>
     <string name="password_error_numbers">Password has to include one number 0–9</string>
     <string name="password_error_spec_symbols">Password has to include one special character @$!%*?&amp;</string>
+    <string name="title_activity_maps">MapsActivity</string>
 
 </resources>

@@ -98,8 +98,11 @@ public class ForgotPassword extends AppCompatActivity {
                         if (!response.body().equals("false")) {
                             TransitUser.user.setEmailCode(response.body());
                             startActivity(Intents.getCreateNewPassword());
-                            finish();
                             handler.removeCallbacks(runnable);
+                            finish();
+                        }
+                        else {
+                            handler.postDelayed(runnable, 5000L);
                         }
                     }
 

@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.services.CreatePhotoFile;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Multipart;
@@ -57,6 +60,7 @@ public class SetAvatar extends AppCompatActivity {
     // endregion
     private TextView[] textViews;
     private Button[] buttons;
+    private File file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,81 +162,98 @@ public class SetAvatar extends AppCompatActivity {
                     assert data != null;
                     Uri selectedImageUri = data.getData();
 
-                    String fileContent = getFileContent(selectedImageUri);
-                    //String fileName = getFileName(selectedImageUri);
-                    //File ava = new File(fileContent);
+                    Bitmap selectedImage;
 
-                    // initialise retrofit
-                    String link = "https://picsum.photos"; // TODO change way
-                    //RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), ava);
+                    try {
+                        InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+                        selectedImage = BitmapFactory.decodeStream(imageStream);
 
-                    Retrofit retrofit = MyRetrofit.initializeRetrofit(link);
-
-                    Multipart mainInterface = retrofit.create(Multipart.class);
-
-                    // initialize call
-                    Call<String> call = mainInterface.UPLOAD("image/jpeg", fileContent);
-                    call.enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, retrofit2.Response<String> response) {
-                            System.out.println("Upload success");
+                        // region File -> byte[] of ByteArrayOutputStream
+                        if (selectedImage != null) {
+                            file = CreatePhotoFile.createFile(selectedImage, getApplicationContext());
                         }
+                        // endregion
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                    }
 
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, Throwable t) {
-                            System.out.println("Upload error: " + t.getMessage());
-                        }
-                    });
-//                    File ava = new File(String.valueOf(selectedImageUri));
-//                    if (selectedImageUri != null) {
-//                        System.out.println(ava);
-//                        // TODO find how to know extension
-//                    }
+                    // TODO send ava to back-end
+
+//                    String fileContent = getFileContent(selectedImageUri);
+//                    //String fileName = getFileName(selectedImageUri);
+//                    //File ava = new File(fileContent);
+//
+//                    // initialise retrofit
+//                    String link = "https://picsum.photos"; // TODO change way
+//                    //RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), ava);
+//
+//                    Retrofit retrofit = MyRetrofit.initializeRetrofit(link);
+//
+//                    Multipart mainInterface = retrofit.create(Multipart.class);
+//
+//                    // initialize call
+//                    Call<String> call = mainInterface.STRING_CALL("image/jpeg", fileContent);
+//                    call.enqueue(new Callback<String>() {
+//                        @Override
+//                        public void onResponse(@NonNull Call<String> call, retrofit2.Response<String> response) {
+//                            System.out.println("Upload success");
+//                        }
+//
+//                        @Override
+//                        public void onFailure(@NonNull Call<String> call, Throwable t) {
+//                            System.out.println("Upload error: " + t.getMessage());
+//                        }
+//                    });
+////                    File ava = new File(String.valueOf(selectedImageUri));
+////                    if (selectedImageUri != null) {
+////                        System.out.println(ava);
+////                        // TODO find how to know extension
+////                    }
                 }
             }
     );
 
-    public String getFileContent(Uri contentUri) {
-        try {
-            InputStream in = getContentResolver().openInputStream(contentUri);
-            if (in != null) {
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder total = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    total.append(line).append('\n'); // TODO \n
-                }
-                return total.toString();
-            } else {
-                System.out.println("TAG: Input stream is null");
-            }
-        } catch (Exception e) {
-            System.out.println("TAG. Error while reading file by uri: " + e);
-        }
-        return "Could not read content!";
-    }
-
-    @SuppressLint("Range")
-    public String getFileName(Uri contentUri) {
-        String result = null;
-        if (contentUri.getScheme() != null && contentUri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(contentUri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            }
-        }
-        if (result == null) {
-            result = contentUri.getPath();
-            if (result == null) {
-                return null;
-            }
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
-    }
+//    public String getFileContent(Uri contentUri) {
+//        try {
+//            InputStream in = getContentResolver().openInputStream(contentUri);
+//            if (in != null) {
+//                BufferedReader r = new BufferedReader(new InputStreamReader(in));
+//                StringBuilder total = new StringBuilder();
+//                for (String line; (line = r.readLine()) != null; ) {
+//                    total.append(line).append('\n'); // TODO \n
+//                }
+//                return total.toString();
+//            } else {
+//                System.out.println("TAG: Input stream is null");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("TAG. Error while reading file by uri: " + e);
+//        }
+//        return "Could not read content!";
+//    }
+//
+//    @SuppressLint("Range")
+//    public String getFileName(Uri contentUri) {
+//        String result = null;
+//        if (contentUri.getScheme() != null && contentUri.getScheme().equals("content")) {
+//            try (Cursor cursor = getContentResolver().query(contentUri, null, null, null, null)) {
+//                if (cursor != null && cursor.moveToFirst()) {
+//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+//                }
+//            }
+//        }
+//        if (result == null) {
+//            result = contentUri.getPath();
+//            if (result == null) {
+//                return null;
+//            }
+//            int cut = result.lastIndexOf('/');
+//            if (cut != -1) {
+//                result = result.substring(cut + 1);
+//            }
+//        }
+//        return result;
+//    }
 
     // region Localisation
     private void setStringResources() {

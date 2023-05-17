@@ -36,6 +36,7 @@ import com.example.instagram.services.Permissions;
 import com.example.instagram.services.SendToCheckExistUser;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
@@ -78,7 +79,7 @@ public class Authorisation extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
-        setUiVisibility();
+        UiVisibility.setUiVisibility(this);
 
         resources = getResources();
 
@@ -156,11 +157,6 @@ public class Authorisation extends AppCompatActivity {
         permissionsDialog.create().show();
     }
 
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
 
     private void findViews() {
         authorisation = findViewById(R.id.authorisation);
