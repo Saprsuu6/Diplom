@@ -100,8 +100,7 @@ public class ForgotPassword extends AppCompatActivity {
                             startActivity(Intents.getCreateNewPassword());
                             handler.removeCallbacks(runnable);
                             finish();
-                        }
-                        else {
+                        } else {
                             handler.postDelayed(runnable, 5000L);
                         }
                     }
@@ -167,58 +166,9 @@ public class ForgotPassword extends AppCompatActivity {
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-//        AdapterView.OnItemSelectedListener itemLoginTypeSelectedListener = new AdapterView.OnItemSelectedListener() {
-//            @SuppressLint("UseCompatLoadingForDrawables")
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                if (editTexts[0].getBackground() != resources.getDrawable(R.drawable.edit_text_auto_reg, getTheme()))
-//                    editTexts[0].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg, getTheme()));
-//                if (editTexts[0].getText().length() > 0) editTexts[0].setText("");
-//                setLoginType(position);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        };
-//        infoTypes.setOnItemSelectedListener(itemLoginTypeSelectedListener);
-
-//        editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
-//            @SuppressLint("UseCompatLoadingForDrawables")
-//            @Override
-//            public void validate(EditText editText, String text) {
-//                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
-//
-//                String type = (String) infoTypes.getSelectedItem();
-//
-//                try {
-//                    if (Objects.equals(type, "Phone number") || Objects.equals(type, "Номер телефону")) {
-//                        Validations.validatePhoneNumber(text, textViews[2].getText().toString(), resources);
-//                    } else if (Objects.equals(type, "Email")) {
-//                        Validations.validateEmail(text, textViews[3].getText().toString(), resources);
-//                    }
-//                    setValidationError(false, "");
-//                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, ForgotPassword.this.getTheme()));
-//                } catch (Exception exception) {
-//                    setValidationError(true, exception.getMessage());
-//                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, ForgotPassword.this.getTheme()));
-//                }
-//            }
-//        });
-
         buttons[0].setOnClickListener(v -> {
             if (editTexts[0].length() != 0) {
                 try {
-//                    if (infoTypes.getSelectedItem() == "Phone number" || infoTypes.getSelectedItem() == "Номер телефону") {
-//                        Validations.validatePhoneNumber(editTexts[0].getText().toString(), textViews[2].getText().toString(), resources);
-//                        TransitUser.user.setPhoneNumber(editTexts[0].getText().toString());
-//                    } else if (infoTypes.getSelectedItem() == "Email") {
-//                        Validations.validateEmail(editTexts[0].getText().toString(), textViews[3].getText().toString(), resources);
-//                        TransitUser.user.setEmail(editTexts[0].getText().toString());
-//                    }
-//
-//                    setValidationError(false, "");
-
                     TransitUser.user.setEmailCode(editTexts[0].getText().toString());
 
                     Services.sendToCheckUserCode(new Callback<String>() {

@@ -2,7 +2,6 @@ package com.example.instagram.main_process;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,66 +11,45 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.example.instagram.R;
-import com.example.instagram.authentication.Authorisation;
-import com.example.instagram.authentication.ForgotPassword;
-import com.example.instagram.authentication.Registration;
-import com.example.instagram.services.CreatePhotoFile;
+import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Multipart;
-import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
-import com.example.instagram.services.Validations;
-import com.example.instagram.services.Validator;
 
 import org.json.JSONException;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class CreatePost extends AppCompatActivity {
     private Resources resources;
@@ -85,7 +63,8 @@ public class CreatePost extends AppCompatActivity {
     private ImageView[] imageViews;
     private View videoView;
     private LinearLayout createNewPost;
-    private File file;
+    private byte[] imageBytes;
+    private String extension;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +116,7 @@ public class CreatePost extends AppCompatActivity {
     private void openGallery() {
         if (TransitUser.user.getOtherInfo().isMediaPermission()) {
             @SuppressLint("IntentReset") Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-            intent.setType("image/jpeg");
+            intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
 
             someActivityResultLauncher.launch(intent);
@@ -158,17 +137,22 @@ public class CreatePost extends AppCompatActivity {
 
                     Bitmap selectedImage;
 
+                    extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+
                     try {
                         InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
-                        selectedImage = BitmapFactory.decodeStream(imageStream);
 
-//                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                        selectedImage.compress(Bitmap.CompressFormat.JPEG, 0, bos);
-//                        byte[] bitmapData = bos.toByteArray();
+                        // region Get image bytes
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            imageBytes = imageStream.readAllBytes();
+                        }
+                        //endregion
+
+                        //selectedImage = BitmapFactory.decodeStream(imageStream);
+                        selectedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
                         // region File -> byte[] of ByteArrayOutputStream
                         if (selectedImage != null) {
-                            file = CreatePhotoFile.createFile(selectedImage, getApplicationContext());
                             imageViews[2].setImageBitmap(selectedImage);
                         }
                         // endregion
@@ -198,65 +182,25 @@ public class CreatePost extends AppCompatActivity {
             finish();
         });
         imageViews[1].setOnClickListener(v -> {
-            // region Send file to back-end
-            RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file);
-            MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
+            if (imageBytes.length == 0) {
+                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
+                return;
+            }
+
+            RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes); // TODO set extension
 
             try {
-                Services.sendNewPost(new Callback<ResponseBody>() {
+                Services.sendAva(new Callback<>() { // TODO change to other method to send post
                     @Override
                     public void onResponse(@Nullable Call<ResponseBody> call, @Nullable Response<ResponseBody> response) {
-                        // region test response
-                        byte[] bytes;
+                        assert Objects.requireNonNull(response).body() != null;
+                        String responseStr = response.body().toString();
 
-                        try {
-                            bytes = response.body().bytes();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                        if (responseStr.equals("0")) {
+                            Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
                         }
-
-                        File myObj = null;
-                        try {
-                            myObj = File.createTempFile("image", "jpg");
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        try (FileOutputStream outputStream = new FileOutputStream(myObj)) {
-                            outputStream.write(bytes);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        InputStream inputStream = null;
-
-                        try {
-                            inputStream = new FileInputStream(myObj);
-                        } catch (FileNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        StringBuilder resultStringBuilder = new StringBuilder();
-                        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-                        String line;
-                        while (true) {
-                            try {
-                                if (!((line = br.readLine()) != null)) break;
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            resultStringBuilder.append(line);
-                        }
-
-                        byte[] output3 = resultStringBuilder.toString().getBytes(StandardCharsets.UTF_8);
-
-
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inMutable = true;
-                        Bitmap bmp = BitmapFactory.decodeByteArray(output3, 0, output3.length, options);
-                        Canvas canvas = new Canvas(bmp); // now it should work ok
-                        // endregion
-
-                        System.out.println(response.body());
                     }
 
                     @Override
@@ -264,7 +208,7 @@ public class CreatePost extends AppCompatActivity {
                         assert t != null;
                         System.out.println(t.getMessage());
                     }
-                }, body);
+                }, image);
             } catch (JSONException e) {
                 System.out.println(e.getMessage());
             }

@@ -5,13 +5,15 @@ import org.json.JSONException;
 import java.io.IOException;
 
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 public class Services {
-    private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
+    //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
+    private final static String BASE_URL = "https://c23c-62-16-20-10.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     // registration user
@@ -70,12 +72,12 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendNewPost(Callback<ResponseBody> callback, MultipartBody.Part body) throws JSONException {
+    public static void sendAva(Callback<ResponseBody> callback, RequestBody image) throws JSONException {
         // create main interface
         Multipart mainInterface = retrofit.create(Multipart.class);
 
         // initialize call
-        Call<ResponseBody> call = mainInterface.STRING_CALL(body);
+        Call<ResponseBody> call = mainInterface.STRING_CALL(image, null); // TODO check multipart
         call.enqueue(callback);
     }
 }

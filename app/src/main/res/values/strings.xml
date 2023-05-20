@@ -84,6 +84,14 @@
     <string name="add_comment">Add comment…</string>
     <string name="auth_attempt">You must try to authorize at least 1 time</string>
     <string name="same_password">Passwords can not match previous one</string>
+    <string name="error_no_photo">You have to set photo to continue</string>
+    <string name="successfully_loaded_0">Successfully loaded…</string>
+    <string name="unsuccessfully_loaded_1">Unsuccessfully loaded</string>
+    <string name="files_not_supported_2">Files not supported</string>
+    <string name="unrecognized_server_error_3">Unrecognized file server error</string>
+    <string name="file_not_found_4">File not found</string>
+    <string name="file_without_extension_not_supported_5">File without extension not supported</string>
+    <string name="file_not_found_6">File not found</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>

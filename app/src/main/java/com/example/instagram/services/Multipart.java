@@ -1,5 +1,7 @@
 package com.example.instagram.services;
 
+import androidx.annotation.Nullable;
+
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -11,6 +13,7 @@ public interface Multipart {
     @retrofit2.http.Multipart
     @POST("/image/*")
     Call<ResponseBody> STRING_CALL(
-            @Part MultipartBody.Part image
+            @Part("image") RequestBody file,
+            @Nullable @Part("description") String description
     );
 }

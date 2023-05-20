@@ -6,14 +6,13 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -21,35 +20,35 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
-import com.example.instagram.services.CreatePhotoFile;
+import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Multipart;
-import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 
-import java.io.BufferedReader;
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.Response;
 
 public class SetAvatar extends AppCompatActivity {
     private Resources resources;
@@ -60,7 +59,8 @@ public class SetAvatar extends AppCompatActivity {
     // endregion
     private TextView[] textViews;
     private Button[] buttons;
-    private File file;
+    private byte[] imageBytes;
+    private String extension;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +137,7 @@ public class SetAvatar extends AppCompatActivity {
         buttons[0].setOnClickListener(v -> {
             if (TransitUser.user.getOtherInfo().isMediaPermission()) {
                 @SuppressLint("IntentReset") Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                intent.setType("image/jpeg");
+                intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
 
                 someActivityResultLauncher.launch(intent);
@@ -162,98 +162,62 @@ public class SetAvatar extends AppCompatActivity {
                     assert data != null;
                     Uri selectedImageUri = data.getData();
 
-                    Bitmap selectedImage;
+                    extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
 
                     try {
                         InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
-                        selectedImage = BitmapFactory.decodeStream(imageStream);
 
-                        // region File -> byte[] of ByteArrayOutputStream
-                        if (selectedImage != null) {
-                            file = CreatePhotoFile.createFile(selectedImage, getApplicationContext());
+                        // region Get image bytes
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            imageBytes = imageStream.readAllBytes();
                         }
-                        // endregion
+                        //endregion
+
+                        sendAvaToBackEnd();
                     } catch (IOException e) {
                         System.out.println(e.getMessage());
                     }
-
-                    // TODO send ava to back-end
-
-//                    String fileContent = getFileContent(selectedImageUri);
-//                    //String fileName = getFileName(selectedImageUri);
-//                    //File ava = new File(fileContent);
-//
-//                    // initialise retrofit
-//                    String link = "https://picsum.photos"; // TODO change way
-//                    //RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), ava);
-//
-//                    Retrofit retrofit = MyRetrofit.initializeRetrofit(link);
-//
-//                    Multipart mainInterface = retrofit.create(Multipart.class);
-//
-//                    // initialize call
-//                    Call<String> call = mainInterface.STRING_CALL("image/jpeg", fileContent);
-//                    call.enqueue(new Callback<String>() {
-//                        @Override
-//                        public void onResponse(@NonNull Call<String> call, retrofit2.Response<String> response) {
-//                            System.out.println("Upload success");
-//                        }
-//
-//                        @Override
-//                        public void onFailure(@NonNull Call<String> call, Throwable t) {
-//                            System.out.println("Upload error: " + t.getMessage());
-//                        }
-//                    });
-////                    File ava = new File(String.valueOf(selectedImageUri));
-////                    if (selectedImageUri != null) {
-////                        System.out.println(ava);
-////                        // TODO find how to know extension
-////                    }
                 }
             }
     );
 
-//    public String getFileContent(Uri contentUri) {
-//        try {
-//            InputStream in = getContentResolver().openInputStream(contentUri);
-//            if (in != null) {
-//                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-//                StringBuilder total = new StringBuilder();
-//                for (String line; (line = r.readLine()) != null; ) {
-//                    total.append(line).append('\n'); // TODO \n
-//                }
-//                return total.toString();
-//            } else {
-//                System.out.println("TAG: Input stream is null");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("TAG. Error while reading file by uri: " + e);
-//        }
-//        return "Could not read content!";
-//    }
-//
-//    @SuppressLint("Range")
-//    public String getFileName(Uri contentUri) {
-//        String result = null;
-//        if (contentUri.getScheme() != null && contentUri.getScheme().equals("content")) {
-//            try (Cursor cursor = getContentResolver().query(contentUri, null, null, null, null)) {
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-//                }
-//            }
-//        }
-//        if (result == null) {
-//            result = contentUri.getPath();
-//            if (result == null) {
-//                return null;
-//            }
-//            int cut = result.lastIndexOf('/');
-//            if (cut != -1) {
-//                result = result.substring(cut + 1);
-//            }
-//        }
-//        return result;
-//    }
+    private void sendAvaToBackEnd() {
+        if (imageBytes.length == 0) {
+            Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
+            return;
+        }
+
+        RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes); // TODO set extension
+
+        try {
+            Services.sendAva(new Callback<>() {
+                @Override
+                public void onResponse(@Nullable Call<ResponseBody> call, @Nullable Response<ResponseBody> response) {
+                    assert Objects.requireNonNull(response).body() != null;
+                    String responseStr = response.body().toString();
+
+                    if (responseStr.equals("0")) {
+                        Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@Nullable Call<ResponseBody> call, @Nullable Throwable t) {
+                    assert t != null;
+                    System.out.println(t.getMessage());
+                }
+            }, image);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // TODO decide how to send post info
+
+        finish();
+    }
 
     // region Localisation
     private void setStringResources() {

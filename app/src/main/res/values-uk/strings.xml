@@ -52,6 +52,14 @@
     <string name="add_comment">Додати коментрій…</string>
     <string name="auth_attempt">Ви повинні спробувати авторизуватися хоча б 1 раз</string>
     <string name="same_password">Паролі не можуть збігатися з попереднім</string>
+    <string name="error_no_photo">Потрібно обрати фото щаб продовжити</string>
+    <string name="successfully_loaded_0">Вдачне завантаження…</string>
+    <string name="unsuccessfully_loaded_1">Невдачне завантаження</string>
+    <string name="files_not_supported_2">Файли не підтримуються</string>
+    <string name="unrecognized_server_error_3">Unrecognized file server error</string>
+    <string name="file_not_found_4">Нерозпізнана помилка файлового сервера</string>
+    <string name="file_without_extension_not_supported_5">Файл без розширення не підтримується</string>
+    <string name="file_not_found_6">Файл не знайдено</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>
