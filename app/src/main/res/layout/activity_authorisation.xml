@@ -41,6 +41,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
+                    android:visibility="gone"
                     android:gravity="center" />
 
                 <LinearLayout
@@ -54,6 +55,7 @@
                         android:id="@+id/country_code"
                         style="@style/Authentication_Button"
                         android:layout_width="wrap_content"
+                        android:visibility="gone"
                         android:layout_height="match_parent"
                         tools:text="@string/code" />
 
@@ -64,7 +66,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:autofillHints="Login"
-                        android:inputType="phone"
+                        android:inputType="text"
                         tools:hint="@string/login_hint_phone"
                         tools:ignore="LabelFor" />
 

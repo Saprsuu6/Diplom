@@ -34,6 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:visibility="gone"
                 android:orientation="horizontal">
 
                 <TextView
@@ -68,6 +69,7 @@
                     style="@style/Authentication_Button"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:visibility="gone"
                     tools:text="@string/code" />
 
                 <EditText
@@ -77,16 +79,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:autofillHints="Login"
-                    android:hint="@string/login_hint_phone"
-                    android:inputType="phone" />
+                    tools:hint="@string/login_hint_phone"
+                    android:inputType="phone"
+                    tools:ignore="LabelFor" />
 
                 <TextView
                     android:id="@+id/email_name"
                     style="@style/Authentication_Button"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="@string/gmail"
-                    android:visibility="gone" />
+                    android:text="@string/gmail" />
 
             </LinearLayout>
 
@@ -106,6 +108,7 @@
                 <CheckBox
                     android:id="@+id/hide_phone"
                     android:layout_width="match_parent"
+                    android:visibility="gone"
                     android:layout_height="wrap_content"
                     tools:text="@string/check_hide_phone" />
 

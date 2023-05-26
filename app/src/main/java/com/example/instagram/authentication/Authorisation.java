@@ -257,6 +257,7 @@ public class Authorisation extends AppCompatActivity {
             }
         });
 
+        // authorisation
         buttons[1].setOnClickListener(v -> {
             if (editTexts[0].length() != 0 && editTexts[1].length() != 0) {
                 try {
@@ -276,7 +277,6 @@ public class Authorisation extends AppCompatActivity {
                     TransitUser.user.setPassword(editTexts[1].getText().toString());
 
                     setValidationError(false, "");
-                    // TODO if remember me shave user data in sp
 
                     if (rememberMe.isChecked()) {
                         com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", rememberMe.isChecked());
@@ -288,7 +288,8 @@ public class Authorisation extends AppCompatActivity {
                     Services.authorizeUser(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.code() == 200) {
+                            assert response.body() != null;
+                            if (response.body().contains("0")) {
                                 startActivity(Intents.getNewsList());
                                 finish();
                             } else {
@@ -304,11 +305,13 @@ public class Authorisation extends AppCompatActivity {
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
-            } else {
+            }
+            else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }
         });
 
+        // forgot password
         textViews[0].setOnClickListener(v -> {
             if (TransitUser.user.getNickName() != null) {
                 try {
@@ -353,22 +356,22 @@ public class Authorisation extends AppCompatActivity {
     private void setLoginType(int position) {
         switch (position) {
             case 0:
-                editTexts[0].setHint(resources.getString(R.string.login_hint_phone));
-                editTexts[0].setInputType(InputType.TYPE_CLASS_PHONE);
-                textViews[3].setVisibility(View.VISIBLE);
-                textViews[4].setVisibility(View.GONE);
-                break;
-            case 1:
                 editTexts[0].setHint(resources.getString(R.string.login_hint_username));
                 editTexts[0].setInputType(InputType.TYPE_CLASS_TEXT);
                 textViews[3].setVisibility(View.GONE);
                 textViews[4].setVisibility(View.GONE);
                 break;
-            case 2:
+            case 1:
                 editTexts[0].setHint(resources.getString(R.string.login_hint_email));
                 editTexts[0].setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 textViews[3].setVisibility(View.GONE);
                 textViews[4].setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                editTexts[0].setHint(resources.getString(R.string.login_hint_phone));
+                editTexts[0].setInputType(InputType.TYPE_CLASS_PHONE);
+                textViews[3].setVisibility(View.VISIBLE);
+                textViews[4].setVisibility(View.GONE);
                 break;
         }
     }
@@ -376,9 +379,9 @@ public class Authorisation extends AppCompatActivity {
     private void setLoginTypes() {
         //region Login types
         ArrayAdapter<String> adapterForLoginTypes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-        adapterForLoginTypes.add(resources.getString(R.string.login_hint_phone));
+        //adapterForLoginTypes.add(resources.getString(R.string.login_hint_phone));
         adapterForLoginTypes.add(resources.getString(R.string.login_hint_username));
-        adapterForLoginTypes.add(resources.getString(R.string.login_hint_email));
+        //adapterForLoginTypes.add(resources.getString(R.string.login_hint_email));
 
         adapterForLoginTypes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

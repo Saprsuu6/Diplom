@@ -14,8 +14,14 @@ public class Post {
     private String resourceVideo;
     @Nullable
     private String metadata;
+    @Nullable
+    private Date postponePublication;
 
     // region setters
+    public void setPostponePublication(@Nullable Date postponePublication) {
+        this.postponePublication = postponePublication;
+    }
+
     public void setDateOfAdd(Date dateOfAdd) {
         this.dateOfAdd = dateOfAdd;
     }
@@ -66,6 +72,10 @@ public class Post {
     @Nullable
     public String getMetadata() {
         return metadata;
+    }
+    @Nullable
+    public Date getPostponePublication() {
+        return postponePublication;
     }
     // endregion
 }

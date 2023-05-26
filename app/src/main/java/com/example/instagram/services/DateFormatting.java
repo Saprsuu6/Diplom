@@ -13,7 +13,7 @@ public class DateFormatting {
             case "EN":
                 simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
                 break;
-            case "UKR":
+            case "UK":
                 simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
                 break;
         }
@@ -25,6 +25,7 @@ public class DateFormatting {
         return simpleDateFormatGeneral.format(date.getTime());
     }
 
+    @SuppressLint("SimpleDateFormat")
     private static SimpleDateFormat simpleDateFormat;
 
     public static String formatDate(Calendar date) {

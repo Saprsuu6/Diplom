@@ -66,7 +66,8 @@ public class Registration extends AppCompatActivity {
         Localisation.setFirstLocale(languages);
 
         setListeners();
-        toggleContentPhoneNumber();
+        toggleContentEmail();
+        //toggleContentPhoneNumber();
         setAnimations(registration).start();
     }
 

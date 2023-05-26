@@ -1,8 +1,10 @@
 package com.example.instagram.services.pagination.paging_views;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,23 +14,25 @@ import com.example.instagram.services.pagination.PagingView;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPostsCells;
 
+import org.json.JSONException;
+
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
-public class PagingViewPostsCells  extends PagingView {
+public class PagingViewGetAllPostsInCells extends PagingView {
     private PaginationAdapterPostsCells paginationAdapter;
     private int lastPosition;
-    private LinearLayoutManager manager;
+    private final LinearLayoutManager manager;
 
-    public PagingViewPostsCells(NestedScrollView scrollView, RecyclerView recyclerView,
-                           ShimmerLayout shimmerLayout, Activity activity,
-                           int page, int onePageLimit) {
-        super(scrollView, recyclerView, shimmerLayout, activity, page, onePageLimit);
+    public PagingViewGetAllPostsInCells(NestedScrollView scrollView, RecyclerView recyclerView,
+                                 ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity,
+                                 int page, int onePageLimit) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, context, activity, page, onePageLimit);
 
         // initialise adapter
-        paginationAdapter = new PaginationAdapterPostsCells(activity, mainDataLibrary);
+        paginationAdapter = new PaginationAdapterPostsCells(context, activity, mainDataLibrary);
 
         // set layout manager
-        manager = new LinearLayoutManager(activity);
+        manager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
 
         // set adapter
@@ -41,13 +45,13 @@ public class PagingViewPostsCells  extends PagingView {
     }
 
     public void loadPosition() {
-        int position = SharedPreferences.loadIntSP(activity, "lastNewsPosition");
+        int position = SharedPreferences.loadIntSP(context, "lastNewsPosition");
         recyclerView.scrollToPosition(position);
     }
 
     public void savePosition() {
-        if (SharedPreferences.loadIntSP(activity, "lastNewsPosition") == 0)
-            SharedPreferences.saveSP(activity, "lastNewsPosition", lastPosition);
+        if (SharedPreferences.loadIntSP(context, "lastNewsPosition") == 0)
+            SharedPreferences.saveSP(context, "lastNewsPosition", lastPosition);
     }
 
     private void setListeners() {
@@ -62,7 +66,7 @@ public class PagingViewPostsCells  extends PagingView {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationAdapterPostsCells(activity, mainDataLibrary);
+        paginationAdapter = new PaginationAdapterPostsCells(context, activity, mainDataLibrary);
         recyclerView.setAdapter(paginationAdapter);
     }
 }

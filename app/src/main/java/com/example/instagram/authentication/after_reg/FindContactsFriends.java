@@ -21,8 +21,10 @@ import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.pagination.paging_views.PagingViewUsers;
+import com.example.instagram.services.pagination.paging_views.PagingViewFindUsers;
 
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +57,13 @@ public class FindContactsFriends extends AppCompatActivity {
         setListeners();
         setAnimations();
 
-        PagingViewUsers pagingView = new PagingViewUsers(findViewById(R.id.scroll_view),
-                findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                this, 1, 20);
+        try {
+            PagingViewFindUsers pagingView = new PagingViewFindUsers(findViewById(R.id.scroll_view),
+                    findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
+                    this, this, 1, 20);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override

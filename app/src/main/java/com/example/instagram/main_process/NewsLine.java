@@ -24,12 +24,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.instagram.R;
+import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.pagination.paging_views.PagingViewPosts;
+import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +42,14 @@ public class NewsLine extends AppCompatActivity {
     private Resources resources;
     private ImageView[] imageViewsTop;
     private ImageView[] imageViewsBottom;
-    private PagingViewPosts pagingView;
+    private PagingViewGetAllPosts pagingView;
     // region localisation
     private Localisation localisation;
     private Spinner languages;
     // endregion
     public static List<TextView> textViews = new ArrayList<>();
+    private FindUser findUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,13 @@ public class NewsLine extends AppCompatActivity {
         setIntents();
         findViews();
 
+        // region find users
+        try {
+            findUser = new FindUser(this, resources);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
+        // endregion
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
@@ -62,15 +74,20 @@ public class NewsLine extends AppCompatActivity {
 
         setListeners();
 
-        pagingView = new PagingViewPosts(findViewById(R.id.scroll_view),
-                findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                this, 1, 10);
+        try {
+            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view),
+                    findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
+                    this, this, 1, 10);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void setIntents() {
         Intents.setComments(new Intent(this, Comments.class));
         Intents.setSelfPage(new Intent(this, SelfPage.class));
         Intents.setChatList(new Intent(this, ChatList.class));
+        Intents.setCreateNewPost(new Intent(this, CreatePost.class));
     }
 
     @SuppressLint("WrongConstant")
@@ -161,23 +178,28 @@ public class NewsLine extends AppCompatActivity {
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        imageViewsBottom[4].setOnClickListener(v -> {
-            Intent intent = Intents.getSelfPage();
-            startActivity(intent);
+        // direct
+        imageViewsTop[3].setOnClickListener(v -> {
+            startActivity(Intents.getChatList());
         });
 
+        // initialize menu bottom
+        BottomMenu.setListeners(this,
+                new ImageView[]{imageViewsBottom[1],
+                        imageViewsBottom[2], imageViewsBottom[3]},
+                findUser);
+
+        // region Bottom menu
         // home
         imageViewsBottom[0].setOnClickListener(v -> {
             ((NestedScrollView) findViewById(R.id.scroll_view)).scrollTo(0, 0);
         });
 
-        // direct
-        imageViewsTop[3].setOnClickListener(v -> {
-            Intent intent = Intents.getChatList();
-            startActivity(intent);
+        // self page
+        imageViewsBottom[4].setOnClickListener(v -> {
+            startActivity(Intents.getSelfPage());
         });
-
-        // TODO: search, add_post, notifications
+        // endregion
 
         // set system theme on label
         imageViewsTop[0].setOnClickListener(v -> {

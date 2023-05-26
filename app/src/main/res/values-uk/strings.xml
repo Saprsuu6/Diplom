@@ -5,6 +5,7 @@
     <string name="login_hint_username">Ім\'я корисувача</string>
     <string name="login_hint_email">Email</string>
     <string name="password_hint">Пароль</string>
+    <string name="password_hint_repeat">Повторіть пароль</string>
     <string name="password_forgot">Забув пароль?</string>
     <string name="show_password">Відобразити</string>
     <string name="hide_password">Сховати</string>
@@ -31,6 +32,8 @@
     <string name="birthday_hint">День народження</string>
     <string name="birthday_borders">Не коректна дата</string>
     <string name="birthday_error">Не коректний рік</string>
+    <string name="birthday_error_age">Користувачеві має бути як мінімум 16 років</string>
+    <string name="birthday_error_date">Дата має бути більшою за поточну</string>
     <string name="error_send_password1">Поле дня введення даних обов\'язкове</string>
     <string name="forgot_pass_info">Введіть свою електронну адресу, ім\'я користувача або номер телефону, і ми надішлемо вам посилання для відновлення доступу до облікового запису</string>
     <string name="confirm_code_text">Підтведіть код який ми вам вислали у єлектронному посиланні яку ви вказували прри реєстрації</string>
@@ -60,6 +63,8 @@
     <string name="file_not_found_4">Нерозпізнана помилка файлового сервера</string>
     <string name="file_without_extension_not_supported_5">Файл без розширення не підтримується</string>
     <string name="file_not_found_6">Файл не знайдено</string>
+    <string name="tag_people_item">Ім\'я користувача</string>
+    <string name="find_user">Почніть писати нік щоб знайти користувача</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>
@@ -115,4 +120,6 @@
     <string name="password_error_letters">Пароль має принаймні одну велику, одну малу літери та число 0–9</string>
     <string name="password_error_numbers">Пароль має містити число 0–9</string>
     <string name="password_error_spec_symbols">Пароль повинен містити один спеціальний символ @$!%*?&amp;</string>
+    <string name="password_repeat_error">Паролі не співпадають</string>
+
 </resources>

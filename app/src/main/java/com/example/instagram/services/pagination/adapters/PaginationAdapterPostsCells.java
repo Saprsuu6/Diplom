@@ -2,6 +2,7 @@ package com.example.instagram.services.pagination.adapters;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,12 +23,15 @@ import com.example.instagram.R;
 import com.example.instagram.services.PostInDialog;
 
 public class PaginationAdapterPostsCells extends RecyclerView.Adapter<PaginationAdapterPostsCells.ViewHolderPostsCells> {
+    @Nullable
     private final Activity activity;
+    private final Context context;
     private final MainDataLibrary mainDataLibrary;
     private final Point size;
 
-    public PaginationAdapterPostsCells(Activity activity, MainDataLibrary mainDataLibrary) {
+    public PaginationAdapterPostsCells(Context context, Activity activity, MainDataLibrary mainDataLibrary) {
         this.activity = activity;
+        this.context = context;
         this.mainDataLibrary = mainDataLibrary;
 
         Display display = activity.getWindowManager().getDefaultDisplay();
@@ -50,27 +55,27 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         // TODO: take 3 post
 
         // set image
-        ImageView image1 = new ImageView(activity);
+        ImageView image1 = new ImageView(context);
         image1.setLayoutParams(holder.cellsContainerParams);
         image1.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image1.setPadding(0, 2, 2, 2);
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(image1);
 
-        ImageView image2 = new ImageView(activity);
+        ImageView image2 = new ImageView(context);
         image2.setLayoutParams(holder.cellsContainerParams);
         image2.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image2.setPadding(2, 2, 2, 2);
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(image2);
 
-        ImageView image3 = new ImageView(activity);
+        ImageView image3 = new ImageView(context);
         image3.setLayoutParams(holder.cellsContainerParams);
         image3.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image3.setPadding(2, 2, 0, 2);
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(image3);
 
@@ -87,7 +92,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     private View.OnClickListener postInDialog() {
         // TODO: load post info
-        return v -> PostInDialog.getPostDialog(activity, activity.getResources()).show();
+        return v -> PostInDialog.getPostDialog(context, context.getResources()).show();
     }
 
     @Override
@@ -98,17 +103,17 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     // region SharedPreferences
     //Сохраняет флажок в SharedPreferences
     public void saveSP(String key, boolean value) {
-        com.example.instagram.services.SharedPreferences.saveSP(activity, key, value);
+        com.example.instagram.services.SharedPreferences.saveSP(context, key, value);
     }
 
     //Загружает нажатый флажок из SharedPreferences
     public boolean loadSP(String key) {
-        return com.example.instagram.services.SharedPreferences.loadBoolSP(activity, key);
+        return com.example.instagram.services.SharedPreferences.loadBoolSP(context, key);
     }
 
     //Удаляет нажатый флажок из SharedPreferences
     public void deleteSp(String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(activity, key);
+        com.example.instagram.services.SharedPreferences.deleteSP(context, key);
     }
     // endregion SharedPreferences
 

@@ -8,9 +8,9 @@ import java.lang.reflect.Type;
 public class SharedPreferences {
     private static String scope = "ClickShot";
 
-    public static void saveSP(Activity activity, String key, Object obj) {
+    public static void saveSP(Context context, String key, Object obj) {
         android.content.SharedPreferences preferences
-                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+                = context.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         android.content.SharedPreferences.Editor editor = preferences.edit();
 
@@ -25,31 +25,31 @@ public class SharedPreferences {
         editor.apply();
     }
 
-    public static void deleteSP(Activity activity, String key) {
+    public static void deleteSP(Context context, String key) {
         android.content.SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+                = context.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(key).apply();
     }
 
-    public static boolean loadBoolSP(Activity activity, String key) {
+    public static boolean loadBoolSP(Context context, String key) {
         android.content.SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+                = context.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         return sharedPreferences.getBoolean(key, false);
     }
 
-    public static int loadIntSP(Activity activity, String key) {
+    public static int loadIntSP(Context context, String key) {
         android.content.SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+                = context.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         return sharedPreferences.getInt(key, 0);
     }
 
-    public static String loadStringSP(Activity activity, String key) {
+    public static String loadStringSP(Context context, String key) {
         android.content.SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(scope, Context.MODE_PRIVATE);
+                = context.getSharedPreferences(scope, Context.MODE_PRIVATE);
 
         return sharedPreferences.getString(key, "empty_string");
     }

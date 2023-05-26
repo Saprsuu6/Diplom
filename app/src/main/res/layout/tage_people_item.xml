@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tag_people_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:cardCornerRadius="15dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        tools:ignore="UselessParent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ava_view"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:contentDescription="@string/avatar"
+            android:scaleType="centerCrop" />
+
+        <EditText
+            android:id="@+id/nickname"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Nickname"
+            android:inputType="text"
+            tools:hint="@string/tag_people_item"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+</LinearLayout>

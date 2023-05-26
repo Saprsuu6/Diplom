@@ -12,6 +12,9 @@ import java.util.Locale;
 
 public class User {
     // region getters
+    public String getPasswordRepeat() {
+        return passwordRepeat;
+    }
     public String getName() {
         return name;
     }
@@ -54,6 +57,9 @@ public class User {
 
     // endregion
     // region setters
+    public void setPasswordRepeat(String passwordRepeat) {
+        this.passwordRepeat = passwordRepeat;
+    }
     public void setDescription(String description) {
         this.description = description;
     }
@@ -100,6 +106,7 @@ public class User {
     private String emailCode;
     private String phoneNumber = "NO_PHONE";
     private String password;
+    private String passwordRepeat;
     private String email = "empty@i.ua";
     private Date birthday;
     private String avatar;
@@ -165,7 +172,7 @@ public class User {
         jsonObject.put("login", nickName);
         jsonObject.put("code", emailCode);
         jsonObject.put("newPassword", password);
-        jsonObject.put("repeatPassword", password);
+        jsonObject.put("repeatPassword", passwordRepeat);
 
         return jsonObject;
     }

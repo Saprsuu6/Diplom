@@ -18,7 +18,7 @@
         <activity
             android:name=".authentication.CreateNewPassword"
             android:exported="true"
-            android:screenOrientation="locked" >
+            android:screenOrientation="locked">
 
         </activity>
         <activity
@@ -34,7 +34,9 @@
         <activity
             android:name=".main_process.SelfPage"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked" >
+
+        </activity>
         <activity
             android:name=".main_process.Comments"
             android:exported="true"
@@ -42,7 +44,9 @@
         <activity
             android:name=".main_process.NewsLine"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name=".authentication.after_reg.FindContactsFriends"
             android:exported="true"
@@ -50,17 +54,15 @@
         <activity
             android:name=".authentication.after_reg.SetAvatar"
             android:exported="true"
-            android:screenOrientation="locked" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:screenOrientation="locked">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".authentication.after_reg.SetBirthday"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name=".authentication.after_reg.SetPassword"
             android:exported="true"
@@ -76,11 +78,19 @@
         <activity
             android:name=".authentication.Registration"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name=".authentication.Authorisation"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -10,7 +10,6 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -43,6 +42,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SetBirthday extends AppCompatActivity {
+    private final int yearOffset = 13;
     private Resources resources;
     private LinearLayout setBirthday;
     // region localisation
@@ -155,8 +155,8 @@ public class SetBirthday extends AppCompatActivity {
 
             DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
-            if (year1 > year) {
-                Toast.makeText(this, R.string.birthday_error, Toast.LENGTH_SHORT).show();
+            if (year - yearOffset <= year1) {
+                Toast.makeText(this, R.string.birthday_error_age, Toast.LENGTH_SHORT).show();
             } else {
                 editTexts[0].setText(DateFormatting.formatDate(selectedDate));
                 editTexts[0].setTextColor(resources.getColor(R.color.black, getTheme()));
@@ -165,44 +165,32 @@ public class SetBirthday extends AppCompatActivity {
 
         buttons[0].setOnClickListener(v -> {
             if (editTexts[0].length() != 0) {
-                TransitUser.user.setBirthday(selectedDate.getTime());
+                if (year <= selectedDate.get(1) - yearOffset) {
+                    Toast.makeText(this, R.string.birthday_error_age, Toast.LENGTH_SHORT).show();
+                } else {
+                    TransitUser.user.setBirthday(selectedDate.getTime());
 
-//                // region send data to server
-//                Thread thread = new Thread(){
-//                    public void run(){
-//                        try {
-//                            Services.addUser(TransitUser.user);
-//                        } catch (JSONException exception) {
-//                            Log.e("JSONException", exception.getMessage());
-//                        } catch (IOException exception) {
-//                            Log.e("IOException", exception.getMessage());
-//                        }
-//                    }
-//                };
-//
-//                thread.start();
-//                //endregion
-
-                try {
-                    Services.addUser(new Callback<String>() {
-                        @Override
-                        public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
-                            assert response != null;
-                            if (response.code() == 200) {
-                                startActivity(Intents.getNewsList());
+                    try {
+                        Services.addUser(new Callback<String>() {
+                            @Override
+                            public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
+                                assert response != null; // TODO waiting for codes
+                                if (response.code() == 200) {
+                                    startActivity(Intents.getNewsList());
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
+                            @Override
+                            public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
 
-                        }
-                    });
-                } catch (IOException | JSONException e) {
-                    System.out.println(e.getMessage());
+                            }
+                        });
+                    } catch (IOException | JSONException e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                    startActivity(Intents.getSetAvatar());
                 }
-
-                //startActivity(Intents.getSetAvatar());
             } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }
@@ -215,6 +203,7 @@ public class SetBirthday extends AppCompatActivity {
     }
 
     // region Localisation
+    @SuppressLint("SetTextI18n")
     private void setStringResources() {
         buttons[0].setText(resources.getString(R.string.next_step));
 
@@ -223,6 +212,10 @@ public class SetBirthday extends AppCompatActivity {
         textViews[2].setText(resources.getString(R.string.log_in));
 
         editTexts[0].setHint(resources.getString(R.string.birthday_hint));
+
+        if (selectedDate != null) {
+            editTexts[0].setText(editTexts[0].getText() + ": " + DateFormatting.formatDate(selectedDate));
+        }
     }
     // endregion
 }

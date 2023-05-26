@@ -1,13 +1,9 @@
 package com.example.instagram.authentication;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -29,22 +25,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
-import com.example.instagram.services.MyRetrofit;
-import com.example.instagram.services.SendToCheckUserCode;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.Validations;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.TransitUser;
-import com.example.instagram.services.Validator;
-import com.example.instagram.services.pagination.PagingRequest;
-
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class ForgotPassword extends AppCompatActivity {
     private Resources resources;

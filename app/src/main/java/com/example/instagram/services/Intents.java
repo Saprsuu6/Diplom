@@ -16,8 +16,13 @@ public class Intents {
     private static Intent comments;
     private static Intent selfPage;
     private static Intent chatList;
+    private static Intent createNewPost;
 
     //region getters
+    public static Intent getCreateNewPost() {
+        return createNewPost;
+    }
+
     public static Intent getCreateNewPassword() {
         return createNewPassword;
     }
@@ -72,6 +77,9 @@ public class Intents {
 
     //endregion
     // region setters
+    public static void setCreateNewPost(Intent createNewPost) {
+        Intents.createNewPost = createNewPost;
+    }
     public static void setCreateNewPassword(Intent createNewPassword) {
         Intents.createNewPassword = createNewPassword;
     }

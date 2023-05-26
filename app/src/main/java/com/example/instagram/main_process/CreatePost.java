@@ -8,18 +8,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -30,11 +31,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.instagram.R;
+import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Permissions;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TagPeople;
+import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
@@ -42,6 +46,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -65,6 +71,9 @@ public class CreatePost extends AppCompatActivity {
     private LinearLayout createNewPost;
     private byte[] imageBytes;
     private String extension;
+    private TagPeople tagPeople;
+    private DatePickerDialog.OnDateSetListener setListener;
+    private Calendar selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +87,7 @@ public class CreatePost extends AppCompatActivity {
 
         resources = getResources();
 
+        tagPeople = new TagPeople(this, resources);
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
@@ -99,6 +109,11 @@ public class CreatePost extends AppCompatActivity {
         if (Intents.getNewsList() == null) {
             Intents.setNewsList(new Intent(this, NewsLine.class));
         }
+    }
+
+    private void setToTagPeople() {
+        AlertDialog.Builder permissionsDialog = tagPeople.getToTagPeople();
+        permissionsDialog.create().show();
     }
 
     private void findViews() {
@@ -148,7 +163,6 @@ public class CreatePost extends AppCompatActivity {
                         }
                         //endregion
 
-                        //selectedImage = BitmapFactory.decodeStream(imageStream);
                         selectedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
                         // region File -> byte[] of ByteArrayOutputStream
@@ -163,6 +177,7 @@ public class CreatePost extends AppCompatActivity {
             }
     );
 
+    @SuppressLint("SetTextI18n")
     private void setListeners() {
         AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -170,6 +185,11 @@ public class CreatePost extends AppCompatActivity {
                 Configuration configuration = Localisation.setLocalize(parent, localisation, position);
                 getBaseContext().getResources().updateConfiguration(configuration, null);
                 setStringResources();
+
+                if (selectedDate != null) {
+                    DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+                    textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+                }
             }
 
             @Override
@@ -177,6 +197,35 @@ public class CreatePost extends AppCompatActivity {
             }
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        textViews[3].setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    CreatePost.this,
+                    android.R.style.Theme_DeviceDefault_Dialog,
+                    setListener, year, month, day);
+
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            datePickerDialog.show();
+        });
+
+        setListener = (view, year1, month1, dayOfMonth) -> {
+            selectedDate = Calendar.getInstance();
+            selectedDate.set(year1, month1, dayOfMonth);
+
+            DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+
+            if (year >= year1 && month >= month1 && day >= dayOfMonth) {
+                TransitPost.post.setPostponePublication(selectedDate.getTime());
+                textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+            } else {
+                Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
+            }
+        };
 
         imageViews[0].setOnClickListener(v -> {
             finish();
@@ -219,16 +268,16 @@ public class CreatePost extends AppCompatActivity {
             finish();
         });
 
-        imageViews[2].setOnClickListener(v -> {
-            openGallery();
-        });
+        imageViews[2].setOnClickListener(v -> openGallery());
+
+        textViews[1].setOnClickListener(v -> setToTagPeople());
 
         // TODO add ability to tag people
         // TODO add ability to add place
-        // TODO add ability to postpone post
     }
 
     // region Localisation
+    @SuppressLint("SetTextI18n")
     private void setStringResources() {
         editTexts[0].setHint(resources.getString(R.string.add_description));
 
@@ -236,6 +285,10 @@ public class CreatePost extends AppCompatActivity {
         textViews[1].setText(resources.getString(R.string.tag_people));
         textViews[2].setText(resources.getString(R.string.add_a_place));
         textViews[3].setText(resources.getString(R.string.postpone_publication));
+
+        if (selectedDate != null) {
+            textViews[3].setText(textViews[3].getText() + ": " + DateFormatting.formatDate(selectedDate));
+        }
     }
     // endregion
 }

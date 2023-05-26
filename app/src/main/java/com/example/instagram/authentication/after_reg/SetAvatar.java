@@ -152,6 +152,11 @@ public class SetAvatar extends AppCompatActivity {
             startActivity(Intents.getAuthorisation());
             finish();
         });
+
+        textViews[3].setOnClickListener( v -> {
+            startActivity(Intents.getNewsList());
+            finish();
+        });
     }
 
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
@@ -214,8 +219,8 @@ public class SetAvatar extends AppCompatActivity {
             System.out.println(e.getMessage());
         }
 
-        // TODO decide how to send post info
-
+        startActivity(Intents.getNewsList());
+        // TODO or find contacts
         finish();
     }
 

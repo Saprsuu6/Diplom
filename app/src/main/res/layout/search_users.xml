@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tag_people"
+    android:id="@+id/search_user"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_list_main"
@@ -11,11 +11,16 @@
     android:padding="10dp"
     android:theme="@style/Theme.Instagram.System">
 
-    <ImageView
-        android:id="@+id/add_to_tag"
+    <EditText
+        android:id="@+id/nickname"
+        style="@style/Authentication_EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/add_to_tag_people"
-        android:src="@drawable/add_post" />
+        android:autofillHints="Nickname"
+        android:inputType="text"
+        tools:hint="@string/find_user"
+        tools:ignore="LabelFor" />
+
+    <include layout="@layout/users_list" />
 
 </LinearLayout>

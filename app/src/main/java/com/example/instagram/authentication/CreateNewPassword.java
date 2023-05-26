@@ -51,6 +51,7 @@ public class CreateNewPassword extends AppCompatActivity {
     private Button[] buttons;
     private ImageView[] imageViews;
     private boolean passwordEyeState = false;
+    private boolean passwordEyeStateRepeat = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +93,8 @@ public class CreateNewPassword extends AppCompatActivity {
     private void findViews() {
         createNewPassword = findViewById(R.id.create_new_password);
         languages = findViewById(R.id.languages);
-        editTexts = new EditText[]{findViewById(R.id.info_for_password)};
-        buttons = new Button[]{findViewById(R.id.next), findViewById(R.id.auth_eye)};
+        editTexts = new EditText[]{findViewById(R.id.info_for_password), findViewById(R.id.info_for_password_repeat)};
+        buttons = new Button[]{findViewById(R.id.next), findViewById(R.id.auth_eye), findViewById(R.id.auth_eye_repeat)};
         textViews = new TextView[]{findViewById(R.id.create_new_password_title),
                 findViewById(R.id.create_new_password_info), findViewById(R.id.reg_question),
                 findViewById(R.id.link_log_in)};
@@ -133,6 +134,18 @@ public class CreateNewPassword extends AppCompatActivity {
             }
         });
 
+        buttons[2].setOnClickListener(v -> {
+            passwordEyeStateRepeat = !passwordEyeStateRepeat;
+
+            if (passwordEyeStateRepeat) {
+                editTexts[1].setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                buttons[2].setText(resources.getString(R.string.hide_password));
+            } else {
+                editTexts[1].setTransformationMethod(PasswordTransformationMethod.getInstance());
+                buttons[2].setText(resources.getString(R.string.show_password));
+            }
+        });
+
         editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
@@ -147,32 +160,60 @@ public class CreateNewPassword extends AppCompatActivity {
                     setValidationError(true, exception.getMessage());
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
                 }
+
+                if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                    editTexts[1].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                } else {
+                    editTexts[1].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                }
+            }
+        });
+
+        editTexts[1].addTextChangedListener(new Validator(editTexts[1]) {
+            @SuppressLint("UseCompatLoadingForDrawables")
+            @Override
+            public void validate(EditText editText, String text) {
+                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
+
+                if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                    setValidationError(false, "");
+                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                } else {
+                    setValidationError(true, resources.getString(R.string.password_repeat_error));
+                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                }
             }
         });
 
         buttons[0].setOnClickListener(v -> {
             if (editTexts[0].length() != 0) {
                 try {
+                    // region Check to next
                     Validations.validatePassword(editTexts[0].getText().toString(), resources);
+
+                    if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                        throw new Exception(resources.getString(R.string.password_repeat_error));
+                    }
+                    // endregion
+
                     setValidationError(false, "");
                     TransitUser.user.setPassword(editTexts[0].getText().toString().trim());
+                    TransitUser.user.setPasswordRepeat(editTexts[1].getText().toString().trim());
 
                     Services.sendNewPasswordAfterForgot(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            assert response.body() != null;
+                            assert response.body() != null; // TODO waiting for codes
                             if (!response.body().contains("denied")) {
                                 startActivity(Intents.getAuthorisation());
                                 finish();
-                            }
-                            else {
+                            } else {
                                 Toast.makeText(getApplicationContext(), resources.getString(R.string.same_password), Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            assert t != null;
                             System.out.println(t.getMessage());
                         }
                     });
@@ -207,6 +248,7 @@ public class CreateNewPassword extends AppCompatActivity {
     private void setStringResources() {
         buttons[0].setText(resources.getString(R.string.next_step));
         buttons[1].setText(resources.getString(R.string.show_password));
+        buttons[2].setText(resources.getString(R.string.show_password));
 
         textViews[0].setText(resources.getString(R.string.create_new_password_after_forgot));
         textViews[1].setText(resources.getString(R.string.create_new_password_after_forgot_info));
@@ -214,6 +256,7 @@ public class CreateNewPassword extends AppCompatActivity {
         textViews[3].setText(resources.getString(R.string.log_in));
 
         editTexts[0].setHint(resources.getString(R.string.password_hint));
+        editTexts[1].setHint(resources.getString(R.string.password_hint_repeat));
     }
 
     // endregion

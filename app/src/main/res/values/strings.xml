@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_link" translatable="false">asdasd</string>
+    <string name="add_to_tag_people" translatable="false">addToTagPeople</string>
     <string name="logo" translatable="false">logo</string>
     <string name="changeTheme" translatable="false">changeTheme</string>
     <string name="direct" translatable="false">direct</string>
@@ -37,6 +37,7 @@
     <string name="login_hint_username">Username</string>
     <string name="login_hint_email">Email</string>
     <string name="password_hint">Password</string>
+    <string name="password_hint_repeat">Repeat password</string>
     <string name="password_forgot">Forgot password?</string>
     <string name="show_password">Show</string>
     <string name="hide_password">Hide</string>
@@ -63,6 +64,8 @@
     <string name="birthday_borders">Not correct date</string>
     <string name="let_birthday">Set your birthday</string>
     <string name="birthday_error">Not correct year</string>
+    <string name="birthday_error_age">User must be at least 16 years old</string>
+    <string name="birthday_error_date">Date must be greater than current</string>
     <string name="let_name_info">Add you name to let your friends find you</string>
     <string name="forgot_pass_info">Enter your email address, username or phone number and we will send you a message to restore access to your account</string>
     <string name="confirm_code_text">Confirm code that we have sent to you in e-mail what you have indicated to registration</string>
@@ -92,6 +95,8 @@
     <string name="file_not_found_4">File not found</string>
     <string name="file_without_extension_not_supported_5">File without extension not supported</string>
     <string name="file_not_found_6">File not found</string>
+    <string name="tag_people_item">User nickname</string>
+    <string name="find_user">Start write username to find</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>
@@ -133,7 +138,7 @@
     <string name="preview">preview</string>
     <string name="add_description">Add description</string>
     <string name="tag_people">Tag people</string>
-    <string name="add_a_place">add a place</string>
+    <string name="add_a_place">Add a place</string>
     <string name="postpone_publication">Postpone publication</string>
 
     <!--    Validation-->
@@ -147,6 +152,6 @@
     <string name="password_error_letters">Password has to include at least one uppercase letter, one lowercase letter one number 0–9</string>
     <string name="password_error_numbers">Password has to include one number 0–9</string>
     <string name="password_error_spec_symbols">Password has to include one special character @$!%*?&amp;</string>
-    <string name="title_activity_maps">MapsActivity</string>
+    <string name="password_repeat_error">Password mismatch</string>
 
 </resources>

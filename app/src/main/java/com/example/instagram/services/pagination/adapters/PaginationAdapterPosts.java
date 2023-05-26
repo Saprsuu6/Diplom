@@ -3,6 +3,7 @@ package com.example.instagram.services.pagination.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -28,13 +30,17 @@ import com.example.instagram.services.TransitUser;
 import java.util.ArrayList;
 
 public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapterPosts.ViewHolderPosts> {
+    private final Context context;
+
+    @Nullable
     private final Activity activity;
     private final MainDataLibrary mainDataLibrary;
     private SparseIntArray positionList = new SparseIntArray();
 
 
-    public PaginationAdapterPosts(Activity activity, MainDataLibrary mainDataLibrary) {
+    public PaginationAdapterPosts(@Nullable Activity activity, Context context, MainDataLibrary mainDataLibrary) {
         this.activity = activity;
+        this.context = context;
         this.mainDataLibrary = mainDataLibrary;
     }
 
@@ -53,27 +59,27 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         MainData data = mainDataLibrary.getDataArrayList().get(position);
 
         // set image
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.content);
 
         // set ava
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.avaView);
 
         holder.nick.setText(data.getName());
         holder.place.setText(data.getName());
 
-        holder.like.setImageDrawable(activity.getResources()
+        holder.like.setImageDrawable(context.getResources()
                 .getDrawable(loadSP(position + "Like")
                         ? R.drawable.like_fill_gradient
-                        : R.drawable.like_empty_gradient, activity.getTheme()));
+                        : R.drawable.like_empty_gradient, context.getTheme()));
 
-        holder.bookmarck.setImageDrawable(activity.getResources()
+        holder.bookmarck.setImageDrawable(context.getResources()
                 .getDrawable(loadSP(position + "Bookmark")
                         ? R.drawable.bookmark_saved
-                        : R.drawable.bookmark, activity.getTheme()));
+                        : R.drawable.bookmark, context.getTheme()));
 
         holder.amountLikesTitle.setText(R.string.amount_likes_title);
         holder.amountLikes.setText(data.getName());
@@ -93,17 +99,17 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     // region SharedPreferences
     //Сохраняет флажок в SharedPreferences
     public void saveSP(String key, boolean value) {
-        com.example.instagram.services.SharedPreferences.saveSP(activity, key, value);
+        com.example.instagram.services.SharedPreferences.saveSP(context, key, value);
     }
 
     //Загружает нажатый флажок из SharedPreferences
     public boolean loadSP(String key) {
-        return com.example.instagram.services.SharedPreferences.loadBoolSP(activity, key);
+        return com.example.instagram.services.SharedPreferences.loadBoolSP(context, key);
     }
 
     //Удаляет нажатый флажок из SharedPreferences
     public void deleteSp(String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(activity, key);
+        com.example.instagram.services.SharedPreferences.deleteSP(context, key);
     }
     // endregion SharedPreferences
 
@@ -166,19 +172,19 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 if (!like_flag) {
                     like_flag = true;
                     saveSP(position + "Like", true);
-                    like.setImageDrawable(activity.getResources()
-                            .getDrawable(R.drawable.like_fill_gradient, activity.getTheme()));
+                    like.setImageDrawable(context.getResources()
+                            .getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
                 } else {
                     like_flag = false;
                     deleteSp(position + "Like");
-                    like.setImageDrawable(activity.getResources()
-                            .getDrawable(R.drawable.like_empty_gradient, activity.getTheme()));
+                    like.setImageDrawable(context.getResources()
+                            .getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
                 }
             });
 
             comment.setOnClickListener(v -> {
                 Intent intent = Intents.getComments();
-                activity.startActivity(intent);
+                context.startActivity(intent);
             });
 
             send.setOnClickListener(v -> {
@@ -190,13 +196,13 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 if (!bookmarck_flag) {
                     bookmarck_flag = true;
                     saveSP(position + "Bookmark", true);
-                    bookmarck.setImageDrawable(activity.getResources()
-                            .getDrawable(R.drawable.bookmark_saved, activity.getTheme()));
+                    bookmarck.setImageDrawable(context.getResources()
+                            .getDrawable(R.drawable.bookmark_saved, context.getTheme()));
                 } else {
                     bookmarck_flag = false;
                     deleteSp(position + "Bookmark");
-                    bookmarck.setImageDrawable(activity.getResources()
-                            .getDrawable(R.drawable.bookmark, activity.getTheme()));
+                    bookmarck.setImageDrawable(context.getResources()
+                            .getDrawable(R.drawable.bookmark, context.getTheme()));
                 }
             });
         }

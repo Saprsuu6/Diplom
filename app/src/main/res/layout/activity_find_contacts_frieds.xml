@@ -45,62 +45,7 @@
                 tools:text="@string/add_btn_skip" />
         </LinearLayout>
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="5dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    tools:ignore="RtlSymmetry"
-                    tools:listitem="@layout/list_item_contacts" />
-
-                <io.supercharge.shimmerlayout.ShimmerLayout
-                    android:id="@+id/skeleton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:visibility="visible"
-                    app:shimmer_animation_duration="1200">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                    </LinearLayout>
-
-                </io.supercharge.shimmerlayout.ShimmerLayout>
-
-            </LinearLayout>
-
-        </androidx.core.widget.NestedScrollView>
+        <include layout="@layout/users_list" />
 
     </LinearLayout>
 

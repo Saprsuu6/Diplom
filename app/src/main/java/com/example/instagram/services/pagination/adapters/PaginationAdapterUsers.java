@@ -1,6 +1,7 @@
 package com.example.instagram.services.pagination.adapters;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,12 @@ import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.FindContactsFriends;
 
 public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapterUsers.ViewHolderUser> {
-    private final Activity activity;
+    //private final Activity activity;
+    private final Context context;
     private final MainDataLibrary mainDataLibrary;
 
-    public PaginationAdapterUsers(Activity activity, MainDataLibrary mainDataLibrary) {
-        this.activity = activity;
+    public PaginationAdapterUsers(Context context, MainDataLibrary mainDataLibrary) {
+        this.context = context;
         this.mainDataLibrary = mainDataLibrary;
     }
 
@@ -41,7 +43,7 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
         MainData data = mainDataLibrary.getDataArrayList().get(position);
 
         // set image
-        Glide.with(activity.getApplicationContext()).load(data.getImage())
+        Glide.with(context).load(data.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.avaView);
 
@@ -52,8 +54,8 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
         // set button
         holder.subscribe.setChecked(loadSP(position + "FindFriends"));
         holder.subscribe.setText(!holder.subscribe.isChecked()
-                ? activity.getString(R.string.subscribe_btn)
-                : activity.getString(R.string.unsubscribe_btn));
+                ? context.getString(R.string.subscribe_btn)
+                : context.getString(R.string.unsubscribe_btn));
     }
 
     @Override
@@ -64,17 +66,17 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
     // region SharedPreferences
     //Сохраняет флажок в SharedPreferences
     public void saveSP(String key, boolean value) {
-        com.example.instagram.services.SharedPreferences.saveSP(activity, key, value);
+        com.example.instagram.services.SharedPreferences.saveSP(context, key, value);
     }
 
     //Загружает нажатый флажок из SharedPreferences
     public boolean loadSP(String key) {
-        return com.example.instagram.services.SharedPreferences.loadBoolSP(activity, key);
+        return com.example.instagram.services.SharedPreferences.loadBoolSP(context, key);
     }
 
     //Удаляет нажатый флажок из SharedPreferences
     public void deleteSp(String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(activity, key);
+        com.example.instagram.services.SharedPreferences.deleteSP(context, key);
     }
     // endregion SharedPreferences
 
@@ -103,8 +105,8 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
                 }
 
                 subscribe.setText(!subscribe.isChecked()
-                        ? activity.getString(R.string.subscribe_btn)
-                        : activity.getString(R.string.unsubscribe_btn));
+                        ? context.getString(R.string.subscribe_btn)
+                        : context.getString(R.string.unsubscribe_btn));
             });
 
             FindContactsFriends.buttons.add(subscribe);

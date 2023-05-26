@@ -71,8 +71,8 @@
                 android:layout_width="90dp"
                 android:layout_height="90dp"
                 android:background="@color/for_skeleton"
-                android:scaleType="centerCrop"
-                android:contentDescription="@string/preview" />
+                android:contentDescription="@string/preview"
+                android:scaleType="centerCrop" />
 
             <EditText
                 android:id="@+id/new_post_description"
@@ -93,23 +93,25 @@
         <TextView
             android:id="@+id/tag_people"
             style="@style/Text"
-            android:layout_margin="15dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="15dp"
             android:text="@string/tag_people" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@drawable/separator" />
+            android:background="@drawable/separator"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/add_place"
             style="@style/Text"
-            android:layout_margin="15dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/add_a_place" />
+            android:layout_margin="15dp"
+            android:text="@string/add_a_place"
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"
@@ -119,9 +121,9 @@
         <TextView
             android:id="@+id/postpone_publication"
             style="@style/Text"
-            android:layout_margin="15dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="15dp"
             android:text="@string/postpone_publication" />
 
     </LinearLayout>

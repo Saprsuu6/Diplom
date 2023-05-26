@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -21,13 +20,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.instagram.R;
-import com.example.instagram.services.Intents;
+import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.pagination.adapters.PaginationAdapterPostsCells;
-import com.example.instagram.services.pagination.paging_views.PagingViewPosts;
-import com.example.instagram.services.pagination.paging_views.PagingViewPostsCells;
-import com.example.instagram.services.themes_and_backgrounds.Themes;
-import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
+import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
+import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+
+import org.json.JSONException;
 
 public class SelfPage extends AppCompatActivity {
 
@@ -40,7 +38,8 @@ public class SelfPage extends AppCompatActivity {
     private ImageView[] imageViews;
     private TextView[] textViews;
     private ImageView[] imageViewsBottom;
-    private PagingViewPostsCells adapter;
+    private PagingViewGetAllPostsInCells adapter;
+    private FindUser findUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +50,13 @@ public class SelfPage extends AppCompatActivity {
         setIntents();
         findViews();
 
+        // region find users
+        try {
+            findUser = new FindUser(this, resources);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
+        // endregion
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
@@ -60,9 +66,13 @@ public class SelfPage extends AppCompatActivity {
 
         registerForContextMenu(imageViews[2]);
 
-        adapter = new PagingViewPostsCells(findViewById(R.id.scroll_view),
-                findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                this, 1, 10);
+        try {
+            adapter = new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view),
+                    findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
+                    this, this ,1, 10);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void setUiVisibility() {
@@ -148,11 +158,22 @@ public class SelfPage extends AppCompatActivity {
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         imageViews[0].setOnClickListener(v -> finish());
-        imageViewsBottom[0].setOnClickListener(v -> finish());
-        // TODO: search, add_post, notifications
-    }
 
-    // TODO: user context
+        // initialize menu bottom
+        BottomMenu.setListeners(this,
+                new ImageView[]{imageViewsBottom[1],
+                        imageViewsBottom[2], imageViewsBottom[3]},
+                findUser);
+
+        // home
+        imageViewsBottom[0].setOnClickListener(v -> finish());
+
+
+        // self page
+        imageViewsBottom[4].setOnClickListener(v -> {
+            ((NestedScrollView) findViewById(R.id.scroll_view)).scrollTo(0, 0);
+        });
+    }
 
     // region Localisation
     private void setStringResources() {
