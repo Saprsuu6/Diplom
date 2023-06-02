@@ -2,12 +2,21 @@ package com.example.instagram.DAOs;
 
 import androidx.annotation.Nullable;
 
+import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.Services;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class Post {
     private Date dateOfAdd;
-    private User author;
+    private String author;
     private String description;
+    private int likes;
     @Nullable
     private String resourceImg;
     @Nullable
@@ -16,8 +25,18 @@ public class Post {
     private String metadata;
     @Nullable
     private Date postponePublication;
+    @Nullable
+    private String place;
 
     // region setters
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public void setPlace(@Nullable String place) {
+        this.place = place;
+    }
+
     public void setPostponePublication(@Nullable Date postponePublication) {
         this.postponePublication = postponePublication;
     }
@@ -26,7 +45,7 @@ public class Post {
         this.dateOfAdd = dateOfAdd;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -45,13 +64,23 @@ public class Post {
     public void setMetadata(@Nullable String metadata) {
         this.metadata = metadata;
     }
+
     // endregion
     // region getters
+    public int getLikes() {
+        return likes;
+    }
+
+    @Nullable
+    public String getPlace() {
+        return place;
+    }
+
     public Date getDateOfAdd() {
         return dateOfAdd;
     }
 
-    public User getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
@@ -73,9 +102,33 @@ public class Post {
     public String getMetadata() {
         return metadata;
     }
+
     @Nullable
     public Date getPostponePublication() {
         return postponePublication;
     }
     // endregion
+
+    public Post(JSONObject object) throws JSONException {
+        try {
+            setPostponePublication(DateFormatting.formatDateFromStandard(object.getString("postponePublication")));
+            setDateOfAdd(DateFormatting.formatDateFromStandard(object.getString("addDate")));
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        setMetadata(object.getString("metadata"));
+
+        setResourceVideo(object.getString("videoUrl"));
+        setResourceImg(object.getString("imageUrl"));
+
+        setDescription(object.getString("header"));
+        setPlace(object.getString("place"));
+        setAuthor(object.getString("author"));
+        setLikes(object.getInt("likes"));
+    }
+
+    public Post() {
+    }
 }

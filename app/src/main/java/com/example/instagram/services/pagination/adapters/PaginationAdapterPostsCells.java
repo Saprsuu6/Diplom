@@ -1,7 +1,6 @@
 package com.example.instagram.services.pagination.adapters;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.view.Display;
@@ -17,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.instagram.DAOs.MainData;
-import com.example.instagram.DAOs.MainDataLibrary;
+import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.services.PostInDialog;
 
@@ -26,13 +25,13 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     @Nullable
     private final Activity activity;
     private final Context context;
-    private final MainDataLibrary mainDataLibrary;
+    private final PostsLibrary postsLibrary;
     private final Point size;
 
-    public PaginationAdapterPostsCells(Context context, Activity activity, MainDataLibrary mainDataLibrary) {
+    public PaginationAdapterPostsCells(Context context, Activity activity, PostsLibrary postsLibrary) {
         this.activity = activity;
         this.context = context;
-        this.mainDataLibrary = mainDataLibrary;
+        this.postsLibrary = postsLibrary;
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         size = new Point();
@@ -50,7 +49,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderPostsCells holder, int position) {
-        MainData data = mainDataLibrary.getDataArrayList().get(position);
+        Post data = postsLibrary.getDataArrayList().get(position);
 
         // TODO: take 3 post
 
@@ -59,25 +58,54 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         image1.setLayoutParams(holder.cellsContainerParams);
         image1.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image1.setPadding(0, 2, 2, 2);
-        Glide.with(context).load(data.getImage())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(image1);
+
+        assert data.getResourceImg() != null;
+        if (data.getResourceImg().equals("")) {
+            // set image
+            Glide.with(context).load(data.getResourceVideo())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image1);
+
+        }
+        else {
+            Glide.with(context).load(data.getResourceImg())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image1);
+        }
 
         ImageView image2 = new ImageView(context);
         image2.setLayoutParams(holder.cellsContainerParams);
         image2.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image2.setPadding(2, 2, 2, 2);
-        Glide.with(context).load(data.getImage())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(image2);
+        if (data.getResourceImg().equals("")) {
+            // set image
+            Glide.with(context).load(data.getResourceVideo())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image2);
+
+        }
+        else {
+            Glide.with(context).load(data.getResourceImg())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image2);
+        }
 
         ImageView image3 = new ImageView(context);
         image3.setLayoutParams(holder.cellsContainerParams);
         image3.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image3.setPadding(2, 2, 0, 2);
-        Glide.with(context).load(data.getImage())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(image3);
+        if (data.getResourceImg().equals("")) {
+            // set image
+            Glide.with(context).load(data.getResourceVideo())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image3);
+
+        }
+        else {
+            Glide.with(context).load(data.getResourceImg())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image3);
+        }
 
         holder.cellsContainerParams.height = size.x / 3;
 
@@ -97,7 +125,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     @Override
     public int getItemCount() {
-        return mainDataLibrary.getDataArrayList().size();
+        return postsLibrary.getDataArrayList().size();
     }
 
     // region SharedPreferences

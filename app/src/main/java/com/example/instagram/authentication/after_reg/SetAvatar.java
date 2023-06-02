@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -92,6 +93,8 @@ public class SetAvatar extends AppCompatActivity {
 
         if (Intents.getAuthorisation() == null)
             Intents.setAuthorisation(new Intent(this, Authorisation.class));
+
+        Intents.setNewsList(new Intent(this, NewsLine.class));
     }
 
     @Override
@@ -188,11 +191,12 @@ public class SetAvatar extends AppCompatActivity {
 
     private void sendAvaToBackEnd() {
         if (imageBytes.length == 0) {
-            Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
+            Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes); // TODO set extension
+        RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes);
+        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getName()); // TODO Andry
 
         try {
             Services.sendAva(new Callback<>() {
@@ -214,7 +218,7 @@ public class SetAvatar extends AppCompatActivity {
                     assert t != null;
                     System.out.println(t.getMessage());
                 }
-            }, image);
+            }, image, nickName);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }

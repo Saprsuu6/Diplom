@@ -11,7 +11,6 @@ import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,11 +28,10 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
-import com.example.instagram.services.SendToCheckExistUser;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
@@ -47,7 +45,6 @@ import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class Authorisation extends AppCompatActivity {
     private Resources resources;
@@ -111,7 +108,10 @@ public class Authorisation extends AppCompatActivity {
             Services.authorizeUser(new Callback<String>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.code() == 200) {
+                    assert response.body() != null;
+                    Errors.authoriseUser(getApplicationContext(), response.body()).show();
+
+                    if (response.body().contains("0")) {
                         startActivity(Intents.getNewsList());
                         finish();
                     } else {
@@ -289,6 +289,8 @@ public class Authorisation extends AppCompatActivity {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             assert response.body() != null;
+                            Errors.authoriseUser(getApplicationContext(), response.body()).show();
+
                             if (response.body().contains("0")) {
                                 startActivity(Intents.getNewsList());
                                 finish();
@@ -318,7 +320,8 @@ public class Authorisation extends AppCompatActivity {
                     Services.sendToForgotPassword(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            System.out.println(response.body());
+                            assert response.body() != null;
+                            Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
                         }
 
                         @Override

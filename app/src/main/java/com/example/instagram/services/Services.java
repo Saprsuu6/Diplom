@@ -1,5 +1,15 @@
 package com.example.instagram.services;
 
+import com.example.instagram.services.interfaces.SendAva;
+import com.example.instagram.services.interfaces.SendMultipartPost;
+import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
+import com.example.instagram.services.interfaces.SendToAddUser;
+import com.example.instagram.services.interfaces.SendToCheckExistUser;
+import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
+import com.example.instagram.services.interfaces.SendToCheckUserCode;
+import com.example.instagram.services.interfaces.SendToForgotPassword;
+import com.example.instagram.services.interfaces.SendToGetAllPosts;
+import com.example.instagram.services.interfaces.SendToGetAva;
 import com.example.instagram.services.pagination.PagingRequestPages;
 
 import org.json.JSONException;
@@ -14,7 +24,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    private final static String BASE_URL = "https://1a9a-62-16-0-223.ngrok-free.app";
+    public final static String BASE_URL = "https://92e2-2a09-bac1-7500-18-00-84-86.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     // registration user
@@ -63,10 +73,17 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendAva(Callback<ResponseBody> callback, RequestBody image) throws JSONException {
-        Multipart mainInterface = retrofit.create(Multipart.class);
+    public static void sendMultipartPost(Callback<ResponseBody> callback, RequestBody image) throws JSONException {
+        SendMultipartPost mainInterface = retrofit.create(SendMultipartPost.class);
 
         Call<ResponseBody> call = mainInterface.STRING_CALL(image, null);
+        call.enqueue(callback);
+    }
+
+    public static void sendAva(Callback<ResponseBody> callback, RequestBody image, RequestBody login) throws JSONException {
+        SendAva mainInterface = retrofit.create(SendAva.class);
+
+        Call<ResponseBody> call = mainInterface.STRING_CALL(image, login);
         call.enqueue(callback);
     }
 
@@ -78,6 +95,22 @@ public class Services {
         Call<String> call = mainInterface.STRING_CALL(page, onePageLimit);
 
         call.enqueue(callback);
+
+        // TODO delete
+    }
+
+    public static void sendToGetAllPosts(Callback<String> callback) throws JSONException {
+        SendToGetAllPosts mainInterface = retrofit.create(SendToGetAllPosts.class);
+
+        Call<String> call = mainInterface.STRING_CALL();
+        call.enqueue(callback);
+    }
+
+    public static void sendToGetAva(Callback<String> callback, String nickName) throws  JSONException {
+        SendToGetAva sendToGetAva = retrofit.create(SendToGetAva.class);
+
+        Call<String> call = sendToGetAva.STRING_CALL(nickName);
+        call.enqueue(callback);
     }
 
     public static void sendToGetUsers(Callback<String> callback, int page, int onePageLimit) throws JSONException { // TODO change method
@@ -88,5 +121,7 @@ public class Services {
         Call<String> call = mainInterface.STRING_CALL(page, onePageLimit);
 
         call.enqueue(callback);
+
+        // TODO delete
     }
 }

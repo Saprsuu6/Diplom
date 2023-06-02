@@ -1,4 +1,4 @@
-package com.example.instagram.services;
+package com.example.instagram.services.interfaces;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

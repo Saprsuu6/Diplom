@@ -1,6 +1,5 @@
 package com.example.instagram.services.pagination.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.instagram.DAOs.MainData;
-import com.example.instagram.DAOs.MainDataLibrary;
+import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.FindContactsFriends;
 
 public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapterUsers.ViewHolderUser> {
     //private final Activity activity;
     private final Context context;
-    private final MainDataLibrary mainDataLibrary;
+    private final PostsLibrary postsLibrary;
 
-    public PaginationAdapterUsers(Context context, MainDataLibrary mainDataLibrary) {
+    public PaginationAdapterUsers(Context context, PostsLibrary postsLibrary) {
         this.context = context;
-        this.mainDataLibrary = mainDataLibrary;
+        this.postsLibrary = postsLibrary;
     }
 
     @NonNull
@@ -40,16 +39,16 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
 
     @Override
     public void onBindViewHolder(@NonNull PaginationAdapterUsers.ViewHolderUser holder, int position) {
-        MainData data = mainDataLibrary.getDataArrayList().get(position);
+        Post data = postsLibrary.getDataArrayList().get(position);
 
         // set image
-        Glide.with(context).load(data.getImage())
+        Glide.with(context).load(data.getResourceImg())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.avaView);
 
         // set name nickname
-        holder.nickView.setText(data.getName());
-        holder.nameView.setText(data.getName());
+        holder.nickView.setText(data.getAuthor());
+        holder.nameView.setText(data.getAuthor());
 
         // set button
         holder.subscribe.setChecked(loadSP(position + "FindFriends"));
@@ -60,7 +59,7 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
 
     @Override
     public int getItemCount() {
-        return mainDataLibrary.getDataArrayList().size();
+        return postsLibrary.getDataArrayList().size();
     }
 
     // region SharedPreferences

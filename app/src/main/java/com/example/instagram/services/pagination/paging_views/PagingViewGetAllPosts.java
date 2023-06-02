@@ -9,13 +9,19 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram.services.Services;
 import com.example.instagram.services.SharedPreferences;
 import com.example.instagram.services.pagination.PagingView;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import io.supercharge.shimmerlayout.ShimmerLayout;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PagingViewGetAllPosts extends PagingView {
     private PaginationAdapterPosts paginationAdapter;
@@ -28,7 +34,7 @@ public class PagingViewGetAllPosts extends PagingView {
         super(scrollView, recyclerView, shimmerLayout, context, activity, page, onePageLimit);
 
         // initialise adapter
-        paginationAdapter = new PaginationAdapterPosts(activity, context, mainDataLibrary);
+        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
 
         // set layout manager
         manager = new LinearLayoutManager(context);
@@ -40,7 +46,11 @@ public class PagingViewGetAllPosts extends PagingView {
         loadPosition();
         setListeners();
 
-        super.getData(page, onePageLimit);
+        try {
+            getData(page, onePageLimit);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void loadPosition() {
@@ -65,7 +75,34 @@ public class PagingViewGetAllPosts extends PagingView {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationAdapterPosts(activity ,context, mainDataLibrary);
+        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
         recyclerView.setAdapter(paginationAdapter);
+    }
+
+    @Override
+    protected void getData(int page, int onePageLimit) throws JSONException {
+        startSkeletonAnim();
+
+        Services.sendToGetAllPosts(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    stopSkeletonAnim();
+
+                    String body = response.body();
+                    try {
+                        postsLibrary.setDataArrayList(new JSONArray(body));
+                        setPaginationAdapter();
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                System.out.println(t.getMessage());
+            }
+        });
     }
 }

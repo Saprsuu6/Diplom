@@ -50,21 +50,14 @@
     <string name="subscribe_btn">Підписатися</string>
     <string name="unsubscribe_btn">Відписатися</string>
     <string name="amount_likes_title">Подобається:</string>
-    <string name="hours_ago">часа тому назад</string>
     <string name="comments_title">Коментарі</string>
     <string name="add_comment">Додати коментрій…</string>
     <string name="auth_attempt">Ви повинні спробувати авторизуватися хоча б 1 раз</string>
     <string name="same_password">Паролі не можуть збігатися з попереднім</string>
     <string name="error_no_photo">Потрібно обрати фото щаб продовжити</string>
-    <string name="successfully_loaded_0">Вдачне завантаження…</string>
-    <string name="unsuccessfully_loaded_1">Невдачне завантаження</string>
-    <string name="files_not_supported_2">Файли не підтримуються</string>
-    <string name="unrecognized_server_error_3">Unrecognized file server error</string>
-    <string name="file_not_found_4">Нерозпізнана помилка файлового сервера</string>
-    <string name="file_without_extension_not_supported_5">Файл без розширення не підтримується</string>
-    <string name="file_not_found_6">Файл не знайдено</string>
     <string name="tag_people_item">Ім\'я користувача</string>
     <string name="find_user">Почніть писати нік щоб знайти користувача</string>
+    <string name="internal_error">Внутрішня помилка</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>
@@ -121,5 +114,44 @@
     <string name="password_error_numbers">Пароль має містити число 0–9</string>
     <string name="password_error_spec_symbols">Пароль повинен містити один спеціальний символ @$!%*?&amp;</string>
     <string name="password_repeat_error">Паролі не співпадають</string>
+
+<!--    add avatar errors-->
+    <string name="successfully_loaded_0">Вдачне завантаження…</string>
+    <string name="unsuccessfully_loaded_1">Невдачне завантаження</string>
+    <string name="files_not_supported_2">Файли не підтримуються</string>
+    <string name="unrecognized_server_error_3">Unrecognized file server error</string>
+    <string name="file_not_found_4">Нерозпізнана помилка файлового сервера</string>
+    <string name="file_without_extension_not_supported_5">Файл без розширення не підтримується</string>
+    <string name="file_not_found_6">Файл не знайдено</string>
+
+    <!--    add user errors-->
+    <string name="add_user_0">Помилок немає</string>
+    <string name="add_user_1">Користувач з таким логіном існує</string>
+    <string name="add_user_2">Файли не підтримуються</string>
+    <string name="add_user_3">День народження не може бути порожнім</string>
+    <string name="add_user_4">Тіло було нульовим</string>
+
+    <!--    authorise-->
+    <string name="authorise_0">Доступ дозволено</string>
+    <string name="authorise_1">Доступ заборонено</string>
+    <string name="authorise_2">Тіло було нульовим</string>
+    <string name="authorise_3">День народження не може бути порожнім</string>
+
+    <!--    forgot_password_code-->
+    <string name="forgot_password_code_0">Код надсилається</string>
+    <string name="forgot_password_code_1">Код вже надіслано, спробуйте пізніше</string>
+
+    <!--    after restore password-->
+    <string name="after_restore_0">Пароль успішно змінено</string>
+    <string name="after_restore_1">Невірний код</string>
+    <string name="after_restore_2">Неправильний логін</string>
+    <string name="after_restore_3">Пароль не може бути пустим</string>
+    <string name="after_restore_4">Паролі не однакові</string>
+    <string name="after_restore_5">Паролі не можуть збігатися з попереднім</string>
+
+    <!--    enter code-->
+    <string name="enter_code_0">Доступ дозволено</string>
+    <string name="enter_code_1">Доступ заборонено, спроби залишилися:</string>
+    <string name="enter_code_2">У доступі відмовлено, спроб немає, запитайте адмінів про Clickshot</string>
 
 </resources>

@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetPassword;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
@@ -191,7 +192,7 @@ public class CreateNewPassword extends AppCompatActivity {
                     // region Check to next
                     Validations.validatePassword(editTexts[0].getText().toString(), resources);
 
-                    if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                    if (!editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
                         throw new Exception(resources.getString(R.string.password_repeat_error));
                     }
                     // endregion
@@ -203,12 +204,12 @@ public class CreateNewPassword extends AppCompatActivity {
                     Services.sendNewPasswordAfterForgot(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            assert response.body() != null; // TODO waiting for codes
-                            if (!response.body().contains("denied")) {
+                            assert response.body() != null;
+                            Errors.afterRestorePassword(getApplicationContext(), response.body()).show();
+
+                            if (response.body().contains("0")) {
                                 startActivity(Intents.getAuthorisation());
                                 finish();
-                            } else {
-                                Toast.makeText(getApplicationContext(), resources.getString(R.string.same_password), Toast.LENGTH_SHORT).show();
                             }
                         }
 

@@ -239,7 +239,7 @@ public class CreatePost extends AppCompatActivity {
             RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes); // TODO set extension
 
             try {
-                Services.sendAva(new Callback<>() { // TODO change to other method to send post
+                Services.sendMultipartPost(new Callback<>() { // TODO change to other method to send post
                     @Override
                     public void onResponse(@Nullable Call<ResponseBody> call, @Nullable Response<ResponseBody> response) {
                         assert Objects.requireNonNull(response).body() != null;

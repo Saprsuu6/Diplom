@@ -24,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.instagram.R;
+import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -34,8 +35,11 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class NewsLine extends AppCompatActivity {
     private LinearLayout newsLine;
@@ -170,6 +174,8 @@ public class NewsLine extends AppCompatActivity {
                 Configuration configuration = Localisation.setLocalize(parent, localisation, position);
                 getBaseContext().getResources().updateConfiguration(configuration, null);
                 setStringResources();
+
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
             }
 
             @Override
@@ -224,7 +230,16 @@ public class NewsLine extends AppCompatActivity {
     private void setStringResources() {
         if (NewsLine.textViews.size() > 0) {
             NewsLine.textViews.get(0).setText(resources.getString(R.string.amount_likes_title));
-            NewsLine.textViews.get(1).setText(resources.getString(R.string.hours_ago));
+
+            try {
+                String dateStr = NewsLine.textViews.get(1).getText().toString();
+                Date newDate = DateFormatting.formatDate(dateStr);
+
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+                NewsLine.textViews.get(1).setText(DateFormatting.formatDate(newDate));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
     // endregion

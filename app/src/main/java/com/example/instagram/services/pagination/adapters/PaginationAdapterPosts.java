@@ -2,7 +2,6 @@ package com.example.instagram.services.pagination.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.SparseIntArray;
@@ -10,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,29 +17,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.instagram.DAOs.MainData;
-import com.example.instagram.DAOs.MainDataLibrary;
+import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
-import com.example.instagram.authentication.after_reg.FindContactsFriends;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.Services;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapterPosts.ViewHolderPosts> {
     private final Context context;
 
     @Nullable
     private final Activity activity;
-    private final MainDataLibrary mainDataLibrary;
+    private final PostsLibrary postsLibrary;
     private SparseIntArray positionList = new SparseIntArray();
 
 
-    public PaginationAdapterPosts(@Nullable Activity activity, Context context, MainDataLibrary mainDataLibrary) {
+    public PaginationAdapterPosts(@Nullable Activity activity, Context context, PostsLibrary postsLibrary) {
         this.activity = activity;
         this.context = context;
-        this.mainDataLibrary = mainDataLibrary;
+        this.postsLibrary = postsLibrary;
     }
 
     @NonNull
@@ -53,23 +61,49 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         return new ViewHolderPosts(view);
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     @Override
     public void onBindViewHolder(@NonNull PaginationAdapterPosts.ViewHolderPosts holder, int position) {
-        MainData data = mainDataLibrary.getDataArrayList().get(position);
+        Post data = postsLibrary.getDataArrayList().get(position);
 
-        // set image
-        Glide.with(context).load(data.getImage())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(holder.content);
+        assert data.getResourceImg() != null;
+        if (data.getResourceImg().equals("")) {
+            // set image
+            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(holder.content);
+        } else {
+            Glide.with(context).load(Services.BASE_URL + data.getResourceImg())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(holder.content);
+        }
 
-        // set ava
-        Glide.with(context).load(data.getImage())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(holder.avaView);
+        // region send request to get avatar
+        try {
+            Services.sendToGetAva(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    assert response.body() != null;
+                    String avaLink = response.body();
 
-        holder.nick.setText(data.getName());
-        holder.place.setText(data.getName());
+                    // set ava
+                    Glide.with(context).load(Services.BASE_URL + avaLink)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(holder.avaView);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    System.out.println(t.getMessage());
+                }
+            }, data.getAuthor());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        // endregion
+
+        holder.nick.setText(data.getAuthor());
+        holder.place.setText(data.getPlace());
 
         holder.like.setImageDrawable(context.getResources()
                 .getDrawable(loadSP(position + "Like")
@@ -82,18 +116,18 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                         : R.drawable.bookmark, context.getTheme()));
 
         holder.amountLikesTitle.setText(R.string.amount_likes_title);
-        holder.amountLikes.setText(data.getName());
-        holder.authorNickname.setText(data.getName());
-        holder.description.setText(data.getName());
-        holder.hours.setText(data.getName());
-        holder.hoursText.setText(R.string.hours_ago);
+        holder.amountLikes.setText(Integer.toString(data.getLikes()));
+        holder.authorNickname.setText(data.getAuthor());
+        holder.description.setText(data.getDescription());
 
-        // TODO change language in activity
+        Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
+
+        holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
     }
 
     @Override
     public int getItemCount() {
-        return mainDataLibrary.getDataArrayList().size();
+        return postsLibrary.getDataArrayList().size();
     }
 
     // region SharedPreferences
@@ -130,7 +164,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         private final TextView authorNickname;
         private final TextView description;
         private final TextView hours;
-        private final TextView hoursText;
 
         public ViewHolderPosts(@NonNull View itemView) {
             super(itemView);
@@ -139,6 +172,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             nick = itemView.findViewById(R.id.nick_view);
             place = itemView.findViewById(R.id.place);
             postContext = itemView.findViewById(R.id.post_context);
+
+            assert activity != null;
             activity.registerForContextMenu(postContext); // post context registration
 
             content = itemView.findViewById(R.id.image_content);
@@ -153,10 +188,9 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             authorNickname = itemView.findViewById(R.id.author_nickname);
             description = itemView.findViewById(R.id.description);
             hours = itemView.findViewById(R.id.hours);
-            hoursText = itemView.findViewById(R.id.hours_ago_title);
 
             NewsLine.textViews.add(amountLikesTitle);
-            NewsLine.textViews.add(hoursText);
+            NewsLine.textViews.add(hours);
 
             setListeners();
         }

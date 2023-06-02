@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -83,8 +84,12 @@ public class ForgotPassword extends AppCompatActivity {
                         assert response != null;
                         assert response.body() != null;
 
-                        if (!response.body().equals("false")) {
-                            TransitUser.user.setEmailCode(response.body());
+                        if (response.body().contains("0")) {
+                            String responseStr = response.body();
+                            int index = responseStr.indexOf(":");
+                            responseStr = responseStr.substring(index + 1);
+
+                            TransitUser.user.setEmailCode(responseStr.trim());
                             startActivity(Intents.getCreateNewPassword());
                             handler.removeCallbacks(runnable);
                             finish();
@@ -164,20 +169,30 @@ public class ForgotPassword extends AppCompatActivity {
                         public void onResponse(@NonNull Call<String> call, @NonNull retrofit2.Response<String> response) {
                             String strResponse = response.body();
                             assert strResponse != null;
-                            if (strResponse.contains("denied")) {
+                            assert response.body() != null;
+
+                            Errors.enterCode(getApplicationContext(), response.body()).show();
+
+                            if (strResponse.contains("1")) {
                                 char symbol = strResponse.charAt(strResponse.length() - 1);
                                 int attempts = Integer.parseInt(String.valueOf(symbol));
 
                                 if (attempts > 0) {
-                                    Toast.makeText(getApplicationContext(), strResponse, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), attempts, Toast.LENGTH_SHORT).show();
                                 } else {
-                                    startActivity(Intents.getCreateNewPassword());
+                                    startActivity(Intents.getAuthorisation());
                                     finish();
                                 }
-
-                                startActivity(Intents.getCreateNewPassword());
-                                finish();
                             }
+
+                            String responseStr = response.body();
+                            int index = responseStr.indexOf(":");
+                            responseStr = responseStr.substring(index + 1);
+
+                            TransitUser.user.setEmailCode(responseStr.trim());
+
+                            startActivity(Intents.getCreateNewPassword());
+                            finish();
                         }
 
                         @Override

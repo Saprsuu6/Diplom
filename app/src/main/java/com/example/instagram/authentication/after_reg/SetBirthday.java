@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.TransitUser;
@@ -36,6 +37,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -174,15 +176,14 @@ public class SetBirthday extends AppCompatActivity {
                         Services.addUser(new Callback<String>() {
                             @Override
                             public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
-                                assert response != null; // TODO waiting for codes
-                                if (response.code() == 200) {
-                                    startActivity(Intents.getNewsList());
-                                }
+                                assert Objects.requireNonNull(response).body() != null;
+                                Errors.registrationUser(getApplicationContext(), response.body()).show();
                             }
 
                             @Override
                             public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
-
+                                assert t != null;
+                                System.out.println(t.getMessage());
                             }
                         });
                     } catch (IOException | JSONException e) {

@@ -1,4 +1,4 @@
-package com.example.instagram.services;
+package com.example.instagram.services.interfaces;
 
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;

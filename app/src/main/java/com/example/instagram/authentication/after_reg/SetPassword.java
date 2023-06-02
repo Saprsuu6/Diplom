@@ -186,7 +186,7 @@ public class SetPassword extends AppCompatActivity {
                     // region Check to next
                     Validations.validatePassword(editTexts[0].getText().toString(), resources);
 
-                    if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                    if (!editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
                         throw new Exception(resources.getString(R.string.password_repeat_error));
                     }
                     // endregion
