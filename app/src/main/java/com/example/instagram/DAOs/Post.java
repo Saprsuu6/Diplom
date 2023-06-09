@@ -27,8 +27,11 @@ public class Post {
     private Date postponePublication;
     @Nullable
     private String place;
-
+    private String nickNames;
     // region setters
+    public void setNickNames(String nickNames) {
+        this.nickNames = nickNames;
+    }
     public void setLikes(int likes) {
         this.likes = likes;
     }
@@ -67,6 +70,10 @@ public class Post {
 
     // endregion
     // region getters
+    public String getNickNames() {
+        return nickNames;
+    }
+
     public int getLikes() {
         return likes;
     }

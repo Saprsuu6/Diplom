@@ -25,7 +25,11 @@
             android:name=".main_process.CreatePost"
             android:exported="true"
             android:screenOrientation="locked">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".main_process.ChatList"
@@ -55,11 +59,7 @@
             android:name=".authentication.after_reg.SetAvatar"
             android:exported="true"
             android:screenOrientation="locked">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".authentication.after_reg.SetBirthday"

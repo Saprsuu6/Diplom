@@ -1,10 +1,5 @@
 package com.example.instagram.main_process;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -29,6 +25,10 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.services.DateFormatting;
@@ -42,13 +42,13 @@ import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -171,7 +171,7 @@ public class CreatePost extends AppCompatActivity {
                         }
                         // endregion
                     } catch (IOException e) {
-                        System.out.println(e.getMessage());
+                        Log.d("ActivityResultLauncher & IOException: ", e.getMessage());
                     }
                 }
             }
@@ -227,9 +227,8 @@ public class CreatePost extends AppCompatActivity {
             }
         };
 
-        imageViews[0].setOnClickListener(v -> {
-            finish();
-        });
+        imageViews[0].setOnClickListener(v -> finish());
+
         imageViews[1].setOnClickListener(v -> {
             if (imageBytes.length == 0) {
                 Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
@@ -241,8 +240,8 @@ public class CreatePost extends AppCompatActivity {
             try {
                 Services.sendMultipartPost(new Callback<>() { // TODO change to other method to send post
                     @Override
-                    public void onResponse(@Nullable Call<ResponseBody> call, @Nullable Response<ResponseBody> response) {
-                        assert Objects.requireNonNull(response).body() != null;
+                    public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
+                        assert response.body() != null;
                         String responseStr = response.body().toString();
 
                         if (responseStr.equals("0")) {
@@ -253,17 +252,14 @@ public class CreatePost extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(@Nullable Call<ResponseBody> call, @Nullable Throwable t) {
-                        assert t != null;
-                        System.out.println(t.getMessage());
+                    public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
+                        Log.d("sendMultipartPost: ", t.getMessage());
                     }
-                }, image);
+                }, image, editTexts[0].getText().toString().trim());
             } catch (JSONException e) {
-                System.out.println(e.getMessage());
+                Log.d("JSONException: ", e.getMessage());
             }
             // endregion
-
-            // TODO decide how to send post info
 
             finish();
         });
@@ -271,9 +267,6 @@ public class CreatePost extends AppCompatActivity {
         imageViews[2].setOnClickListener(v -> openGallery());
 
         textViews[1].setOnClickListener(v -> setToTagPeople());
-
-        // TODO add ability to tag people
-        // TODO add ability to add place
     }
 
     // region Localisation

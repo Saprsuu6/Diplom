@@ -21,6 +21,16 @@
             android:contentDescription="@string/avatar"
             android:scaleType="centerCrop" />
 
+        <ImageView
+            android:id="@+id/validation_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/nickname"
             style="@style/Authentication_EditText"

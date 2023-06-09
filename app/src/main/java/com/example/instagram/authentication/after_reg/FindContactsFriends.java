@@ -60,7 +60,7 @@ public class FindContactsFriends extends AppCompatActivity {
         try {
             PagingViewFindUsers pagingView = new PagingViewFindUsers(findViewById(R.id.scroll_view),
                     findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                    this, this, 1, 20);
+                    this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }

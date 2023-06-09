@@ -23,9 +23,8 @@ public class PagingViewFindUsers extends PagingView {
     private PaginationAdapterUsers paginationAdapter;
 
     public PagingViewFindUsers(NestedScrollView scrollView, RecyclerView recyclerView,
-                               ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity,
-                               int page, int onePageLimit) throws JSONException {
-        super(scrollView, recyclerView, shimmerLayout, context, activity,  page, onePageLimit);
+                               ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, context, activity);
 
         // initialise adapter
         paginationAdapter = new PaginationAdapterUsers(context, postsLibrary);
@@ -37,7 +36,7 @@ public class PagingViewFindUsers extends PagingView {
         recyclerView.setAdapter(paginationAdapter);
 
         try {
-            getData(page, onePageLimit);
+            getData();
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -50,18 +49,18 @@ public class PagingViewFindUsers extends PagingView {
     }
 
     @Override
-    protected void getData(int page, int onePageLimit) throws JSONException {
-        Services.sendToGetUsers(new Callback<String>() {
-            @Override
-            public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
-                System.out.println("getUsers");
-            }
-
-            @Override
-            public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
-                assert t != null;
-                System.out.println(t.getMessage());
-            }
-        }, 1, 20);
+    protected void getData() throws JSONException {
+//        Services.sendToGetUsers(new Callback<>() {
+//            @Override
+//            public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
+//                System.out.println("getUsers");
+//            }
+//
+//            @Override
+//            public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
+//                assert t != null;
+//                System.out.println(t.getMessage());
+//            }
+//        }, 1, 20);
     }
 }

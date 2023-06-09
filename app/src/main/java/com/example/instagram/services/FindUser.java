@@ -83,16 +83,9 @@ public class FindUser {
                     System.out.println(e.getMessage());
                 }
 
-                try {
-                    pagingViewUsers = new PagingViewFindUsers(view.findViewById(R.id.scroll_view),
-                            view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton),
-                            context, null, 1, 20);
-                } catch (JSONException e) {
-                    System.out.println(e.getMessage());
-                }
-
                 // TODO: send request to server
             }
         });
     }
+
 }

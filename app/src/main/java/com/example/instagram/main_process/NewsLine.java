@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.widget.NestedScrollView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -12,6 +13,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +30,7 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
@@ -35,18 +38,23 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NewsLine extends AppCompatActivity {
     private LinearLayout newsLine;
     private Resources resources;
     private ImageView[] imageViewsTop;
     private ImageView[] imageViewsBottom;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private PagingViewGetAllPosts pagingView;
+
     // region localisation
     private Localisation localisation;
     private Spinner languages;
@@ -81,7 +89,7 @@ public class NewsLine extends AppCompatActivity {
         try {
             pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view),
                     findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                    this, this, 1, 10);
+                    this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -97,14 +105,13 @@ public class NewsLine extends AppCompatActivity {
     @SuppressLint("WrongConstant")
     @Override
     protected void onResume() {
+        super.onResume();
+
         ThemesBackgrounds.setThemeContent(resources, imageViewsTop[1], getApplicationContext());
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
         ThemesBackgrounds.loadBackground(this, newsLine);
 
         setAnimations();
-        //Localisation.setFirstLocale(languages);
-
-        super.onResume();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -135,8 +142,8 @@ public class NewsLine extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         pagingView.savePosition();
     }
 
@@ -155,6 +162,7 @@ public class NewsLine extends AppCompatActivity {
 
     private void findViews() {
         resources = getResources();
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         newsLine = findViewById(R.id.news_list);
         languages = findViewById(R.id.languages);
         imageViewsTop = new ImageView[]{findViewById(R.id.logo), findViewById(R.id.change_main_theme), findViewById(R.id.change_theme), findViewById(R.id.direct)};
@@ -168,6 +176,17 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void setListeners() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            try {
+                pagingView.setToBegin();
+            } catch (JSONException e) {
+                Log.d("sendToGetAllPosts: ", e.getMessage());
+            }
+
+            pagingView.notifyAdapter();
+            swipeRefreshLayout.setRefreshing(false);
+        });
+
         AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -185,9 +204,7 @@ public class NewsLine extends AppCompatActivity {
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         // direct
-        imageViewsTop[3].setOnClickListener(v -> {
-            startActivity(Intents.getChatList());
-        });
+        imageViewsTop[3].setOnClickListener(v -> startActivity(Intents.getChatList()));
 
         // initialize menu bottom
         BottomMenu.setListeners(this,
@@ -197,14 +214,10 @@ public class NewsLine extends AppCompatActivity {
 
         // region Bottom menu
         // home
-        imageViewsBottom[0].setOnClickListener(v -> {
-            ((NestedScrollView) findViewById(R.id.scroll_view)).scrollTo(0, 0);
-        });
+        imageViewsBottom[0].setOnClickListener(v -> ((NestedScrollView) findViewById(R.id.scroll_view)).scrollTo(0, 0));
 
         // self page
-        imageViewsBottom[4].setOnClickListener(v -> {
-            startActivity(Intents.getSelfPage());
-        });
+        imageViewsBottom[4].setOnClickListener(v -> startActivity(Intents.getSelfPage()));
         // endregion
 
         // set system theme on label
@@ -221,9 +234,7 @@ public class NewsLine extends AppCompatActivity {
         });
 
         // choose background
-        imageViewsTop[2].setOnClickListener(v -> {
-            chooseTheme();
-        });
+        imageViewsTop[2].setOnClickListener(v -> chooseTheme());
     }
 
     // region Localisation

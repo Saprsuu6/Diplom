@@ -1,7 +1,9 @@
 package com.example.instagram.services.pagination.paging_views;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,12 +28,12 @@ import retrofit2.Response;
 public class PagingViewGetAllPosts extends PagingView {
     private PaginationAdapterPosts paginationAdapter;
     private int lastPosition;
+    private static final int paginationAmount = 2; // TODO change amount
     private final LinearLayoutManager manager;
 
     public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView,
-                                 ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity,
-                                 int page, int onePageLimit) throws JSONException {
-        super(scrollView, recyclerView, shimmerLayout, context, activity, page, onePageLimit);
+                                 ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, context, activity);
 
         // initialise adapter
         paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
@@ -43,24 +45,28 @@ public class PagingViewGetAllPosts extends PagingView {
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
-        loadPosition();
         setListeners();
 
         try {
-            getData(page, onePageLimit);
+            resetAmountOfPosts();
         } catch (JSONException e) {
-            System.out.println(e.getMessage());
+            Log.d("sendToGetAllPosts: ", e.getMessage());
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void notifyAdapter() {
+        paginationAdapter.notifyDataSetChanged();
+    }
+
+    // region sva and load position
     public void loadPosition() {
         int position = SharedPreferences.loadIntSP(context, "lastNewsPosition");
         recyclerView.scrollToPosition(position);
     }
 
     public void savePosition() {
-        if (SharedPreferences.loadIntSP(context, "lastNewsPosition") == 0)
-            SharedPreferences.saveSP(context, "lastNewsPosition", lastPosition);
+        SharedPreferences.saveSP(context, "lastNewsPosition", lastPosition);
     }
 
     private void setListeners() {
@@ -72,6 +78,7 @@ public class PagingViewGetAllPosts extends PagingView {
             }
         });
     }
+    // endregion
 
     @Override
     protected void setPaginationAdapter() {
@@ -80,29 +87,97 @@ public class PagingViewGetAllPosts extends PagingView {
     }
 
     @Override
-    protected void getData(int page, int onePageLimit) throws JSONException {
+    protected void getData() throws JSONException {
         startSkeletonAnim();
 
-        Services.sendToGetAllPosts(new Callback<String>() {
+        Services.sendToGetAllPosts(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    stopSkeletonAnim();
-
                     String body = response.body();
-                    try {
-                        postsLibrary.setDataArrayList(new JSONArray(body));
-                        setPaginationAdapter();
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
+
+                    if (!body.equals("[]")) {
+                        try {
+                            postsLibrary.setDataArrayList(new JSONArray(body));
+                            setPaginationAdapter();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
+
+                    stopSkeletonAnim();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                System.out.println(t.getMessage());
+                Log.d("sendToGetAllPosts: ", t.getMessage());
             }
-        });
+        }, PagingViewGetAllPosts.paginationAmount, null);
     }
+
+    private void resetAmountOfPosts() throws JSONException { // TODO refactor
+        startSkeletonAnim();
+
+        Services.sendToGetAllPosts(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String body = response.body();
+
+                    if (!body.equals("[]") && !body.equals("")) {
+                        try {
+                            postsLibrary.setDataArrayList(new JSONArray(body));
+                            setPaginationAdapter();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        // TODO not enough time
+                        loadPosition();
+                    }
+                    else {
+                        try {
+                            getData();
+                        } catch (JSONException e) {
+                            Log.d("sendToGetAllPosts: ", e.getMessage());
+                        }
+                    }
+
+                    stopSkeletonAnim();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                Log.d("sendToGetAllPosts: ", t.getMessage());
+            }
+        }, 0, "current");
+    }
+
+    public void setToBegin()throws JSONException {
+        startSkeletonAnim();
+
+        Services.sendToGetAllPosts(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        getData();
+                    } catch (JSONException e) {
+                        Log.d("sendToGetAllPosts: ", e.getMessage());
+                    }
+
+                    stopSkeletonAnim();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                Log.d("sendToGetAllPosts: ", t.getMessage());
+            }
+        }, PagingViewGetAllPosts.paginationAmount, "begin");
+    }
+
+    // begin - в начало end - в конец current - от начала до текущего
 }

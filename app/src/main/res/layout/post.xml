@@ -14,7 +14,7 @@
         <VideoView
             android:id="@+id/video_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="250dp"
             android:background="@color/black_secondary"
             android:contentDescription="@string/video"
             android:visibility="gone" />
@@ -22,10 +22,10 @@
         <ImageView
             android:id="@+id/image_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="250dp"
             android:background="@color/black_secondary"
             android:contentDescription="@string/img"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:visibility="visible" />
     </LinearLayout>
 

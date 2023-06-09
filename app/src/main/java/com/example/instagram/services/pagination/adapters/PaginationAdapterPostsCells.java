@@ -49,64 +49,16 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderPostsCells holder, int position) {
-        Post data = postsLibrary.getDataArrayList().get(position);
+        Post data1 = postsLibrary.getDataArrayList().get(position);
+        Post data2 = postsLibrary.getDataArrayList().get(position + 1);
+        Post data3 = postsLibrary.getDataArrayList().get(position + 2);
 
-        // TODO: take 3 post
+        // prepare all posts in row
+        ImageView image1 = setImage(data1, holder);
+        ImageView image2 = setImage(data2, holder);
+        ImageView image3 = setImage(data3, holder);
 
-        // set image
-        ImageView image1 = new ImageView(context);
-        image1.setLayoutParams(holder.cellsContainerParams);
-        image1.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image1.setPadding(0, 2, 2, 2);
-
-        assert data.getResourceImg() != null;
-        if (data.getResourceImg().equals("")) {
-            // set image
-            Glide.with(context).load(data.getResourceVideo())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image1);
-
-        }
-        else {
-            Glide.with(context).load(data.getResourceImg())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image1);
-        }
-
-        ImageView image2 = new ImageView(context);
-        image2.setLayoutParams(holder.cellsContainerParams);
-        image2.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image2.setPadding(2, 2, 2, 2);
-        if (data.getResourceImg().equals("")) {
-            // set image
-            Glide.with(context).load(data.getResourceVideo())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image2);
-
-        }
-        else {
-            Glide.with(context).load(data.getResourceImg())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image2);
-        }
-
-        ImageView image3 = new ImageView(context);
-        image3.setLayoutParams(holder.cellsContainerParams);
-        image3.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image3.setPadding(2, 2, 0, 2);
-        if (data.getResourceImg().equals("")) {
-            // set image
-            Glide.with(context).load(data.getResourceVideo())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image3);
-
-        }
-        else {
-            Glide.with(context).load(data.getResourceImg())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image3);
-        }
-
+        // set size for cells
         holder.cellsContainerParams.height = size.x / 3;
 
         holder.cellsContainer.addView(image1);
@@ -116,6 +68,28 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         image1.setOnClickListener(postInDialog());
         image2.setOnClickListener(postInDialog());
         image3.setOnClickListener(postInDialog());
+    }
+
+    private ImageView setImage(Post data, @NonNull ViewHolderPostsCells holder) {
+        ImageView image = new ImageView(context);
+        image.setLayoutParams(holder.cellsContainerParams);
+        image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        image.setPadding(2, 2, 0, 2);
+
+        assert data.getResourceImg() != null;
+        if (data.getResourceImg().equals("")) {
+            // set image
+            Glide.with(context).load(data.getResourceVideo())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image);
+
+        } else {
+            Glide.with(context).load(data.getResourceImg())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(image);
+        }
+
+        return image;
     }
 
     private View.OnClickListener postInDialog() {
@@ -147,7 +121,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {
         private final LinearLayout cellsContainer;
-//        private final int likes;
+        //        private final int likes;
 //        private final String description;
 //        private final String hAgo;
         private final LinearLayout.LayoutParams cellsContainerParams;

@@ -97,7 +97,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     System.out.println(t.getMessage());
                 }
             }, data.getAuthor());
-        } catch (Exception e) {
+        } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
         // endregion
@@ -121,7 +121,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         holder.description.setText(data.getDescription());
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
-
         holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
     }
 

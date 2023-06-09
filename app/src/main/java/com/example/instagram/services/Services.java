@@ -10,7 +10,6 @@ import com.example.instagram.services.interfaces.SendToCheckUserCode;
 import com.example.instagram.services.interfaces.SendToForgotPassword;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
-import com.example.instagram.services.pagination.PagingRequestPages;
 
 import org.json.JSONException;
 
@@ -24,7 +23,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://92e2-2a09-bac1-7500-18-00-84-86.ngrok-free.app";
+    public final static String BASE_URL = "https://d26a-2a09-bac1-7520-18-00-84-7a.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     // registration user
@@ -73,10 +72,10 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendMultipartPost(Callback<ResponseBody> callback, RequestBody image) throws JSONException {
+    public static void sendMultipartPost(Callback<ResponseBody> callback, RequestBody image, String description) throws JSONException {
         SendMultipartPost mainInterface = retrofit.create(SendMultipartPost.class);
 
-        Call<ResponseBody> call = mainInterface.STRING_CALL(image, null);
+        Call<ResponseBody> call = mainInterface.STRING_CALL(image, description);
         call.enqueue(callback);
     }
 
@@ -87,41 +86,17 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendToGetPosts(Callback<String> callback, int page, int onePageLimit) throws JSONException { // TODO change method
-        String link = "https://picsum.photos"; // TODO change way
-        Retrofit retrofit = MyRetrofit.initializeRetrofit(link);
-
-        PagingRequestPages mainInterface = retrofit.create(PagingRequestPages.class);
-        Call<String> call = mainInterface.STRING_CALL(page, onePageLimit);
-
-        call.enqueue(callback);
-
-        // TODO delete
-    }
-
-    public static void sendToGetAllPosts(Callback<String> callback) throws JSONException {
+    public static void sendToGetAllPosts(Callback<String> callback, int amount, String scroll) throws JSONException {
         SendToGetAllPosts mainInterface = retrofit.create(SendToGetAllPosts.class);
 
-        Call<String> call = mainInterface.STRING_CALL();
+        Call<String> call = mainInterface.STRING_CALL(amount, scroll);
         call.enqueue(callback);
     }
 
-    public static void sendToGetAva(Callback<String> callback, String nickName) throws  JSONException {
-        SendToGetAva sendToGetAva = retrofit.create(SendToGetAva.class);
+    public static void sendToGetAva(Callback<String> callback, String nickName) throws JSONException {
+        SendToGetAva mainInterface = retrofit.create(SendToGetAva.class);
 
-        Call<String> call = sendToGetAva.STRING_CALL(nickName);
+        Call<String> call = mainInterface.STRING_CALL(nickName);
         call.enqueue(callback);
-    }
-
-    public static void sendToGetUsers(Callback<String> callback, int page, int onePageLimit) throws JSONException { // TODO change method
-        String link = "https://picsum.photos"; // TODO change way
-        Retrofit retrofit = MyRetrofit.initializeRetrofit(link);
-
-        PagingRequestPages mainInterface = retrofit.create(PagingRequestPages.class);
-        Call<String> call = mainInterface.STRING_CALL(page, onePageLimit);
-
-        call.enqueue(callback);
-
-        // TODO delete
     }
 }

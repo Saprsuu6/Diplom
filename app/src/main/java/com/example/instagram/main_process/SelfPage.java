@@ -38,7 +38,7 @@ public class SelfPage extends AppCompatActivity {
     private ImageView[] imageViews;
     private TextView[] textViews;
     private ImageView[] imageViewsBottom;
-    private PagingViewGetAllPostsInCells adapter;
+    private PagingViewGetAllPostsInCells pagingView;
     private FindUser findUser;
 
     @Override
@@ -67,9 +67,9 @@ public class SelfPage extends AppCompatActivity {
         registerForContextMenu(imageViews[2]);
 
         try {
-            adapter = new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view),
+            pagingView = new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view),
                     findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                    this, this ,1, 10);
+                    this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -82,6 +82,12 @@ public class SelfPage extends AppCompatActivity {
 
     private void setIntents() {
         // TODO: set new intents
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        pagingView.savePosition();
     }
 
     @SuppressLint("NonConstantResourceId")
