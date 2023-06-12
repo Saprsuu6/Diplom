@@ -173,7 +173,7 @@ public class SetBirthday extends AppCompatActivity {
                     TransitUser.user.setBirthday(selectedDate.getTime());
 
                     try {
-                        Services.addUser(new Callback<String>() {
+                        Services.addUser(new Callback<>() {
                             @Override
                             public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
                                 assert Objects.requireNonNull(response).body() != null;

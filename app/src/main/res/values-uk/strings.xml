@@ -58,7 +58,8 @@
     <string name="tag_people_item">Ім\'я користувача</string>
     <string name="find_user">Почніть писати нік щоб знайти користувача</string>
     <string name="internal_error">Внутрішня помилка</string>
-    <string name="user_are_not_exists" translatable="false">Користувач не існує</string>
+    <string name="user_are_not_exists">Користувач не існує</string>
+    <string name="tagged_people">Позначені люди</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>

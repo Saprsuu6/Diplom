@@ -10,9 +10,9 @@ import retrofit2.http.Part;
 
 public interface SendMultipartPost {
     @retrofit2.http.Multipart
-    @POST("/image/*")
+    @POST("/addpost") // TODO change servlet
     Call<ResponseBody> STRING_CALL(
             @Part("image") RequestBody file,
-            @Nullable @Part("description") String description
+            @Nullable @Part("otherInfo") String description
     );
 }

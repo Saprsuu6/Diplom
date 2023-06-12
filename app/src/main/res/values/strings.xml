@@ -13,7 +13,8 @@
     <string name="validation_error" translatable="false">validation_error</string>
     <string name="close" translatable="false">close</string>
     <string name="done" translatable="false">done</string>
-    <string name="user_are_not_exists" translatable="false">User are not exists</string>
+    <string name="user_are_not_exists">User are not exists</string>
+    <string name="tagged_people">Tagged people</string>
 
     <string name="search" translatable="false">search</string>
     <string name="add_post" translatable="false">add_post</string>

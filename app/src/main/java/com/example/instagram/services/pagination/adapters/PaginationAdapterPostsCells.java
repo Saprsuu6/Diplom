@@ -20,6 +20,7 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.services.PostInDialog;
+import com.example.instagram.services.Services;
 
 public class PaginationAdapterPostsCells extends RecyclerView.Adapter<PaginationAdapterPostsCells.ViewHolderPostsCells> {
     @Nullable
@@ -41,8 +42,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     @NonNull
     @Override
     public ViewHolderPostsCells onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_post_self_page_cell, parent, false); // don't forget to change
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post_self_page_cell, parent, false); // don't forget to change
 
         return new PaginationAdapterPostsCells.ViewHolderPostsCells(view);
     }
@@ -79,14 +79,10 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         assert data.getResourceImg() != null;
         if (data.getResourceImg().equals("")) {
             // set image
-            Glide.with(context).load(data.getResourceVideo())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image);
+            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
 
         } else {
-            Glide.with(context).load(data.getResourceImg())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(image);
+            Glide.with(context).load(Services.BASE_URL + data.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
         }
 
         return image;
@@ -99,7 +95,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     @Override
     public int getItemCount() {
-        return postsLibrary.getDataArrayList().size();
+        return postsLibrary.getDataArrayList().size() > 0 ? 1 : 0;
     }
 
     // region SharedPreferences
@@ -121,9 +117,6 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {
         private final LinearLayout cellsContainer;
-        //        private final int likes;
-//        private final String description;
-//        private final String hAgo;
         private final LinearLayout.LayoutParams cellsContainerParams;
 
         public ViewHolderPostsCells(@NonNull View itemView) {

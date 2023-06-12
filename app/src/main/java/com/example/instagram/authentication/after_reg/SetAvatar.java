@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -201,22 +203,22 @@ public class SetAvatar extends AppCompatActivity {
         try {
             Services.sendAva(new Callback<>() {
                 @Override
-                public void onResponse(@Nullable Call<ResponseBody> call, @Nullable Response<ResponseBody> response) {
-                    assert Objects.requireNonNull(response).body() != null;
-                    String responseStr = response.body().toString();
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String responseStr = response.body().toString();
 
-                    if (responseStr.equals("0")) {
-                        Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
+                        if (responseStr.equals("0")) {
+                            Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
                 @Override
-                public void onFailure(@Nullable Call<ResponseBody> call, @Nullable Throwable t) {
-                    assert t != null;
-                    System.out.println(t.getMessage());
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    Log.d("sendAvaToBackEnd: ", t.getMessage());
                 }
             }, image, nickName);
         } catch (JSONException e) {

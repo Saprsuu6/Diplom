@@ -87,9 +87,7 @@ public class NewsLine extends AppCompatActivity {
         setListeners();
 
         try {
-            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view),
-                    findViewById(R.id.recycler_view), findViewById(R.id.skeleton),
-                    this, this);
+            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -207,10 +205,7 @@ public class NewsLine extends AppCompatActivity {
         imageViewsTop[3].setOnClickListener(v -> startActivity(Intents.getChatList()));
 
         // initialize menu bottom
-        BottomMenu.setListeners(this,
-                new ImageView[]{imageViewsBottom[1],
-                        imageViewsBottom[2], imageViewsBottom[3]},
-                findUser);
+        BottomMenu.setListeners(this, new ImageView[]{imageViewsBottom[1], imageViewsBottom[2], imageViewsBottom[3]}, findUser);
 
         // region Bottom menu
         // home
@@ -228,8 +223,7 @@ public class NewsLine extends AppCompatActivity {
 
         // set night/day theme
         imageViewsTop[1].setOnClickListener(v -> {
-            ThemesBackgrounds.theme = ThemesBackgrounds.isNight(resources)
-                    ? Themes.DAY : Themes.NIGHT;
+            ThemesBackgrounds.theme = ThemesBackgrounds.isNight(resources) ? Themes.DAY : Themes.NIGHT;
             recreate();
         });
 
@@ -251,6 +245,8 @@ public class NewsLine extends AppCompatActivity {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
+
+            NewsLine.textViews.get(2).setText(resources.getString(R.string.tag_people));
         }
     }
     // endregion

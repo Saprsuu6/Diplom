@@ -264,7 +264,7 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="true"
                     tools:ignore="RtlSymmetry"
-                    tools:listitem="@layout/list_item_post_self_page_cell"/>
+                    tools:listitem="@layout/list_item_post_self_page_cell" />
 
                 <io.supercharge.shimmerlayout.ShimmerLayout
                     android:id="@+id/skeleton"

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -40,11 +41,13 @@ import retrofit2.Response;
 public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapterPosts.ViewHolderPosts> {
     private final Context context;
 
-    @Nullable
     private final Activity activity;
     private final PostsLibrary postsLibrary;
     private SparseIntArray positionList = new SparseIntArray();
 
+    public PostsLibrary getPostsLibrary() {
+        return postsLibrary;
+    }
 
     public PaginationAdapterPosts(@Nullable Activity activity, Context context, PostsLibrary postsLibrary) {
         this.activity = activity;
@@ -55,8 +58,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     @NonNull
     @Override
     public PaginationAdapterPosts.ViewHolderPosts onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_post, parent, false); // don't forget to change
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false); // don't forget to change
 
         return new ViewHolderPosts(view);
     }
@@ -69,13 +71,9 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         assert data.getResourceImg() != null;
         if (data.getResourceImg().equals("")) {
             // set image
-            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(holder.content);
+            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.content);
         } else {
-            Glide.with(context).load(Services.BASE_URL + data.getResourceImg())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(holder.content);
+            Glide.with(context).load(Services.BASE_URL + data.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.content);
         }
 
         // region send request to get avatar
@@ -87,9 +85,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     String avaLink = response.body();
 
                     // set ava
-                    Glide.with(context).load(Services.BASE_URL + avaLink)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(holder.avaView);
+                    Glide.with(context).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
                 }
 
                 @Override
@@ -105,20 +101,29 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         holder.nick.setText(data.getAuthor());
         holder.place.setText(data.getPlace());
 
-        holder.like.setImageDrawable(context.getResources()
-                .getDrawable(loadSP(position + "Like")
-                        ? R.drawable.like_fill_gradient
-                        : R.drawable.like_empty_gradient, context.getTheme()));
+        holder.like.setImageDrawable(context.getResources().getDrawable(loadSP(position + "Like") ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
 
-        holder.bookmarck.setImageDrawable(context.getResources()
-                .getDrawable(loadSP(position + "Bookmark")
-                        ? R.drawable.bookmark_saved
-                        : R.drawable.bookmark, context.getTheme()));
+        holder.bookmarck.setImageDrawable(context.getResources().getDrawable(loadSP(position + "Bookmark") ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
 
         holder.amountLikesTitle.setText(R.string.amount_likes_title);
         holder.amountLikes.setText(Integer.toString(data.getLikes()));
         holder.authorNickname.setText(data.getAuthor());
         holder.description.setText(data.getDescription());
+
+        if (data.getNickNames() != null) {
+            holder.taggedPeople.setVisibility(View.VISIBLE);
+            holder.taggedPeople.setText(context.getResources().getString(R.string.tagged_people));
+
+            String[] taggedPeople = data.getNickNames().split(", ");
+
+            for (String person : taggedPeople) {
+                TextView taggedPerson = new TextView(context);
+                taggedPerson.setTextSize(18);
+                taggedPerson.setText(person);
+
+                holder.taggedPeopleLayout.addView(taggedPerson);
+            }
+        }
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
         holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
@@ -127,6 +132,12 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     @Override
     public int getItemCount() {
         return postsLibrary.getDataArrayList().size();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void deleteByPosition(int position) {
+        this.postsLibrary.getDataArrayList().remove(position);
+        notifyDataSetChanged();
     }
 
     // region SharedPreferences
@@ -148,6 +159,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
         private final ImageView avaView;
+        private final LinearLayout taggedPeopleLayout;
+        private final TextView taggedPeople;
         private final TextView nick;
         private final TextView place;
         private final ImageView postContext;
@@ -172,7 +185,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             place = itemView.findViewById(R.id.place);
             postContext = itemView.findViewById(R.id.post_context);
 
-            assert activity != null;
             activity.registerForContextMenu(postContext); // post context registration
 
             content = itemView.findViewById(R.id.image_content);
@@ -186,18 +198,23 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             amountLikes = itemView.findViewById(R.id.amount_likes);
             authorNickname = itemView.findViewById(R.id.author_nickname);
             description = itemView.findViewById(R.id.description);
+
+            taggedPeopleLayout = itemView.findViewById(R.id.tagged_people_layout);
+            taggedPeople = itemView.findViewById(R.id.tagged_people);
+
             hours = itemView.findViewById(R.id.hours);
 
             NewsLine.textViews.add(amountLikesTitle);
             NewsLine.textViews.add(hours);
+            NewsLine.textViews.add(taggedPeople);
 
             setListeners();
         }
 
         @SuppressLint("UseCompatLoadingForDrawables")
         private void setListeners() {
-            postContext.setOnClickListener(v -> {
-                // TODO call post context
+            taggedPeople.setOnClickListener(v -> {
+                // TODO show user page
             });
 
             like.setOnClickListener(v -> {
@@ -205,13 +222,11 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 if (!like_flag) {
                     like_flag = true;
                     saveSP(position + "Like", true);
-                    like.setImageDrawable(context.getResources()
-                            .getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
+                    like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
                 } else {
                     like_flag = false;
                     deleteSp(position + "Like");
-                    like.setImageDrawable(context.getResources()
-                            .getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
+                    like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
                 }
             });
 
@@ -229,13 +244,11 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 if (!bookmarck_flag) {
                     bookmarck_flag = true;
                     saveSP(position + "Bookmark", true);
-                    bookmarck.setImageDrawable(context.getResources()
-                            .getDrawable(R.drawable.bookmark_saved, context.getTheme()));
+                    bookmarck.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
                 } else {
                     bookmarck_flag = false;
                     deleteSp(position + "Bookmark");
-                    bookmarck.setImageDrawable(context.getResources()
-                            .getDrawable(R.drawable.bookmark, context.getTheme()));
+                    bookmarck.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark, context.getTheme()));
                 }
             });
         }

@@ -22,7 +22,6 @@ import android.widget.TextView;
 import com.example.instagram.R;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 
 import org.json.JSONException;

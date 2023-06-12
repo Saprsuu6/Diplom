@@ -2,6 +2,7 @@ package com.example.instagram.services.pagination.paging_views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,7 +48,7 @@ public class PagingViewGetAllPostsInCells extends PagingView {
         setListeners();
 
         try {
-            getData();
+            setToBegin();
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -88,22 +89,49 @@ public class PagingViewGetAllPostsInCells extends PagingView {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    stopSkeletonAnim();
-
                     String body = response.body();
-                    try {
-                        postsLibrary.setDataArrayList(new JSONArray(body));
-                        setPaginationAdapter();
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
+
+                    if (!body.equals("[]")) {
+                        try {
+                            postsLibrary.setDataArrayList(new JSONArray(body));
+                            setPaginationAdapter();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
+
+                    stopSkeletonAnim();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                System.out.println(t.getMessage());
+                Log.d("sendToGetAllPosts: ", t.getMessage());
             }
         }, PagingViewGetAllPostsInCells.paginationAmount, null);
+    }
+
+    public void setToBegin()throws JSONException {
+        startSkeletonAnim();
+
+        Services.sendToGetAllPosts(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        getData();
+                    } catch (JSONException e) {
+                        Log.d("sendToGetAllPosts: ", e.getMessage());
+                    }
+
+                    stopSkeletonAnim();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                Log.d("sendToGetAllPosts: ", t.getMessage());
+            }
+        }, PagingViewGetAllPostsInCells.paginationAmount, "begin");
     }
 }

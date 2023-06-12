@@ -28,7 +28,7 @@ import retrofit2.Response;
 public class PagingViewGetAllPosts extends PagingView {
     private PaginationAdapterPosts paginationAdapter;
     private int lastPosition;
-    private static final int paginationAmount = 2; // TODO change amount
+    private static final int paginationAmount = 2;
     private final LinearLayoutManager manager;
 
     public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView,
@@ -56,7 +56,12 @@ public class PagingViewGetAllPosts extends PagingView {
 
     @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapter() {
+        paginationAdapter.getPostsLibrary().getDataArrayList().clear();
         paginationAdapter.notifyDataSetChanged();
+    }
+
+    public PaginationAdapterPosts getPaginationAdapter() {
+        return paginationAdapter;
     }
 
     // region sva and load position
@@ -116,7 +121,7 @@ public class PagingViewGetAllPosts extends PagingView {
         }, PagingViewGetAllPosts.paginationAmount, null);
     }
 
-    private void resetAmountOfPosts() throws JSONException { // TODO refactor
+    private void resetAmountOfPosts() throws JSONException {
         startSkeletonAnim();
 
         Services.sendToGetAllPosts(new Callback<>() {
@@ -130,7 +135,7 @@ public class PagingViewGetAllPosts extends PagingView {
                             postsLibrary.setDataArrayList(new JSONArray(body));
                             setPaginationAdapter();
                         } catch (JSONException e) {
-                            throw new RuntimeException(e);
+                            Log.d("JSONException: ", e.getMessage());
                         }
 
                         // TODO not enough time

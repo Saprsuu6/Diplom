@@ -87,7 +87,7 @@ public class CreatePost extends AppCompatActivity {
 
         resources = getResources();
 
-        tagPeople = new TagPeople(this, resources);
+        tagPeople = new TagPeople(this, resources, this);
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
@@ -120,10 +120,8 @@ public class CreatePost extends AppCompatActivity {
         createNewPost = findViewById(R.id.create_post);
         languages = findViewById(R.id.languages);
         editTexts = new EditText[]{findViewById(R.id.new_post_description)};
-        textViews = new TextView[]{findViewById(R.id.new_post_title), findViewById(R.id.tag_people),
-                findViewById(R.id.add_place), findViewById(R.id.postpone_publication)};
-        imageViews = new ImageView[]{findViewById(R.id.cancel), findViewById(R.id.done),
-                findViewById(R.id.preview_photo), findViewById(R.id.cancel), findViewById(R.id.done)};
+        textViews = new TextView[]{findViewById(R.id.new_post_title), findViewById(R.id.tag_people), findViewById(R.id.add_place), findViewById(R.id.postpone_publication)};
+        imageViews = new ImageView[]{findViewById(R.id.cancel), findViewById(R.id.done), findViewById(R.id.preview_photo), findViewById(R.id.cancel), findViewById(R.id.done)};
         videoView = findViewById(R.id.video_content);
     }
 
@@ -142,40 +140,38 @@ public class CreatePost extends AppCompatActivity {
         }
     }
 
-    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent data = result.getData();
-                    assert data != null;
-                    Uri selectedImageUri = data.getData();
+    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data = result.getData();
+            assert data != null;
+            Uri selectedImageUri = data.getData();
 
-                    Bitmap selectedImage;
+            Bitmap selectedImage;
 
-                    extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+            extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
 
-                    try {
-                        InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+            try {
+                InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
 
-                        // region Get image bytes
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            imageBytes = imageStream.readAllBytes();
-                        }
-                        //endregion
-
-                        selectedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-
-                        // region File -> byte[] of ByteArrayOutputStream
-                        if (selectedImage != null) {
-                            imageViews[2].setImageBitmap(selectedImage);
-                        }
-                        // endregion
-                    } catch (IOException e) {
-                        Log.d("ActivityResultLauncher & IOException: ", e.getMessage());
-                    }
+                // region Get image bytes
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    imageBytes = imageStream.readAllBytes();
                 }
+                //endregion
+
+                selectedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
+                // region File -> byte[] of ByteArrayOutputStream
+                if (selectedImage != null) {
+                    imageViews[2].setImageBitmap(selectedImage);
+                    TransitPost.post.setMetadata("Extension: " + extension + "; Size: " + selectedImage.getHeight() + " x " + selectedImage.getWidth());
+                }
+                // endregion
+            } catch (IOException e) {
+                Log.d("ActivityResultLauncher & IOException: ", e.getMessage());
             }
-    );
+        }
+    });
 
     @SuppressLint("SetTextI18n")
     private void setListeners() {
@@ -204,10 +200,7 @@ public class CreatePost extends AppCompatActivity {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         textViews[3].setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    CreatePost.this,
-                    android.R.style.Theme_DeviceDefault_Dialog,
-                    setListener, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, setListener, year, month, day);
 
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
             datePickerDialog.show();
@@ -219,7 +212,7 @@ public class CreatePost extends AppCompatActivity {
 
             DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
-            if (year >= year1 && month >= month1 && day >= dayOfMonth) {
+            if (year >= year1 && month >= month1 && dayOfMonth >= day) {
                 TransitPost.post.setPostponePublication(selectedDate.getTime());
                 textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
             } else {
@@ -236,18 +229,16 @@ public class CreatePost extends AppCompatActivity {
             }
 
             RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes); // TODO set extension
+            TransitPost.post.setDescription(editTexts[0].getText().toString());
 
             try {
-                Services.sendMultipartPost(new Callback<>() { // TODO change to other method to send post
+                String otherInfo = TransitPost.post.crateOtherInfo().toString();
+
+                Services.sendMultipartPost(new Callback<>() {
                     @Override
                     public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
-                        assert response.body() != null;
-                        String responseStr = response.body().toString();
-
-                        if (responseStr.equals("0")) {
+                        if (response.isSuccessful() && response.body() != null) {
                             Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -255,7 +246,7 @@ public class CreatePost extends AppCompatActivity {
                     public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
                         Log.d("sendMultipartPost: ", t.getMessage());
                     }
-                }, image, editTexts[0].getText().toString().trim());
+                }, image, otherInfo);
             } catch (JSONException e) {
                 Log.d("JSONException: ", e.getMessage());
             }
@@ -275,7 +266,11 @@ public class CreatePost extends AppCompatActivity {
         editTexts[0].setHint(resources.getString(R.string.add_description));
 
         textViews[0].setText(resources.getString(R.string.new_post));
-        textViews[1].setText(resources.getString(R.string.tag_people));
+
+        if (TransitPost.post.getNickNames() != null) {
+            textViews[1].setText(resources.getString(R.string.tag_people) + ": " + TransitPost.post.getNickNames());
+        }
+
         textViews[2].setText(resources.getString(R.string.add_a_place));
         textViews[3].setText(resources.getString(R.string.postpone_publication));
 

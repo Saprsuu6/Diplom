@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,10 +28,10 @@ public class Post {
     private Date postponePublication;
     @Nullable
     private String place;
-    private String nickNames;
+    private String taggedPeople;
     // region setters
     public void setNickNames(String nickNames) {
-        this.nickNames = nickNames;
+        this.taggedPeople = nickNames;
     }
     public void setLikes(int likes) {
         this.likes = likes;
@@ -71,7 +72,7 @@ public class Post {
     // endregion
     // region getters
     public String getNickNames() {
-        return nickNames;
+        return taggedPeople;
     }
 
     public int getLikes() {
@@ -134,6 +135,23 @@ public class Post {
         setPlace(object.getString("place"));
         setAuthor(object.getString("author"));
         setLikes(object.getInt("likes"));
+
+        if (!object.isNull("taggedPeople")) {
+            setNickNames(object.getString("taggedPeople"));
+        }
+    }
+
+    public JSONObject crateOtherInfo() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("author","Andry"); // TODO TransitUser.user.getName()
+        jsonObject.put("header", description);
+        jsonObject.put("metadata", metadata);
+
+        assert postponePublication != null;
+        jsonObject.put("postponePublication", DateFormatting.formatToGeneralDate(postponePublication));
+        jsonObject.put("taggedPeople", taggedPeople);
+
+        return jsonObject;
     }
 
     public Post() {
