@@ -3,15 +3,12 @@ package com.example.instagram.DAOs;
 import androidx.annotation.Nullable;
 
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 public class Post {
     private Date dateOfAdd;
@@ -29,10 +26,12 @@ public class Post {
     @Nullable
     private String place;
     private String taggedPeople;
+
     // region setters
     public void setNickNames(String nickNames) {
         this.taggedPeople = nickNames;
     }
+
     public void setLikes(int likes) {
         this.likes = likes;
     }
@@ -121,8 +120,7 @@ public class Post {
         try {
             setPostponePublication(DateFormatting.formatDateFromStandard(object.getString("postponePublication")));
             setDateOfAdd(DateFormatting.formatDateFromStandard(object.getString("addDate")));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
@@ -143,12 +141,14 @@ public class Post {
 
     public JSONObject crateOtherInfo() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("author","Andry"); // TODO TransitUser.user.getName()
+        jsonObject.put("author", TransitUser.user.getName());
         jsonObject.put("header", description);
         jsonObject.put("metadata", metadata);
 
-        assert postponePublication != null;
-        jsonObject.put("postponePublication", DateFormatting.formatToGeneralDate(postponePublication));
+        if (postponePublication != null) {
+            jsonObject.put("postponePublication", DateFormatting.formatToGeneralDate(postponePublication));
+        }
+
         jsonObject.put("taggedPeople", taggedPeople);
 
         return jsonObject;

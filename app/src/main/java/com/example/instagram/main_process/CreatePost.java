@@ -44,6 +44,7 @@ import com.example.instagram.services.UiVisibility;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,11 +165,18 @@ public class CreatePost extends AppCompatActivity {
                 // region File -> byte[] of ByteArrayOutputStream
                 if (selectedImage != null) {
                     imageViews[2].setImageBitmap(selectedImage);
-                    TransitPost.post.setMetadata("Extension: " + extension + "; Size: " + selectedImage.getHeight() + " x " + selectedImage.getWidth());
+
+                    JSONObject object = new JSONObject();
+                    object.put("Extension", extension);
+                    object.put("Size", selectedImage.getHeight() + "x" + selectedImage.getWidth());
+
+                    TransitPost.post.setMetadata(object.toString());
                 }
                 // endregion
             } catch (IOException e) {
                 Log.d("ActivityResultLauncher & IOException: ", e.getMessage());
+            } catch (JSONException e) {
+                Log.d("JSONException (setMetadata): ", e.getMessage());
             }
         }
     });
@@ -223,8 +231,9 @@ public class CreatePost extends AppCompatActivity {
         imageViews[0].setOnClickListener(v -> finish());
 
         imageViews[1].setOnClickListener(v -> {
-            if (imageBytes.length == 0) {
+            if (imageBytes == null || imageBytes.length == 0) {
                 Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
+                finish();
                 return;
             }
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Pair;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -122,6 +123,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 taggedPerson.setText(person);
 
                 holder.taggedPeopleLayout.addView(taggedPerson);
+
+                // TODO: set like_flag and saves dinamicaly from back end
             }
         }
 
@@ -186,7 +189,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             postContext = itemView.findViewById(R.id.post_context);
 
             activity.registerForContextMenu(postContext); // post context registration
-
             content = itemView.findViewById(R.id.image_content);
 
             like = itemView.findViewById(R.id.post_like);
@@ -223,10 +225,22 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     like_flag = true;
                     saveSP(position + "Like", true);
                     like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
+
+                    // + 1 like
+                    postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() + 1);
+                    notifyItemChanged(position);
+
+                    NewsLine.mapPost = new Pair<>(position, postsLibrary.getDataArrayList().get(position));
                 } else {
                     like_flag = false;
                     deleteSp(position + "Like");
                     like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
+
+                    // -1 like
+                    postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() - 1);
+                    notifyItemChanged(position);
+
+                    NewsLine.mapPost = null;
                 }
             });
 
@@ -245,6 +259,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     bookmarck_flag = true;
                     saveSP(position + "Bookmark", true);
                     bookmarck.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
+
+                    // TODO saves
                 } else {
                     bookmarck_flag = false;
                     deleteSp(position + "Bookmark");

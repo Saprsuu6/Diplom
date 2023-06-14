@@ -12,20 +12,26 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
+import com.example.instagram.services.AndroidDownloader;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
@@ -37,11 +43,14 @@ import com.example.instagram.services.themes_and_backgrounds.Themes;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,7 +70,7 @@ public class NewsLine extends AppCompatActivity {
     // endregion
     public static List<TextView> textViews = new ArrayList<>();
     private FindUser findUser;
-
+    static public Pair<Integer, Post> mapPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,16 +136,54 @@ public class NewsLine extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.remove_post:
-                System.out.println("remove post"); // TODO: remove post
-                return true;
-            case R.id.complain_post:
-                System.out.println("complain post"); // TODO: complain post
-                return true;
-            default:
-                return super.onContextItemSelected(item);
+        if (NewsLine.mapPost != null) {
+            switch (item.getItemId()) {
+                case R.id.remove_post:
+                    pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
+                    break;
+                case R.id.download:
+                    AndroidDownloader androidDownloader = new AndroidDownloader(this);
+                    Uri uri = null;
+
+                    if (NewsLine.mapPost.second.getResourceImg() != null) {
+                        uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
+                    } else if (NewsLine.mapPost.second.getResourceVideo() != null) {
+                        uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
+                    }
+
+                    if (NewsLine.mapPost.second.getMetadata() != null) {
+//                        try {
+//                            JSONObject object = new JSONObject(NewsLine.mapPost.second.getMetadata());
+//                            androidDownloader.downloadFile(uri, "JPG", NewsLine.mapPost.second.getDescription()); // TODO object.getString("Extension"), NewsLine.mapPost.second.getDescription()
+//                        } catch (JSONException e) {
+//                            Log.d("JSONException (getMetadata): ", e.getMessage());
+//                        }
+
+                        androidDownloader.downloadFile(uri, "JPG", NewsLine.mapPost.second.getDescription());
+                    }
+                    break;
+                case R.id.copy_link_media:
+                    System.out.println("copy link to media content"); // TODO: copy link to media content
+                    break;
+                case R.id.copy_link:
+                    System.out.println("copy link to post"); // TODO: copy link to post
+                    break;
+                case R.id.copy_post_qr:
+                    System.out.println("copy qr link to post"); // TODO: copy qr link to post
+                    break;
+                case R.id.complain_post:
+                    System.out.println("complain post"); // TODO: complain post
+                    break;
+                default:
+                    super.onContextItemSelected(item);
+                    break;
+            }
+        } else {
+            Toast.makeText(this, resources.getString(R.string.context_error), Toast.LENGTH_SHORT).show();
         }
+
+        NewsLine.mapPost = null;
+        return true;
     }
 
     @Override
@@ -181,7 +228,7 @@ public class NewsLine extends AppCompatActivity {
                 Log.d("sendToGetAllPosts: ", e.getMessage());
             }
 
-            pagingView.notifyAdapter();
+            pagingView.notifyAdapterToClearAll();
             swipeRefreshLayout.setRefreshing(false);
         });
 

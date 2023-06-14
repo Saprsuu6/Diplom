@@ -78,7 +78,7 @@ public class ForgotPassword extends AppCompatActivity {
     private Runnable checkUsedLink() {
         return () -> {
             try {
-                Services.sendToCheckUsedLickInMail(new Callback<String>() {
+                Services.sendToCheckUsedLickInMail(new Callback<>() {
                     @Override
                     public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
                         assert response != null;
@@ -164,7 +164,7 @@ public class ForgotPassword extends AppCompatActivity {
                 try {
                     TransitUser.user.setEmailCode(editTexts[0].getText().toString());
 
-                    Services.sendToCheckUserCode(new Callback<String>() {
+                    Services.sendToCheckUserCode(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull retrofit2.Response<String> response) {
                             String strResponse = response.body();
@@ -219,24 +219,6 @@ public class ForgotPassword extends AppCompatActivity {
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);
-    }
-
-    // region Login types
-    private void setLoginType(int position) {
-        switch (position) {
-            case 0:
-                editTexts[0].setHint(resources.getString(R.string.login_hint_phone));
-                editTexts[0].setInputType(InputType.TYPE_CLASS_PHONE);
-                textViews[2].setVisibility(View.VISIBLE);
-                textViews[3].setVisibility(View.GONE);
-                break;
-            case 1:
-                editTexts[0].setHint(resources.getString(R.string.login_hint_email));
-                editTexts[0].setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-                textViews[2].setVisibility(View.GONE);
-                textViews[3].setVisibility(View.VISIBLE);
-                break;
-        }
     }
 
     private void setLoginTypes() {

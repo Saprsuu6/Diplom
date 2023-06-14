@@ -60,6 +60,8 @@
     <string name="internal_error">Внутрішня помилка</string>
     <string name="user_are_not_exists">Користувач не існує</string>
     <string name="tagged_people">Позначені люди</string>
+    <string name="context_error">Лайкніть пост хочаб один раз ^_^</string>
+    <string name="file_loader">Файл завантажен</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>
@@ -68,7 +70,8 @@
 
     <!--    Post context-->
     <string name="remove_post">Видалити</string>
-    <string name="hide">Сховати</string>
+    <string name="download">Завантадити</string>
+    <string name="copy_link_media">Скопіювати посилання на медіа контент</string>
     <string name="copy_link">Скопіювати посилання на пост</string>
     <string name="copy_post_qr">Скопіювати QR посилання на пост</string>
     <string name="complain_post">Поскаржитися</string>

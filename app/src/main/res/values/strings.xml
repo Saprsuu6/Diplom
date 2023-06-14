@@ -92,6 +92,8 @@
     <string name="tag_people_item">User nickname</string>
     <string name="find_user">Start write username to find</string>
     <string name="internal_error">Internal error</string>
+    <string name="context_error">Like post at least one time ^_^</string>
+    <string name="file_loader">File is loaded</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>
@@ -100,7 +102,8 @@
 
     <!--    Post context-->
     <string name="remove_post">Remove</string>
-    <string name="hide">Hide</string>
+    <string name="download">Download</string>
+    <string name="copy_link_media">Copy link to media content</string>
     <string name="copy_link">Copy link</string>
     <string name="copy_post_qr">Copy QR</string>
     <string name="complain_post">Complain</string>

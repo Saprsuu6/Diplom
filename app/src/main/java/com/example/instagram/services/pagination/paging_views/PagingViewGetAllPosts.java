@@ -28,7 +28,7 @@ import retrofit2.Response;
 public class PagingViewGetAllPosts extends PagingView {
     private PaginationAdapterPosts paginationAdapter;
     private int lastPosition;
-    private static final int paginationAmount = 2;
+    private static final int paginationAmount = 3;
     private final LinearLayoutManager manager;
 
     public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView,
@@ -54,15 +54,18 @@ public class PagingViewGetAllPosts extends PagingView {
         }
     }
 
+    // region notifiers
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAdapter() {
-        paginationAdapter.getPostsLibrary().getDataArrayList().clear();
-        paginationAdapter.notifyDataSetChanged();
+    public void notifyAdapterToClearByPosition(int position) {
+        paginationAdapter.deleteByPosition(position);
+        paginationAdapter.notifyItemChanged(position);
     }
 
-    public PaginationAdapterPosts getPaginationAdapter() {
-        return paginationAdapter;
+    @SuppressLint("NotifyDataSetChanged")
+    public void notifyAdapterToClearAll() {
+        paginationAdapter.getPostsLibrary().getDataArrayList().clear();
     }
+    // endregion
 
     // region sva and load position
     public void loadPosition() {

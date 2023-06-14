@@ -23,7 +23,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://a8ea-2a09-bac5-597d-52d-00-84-8a.ngrok-free.app";
+    public final static String BASE_URL = "https://ee81-2a09-bac5-5979-52d-00-84-65.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     // registration user
