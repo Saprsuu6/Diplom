@@ -31,6 +31,8 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.TransitUser;
 
+import org.json.JSONException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -105,7 +107,7 @@ public class ForgotPassword extends AppCompatActivity {
                     }
                 });
 
-            } catch (Exception e) {
+            } catch (JSONException e) {
                 System.out.println(e.getMessage());
             }
         };

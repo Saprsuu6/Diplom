@@ -98,19 +98,19 @@ public class Authorisation extends AppCompatActivity {
     private boolean setRememberMe() throws JSONException {
         boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
 
-
         if (rememberMeFlag) {
             TransitUser.user.setNickName(com.example.instagram.services.SharedPreferences.loadStringSP(this, "nickName"));
             TransitUser.user.setPhoneNumber(com.example.instagram.services.SharedPreferences.loadStringSP(this, "phone"));
             TransitUser.user.setEmailCode(com.example.instagram.services.SharedPreferences.loadStringSP(this, "email"));
             TransitUser.user.setPassword(com.example.instagram.services.SharedPreferences.loadStringSP(this, "password"));
 
-            Services.authorizeUser(new Callback<String>() {
+            Services.authorizeUser(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     assert response.body() != null;
                     Errors.authoriseUser(getApplicationContext(), response.body()).show();
 
+                    TransitUser.user.setLogin(editTexts[0].getText().toString());
                     if (response.body().contains("0")) {
                         startActivity(Intents.getNewsList());
                         finish();
@@ -285,12 +285,13 @@ public class Authorisation extends AppCompatActivity {
                         com.example.instagram.services.SharedPreferences.saveSP(this, "email", TransitUser.user.getEmail());
                         com.example.instagram.services.SharedPreferences.saveSP(this, "password", TransitUser.user.getPassword());
                     }
-                    Services.authorizeUser(new Callback<String>() {
+                    Services.authorizeUser(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             assert response.body() != null;
                             Errors.authoriseUser(getApplicationContext(), response.body()).show();
 
+                            TransitUser.user.setLogin(editTexts[0].getText().toString());
                             if (response.body().contains("0")) {
                                 startActivity(Intents.getNewsList());
                                 finish();
@@ -307,8 +308,7 @@ public class Authorisation extends AppCompatActivity {
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }
         });
@@ -317,7 +317,7 @@ public class Authorisation extends AppCompatActivity {
         textViews[0].setOnClickListener(v -> {
             if (TransitUser.user.getNickName() != null) {
                 try {
-                    Services.sendToForgotPassword(new Callback<String>() {
+                    Services.sendToForgotPassword(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             assert response.body() != null;

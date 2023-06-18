@@ -4,6 +4,9 @@ import java.util.Date;
 
 public class UserOtherInfo {
     // region setters
+    public void setToken(String token) {
+        this.token = token;
+    }
     public void setPhoneBookPermission(boolean phoneBookPermission) {
         this.phoneBookPermission = phoneBookPermission;
     }
@@ -71,6 +74,9 @@ public class UserOtherInfo {
 
     // endregion
     // region getters
+    public String getToken() {
+        return token;
+    }
     public Date getDateOfRegistration() {
         return dateOfRegistration;
     }
@@ -151,5 +157,6 @@ public class UserOtherInfo {
     private boolean hideEmail;
     private boolean phoneBookPermission;
     private boolean mediaPermission;
+    private String token;
 // json constructor
 }

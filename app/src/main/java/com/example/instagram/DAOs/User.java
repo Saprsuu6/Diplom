@@ -12,11 +12,14 @@ import java.util.Locale;
 
 public class User {
     // region getters
+    public String getToken() {
+        return token;
+    }
     public String getPasswordRepeat() {
         return passwordRepeat;
     }
-    public String getName() {
-        return name;
+    public String getLogin() {
+        return login;
     }
 
     public String getNickName() {
@@ -57,6 +60,10 @@ public class User {
 
     // endregion
     // region setters
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public void setPasswordRepeat(String passwordRepeat) {
         this.passwordRepeat = passwordRepeat;
     }
@@ -64,8 +71,8 @@ public class User {
         this.description = description;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLogin(String name) {
+        this.login = name;
     }
 
     public void setNickName(String nickName) {
@@ -101,7 +108,7 @@ public class User {
     }
 
     // endregion
-    private String name;
+    private String login;
     private String nickName;
     private String emailCode;
     private String phoneNumber = "NO_PHONE";
@@ -110,6 +117,7 @@ public class User {
     private String email = "empty@i.ua";
     private Date birthday;
     private String avatar;
+    private String token;
     private String description = "NO_BIO";
     private List<User> subscribers;
     private List<User> subscribings;
@@ -123,7 +131,7 @@ public class User {
     }
 
     public User(String name, String nickName, String phoneNumber, String password, String email) {
-        this.name = name;
+        this.login = name;
         this.nickName = nickName;
         this.phoneNumber = phoneNumber;
         this.password = password;
@@ -137,14 +145,14 @@ public class User {
 
         JSONObject userBody = new JSONObject();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("login", name);
+        jsonObject.put("login", login);
         jsonObject.put("password", password);
-        jsonObject.put("name", name);
-        jsonObject.put("surname", name);
+        jsonObject.put("name", login);
+        jsonObject.put("surname", login);
         jsonObject.put("phone", phoneNumber);
         jsonObject.put("email", email);
         jsonObject.put("avatar", "avatar");
-        jsonObject.put("birthday", DateFormatting.formatToGeneralDate(birthday));
+        jsonObject.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
         jsonObject.put("bio", description);
 
         userBody.put("userBody", jsonObject);

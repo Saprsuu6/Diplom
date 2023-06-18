@@ -23,12 +23,6 @@ public class DateFormatting {
         }
     }
 
-    public static String formatToGeneralDate(Date date) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormatGeneral =
-                new SimpleDateFormat("yyyy-MM-dd");
-        return simpleDateFormatGeneral.format(date.getTime());
-    }
-
     @SuppressLint("SimpleDateFormat")
     private static SimpleDateFormat simpleDateFormat;
 
@@ -54,4 +48,17 @@ public class DateFormatting {
         calendar.setTime(date);
         return calendar;
     }
+
+    public static String formatToDateWithoutTime(Date date) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormatGeneral =
+                new SimpleDateFormat("yyyy-MM-dd");
+        return simpleDateFormatGeneral.format(date.getTime());
+    }
+
+    public static String formatToDateWithTime(Date date) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormatGeneral =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return simpleDateFormatGeneral.format(date.getTime());
+    }
+
 }

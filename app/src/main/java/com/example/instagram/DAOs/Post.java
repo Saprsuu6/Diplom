@@ -11,33 +11,38 @@ import org.json.JSONObject;
 import java.util.Date;
 
 public class Post {
+    private String postId;
     private Date dateOfAdd;
     private String author;
     private String description;
     private int likes;
-    @Nullable
     private String resourceImg;
-    @Nullable
     private String resourceVideo;
     @Nullable
     private String metadata;
     @Nullable
     private Date postponePublication;
-    @Nullable
-    private String place;
     private String taggedPeople;
-
+    private Boolean isLiked = null;
+    private Boolean isSaved = null;
     // region setters
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+    }
+
+    public void setSaved(boolean saved) {
+        isSaved = saved;
+    }
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
     public void setNickNames(String nickNames) {
         this.taggedPeople = nickNames;
     }
 
     public void setLikes(int likes) {
         this.likes = likes;
-    }
-
-    public void setPlace(@Nullable String place) {
-        this.place = place;
     }
 
     public void setPostponePublication(@Nullable Date postponePublication) {
@@ -56,11 +61,11 @@ public class Post {
         this.description = description;
     }
 
-    public void setResourceImg(@Nullable String resourceImg) {
+    public void setResourceImg(String resourceImg) {
         this.resourceImg = resourceImg;
     }
 
-    public void setResourceVideo(@Nullable String resourceVideo) {
+    public void setResourceVideo(String resourceVideo) {
         this.resourceVideo = resourceVideo;
     }
 
@@ -70,17 +75,24 @@ public class Post {
 
     // endregion
     // region getters
+    public Boolean isLiked() {
+        return isLiked;
+    }
+
+    public Boolean isSaved() {
+        return isSaved;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
     public String getNickNames() {
         return taggedPeople;
     }
 
     public int getLikes() {
         return likes;
-    }
-
-    @Nullable
-    public String getPlace() {
-        return place;
     }
 
     public Date getDateOfAdd() {
@@ -95,12 +107,10 @@ public class Post {
         return description;
     }
 
-    @Nullable
     public String getResourceImg() {
         return resourceImg;
     }
 
-    @Nullable
     public String getResourceVideo() {
         return resourceVideo;
     }
@@ -124,31 +134,24 @@ public class Post {
             System.out.println(e.getMessage());
         }
 
+        setPostId(object.getString("id"));
         setMetadata(object.getString("metadata"));
 
         setResourceVideo(object.getString("videoUrl"));
         setResourceImg(object.getString("imageUrl"));
 
-        setDescription(object.getString("header"));
-        setPlace(object.getString("place"));
+        setDescription(object.getString("description"));
         setAuthor(object.getString("author"));
         setLikes(object.getInt("likes"));
-
-        if (!object.isNull("taggedPeople")) {
-            setNickNames(object.getString("taggedPeople"));
-        }
     }
 
     public JSONObject crateOtherInfo() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("author", TransitUser.user.getName());
-        jsonObject.put("header", description);
+        jsonObject.put("author", "Andry"); // TODO TransitUser.user.getLogin()
+        jsonObject.put("description", description);
         jsonObject.put("metadata", metadata);
 
-        if (postponePublication != null) {
-            jsonObject.put("postponePublication", DateFormatting.formatToGeneralDate(postponePublication));
-        }
-
+        jsonObject.put("postponePublication", postponePublication != null ? DateFormatting.formatToDateWithTime(postponePublication) : DateFormatting.formatToDateWithTime(new Date()));
         jsonObject.put("taggedPeople", taggedPeople);
 
         return jsonObject;

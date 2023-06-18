@@ -110,7 +110,7 @@ public class SetName extends AppCompatActivity {
 
         buttons[0].setOnClickListener(v -> {
             if (editTexts[0].length() != 0) {
-                TransitUser.user.setName(editTexts[0].getText().toString().trim());
+                TransitUser.user.setLogin(editTexts[0].getText().toString().trim());
 
                 startActivity(Intents.getSetPassword());
             } else {

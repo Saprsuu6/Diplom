@@ -1,11 +1,5 @@
 package com.example.instagram.main_process;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.widget.NestedScrollView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -21,22 +15,29 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
@@ -47,10 +48,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -94,6 +93,7 @@ public class NewsLine extends AppCompatActivity {
         Localisation.setFirstLocale(languages);
 
         setListeners();
+        LoadAvatar();
 
         try {
             pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
@@ -107,6 +107,31 @@ public class NewsLine extends AppCompatActivity {
         Intents.setSelfPage(new Intent(this, SelfPage.class));
         Intents.setChatList(new Intent(this, ChatList.class));
         Intents.setCreateNewPost(new Intent(this, CreatePost.class));
+    }
+
+    private void LoadAvatar() {
+        // region send request to get avatar
+        try {
+            Services.sendToGetAva(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String avaLink = response.body();
+
+                        // set ava
+                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
+                }
+            }, "Andry"); // TODO TransitUser.user.getLogin()
+        } catch (JSONException e) {
+            Log.d("sendToGetAva: (JSONException)", e.getMessage());
+        }
+        // endregion
     }
 
     @SuppressLint("WrongConstant")
@@ -136,60 +161,69 @@ public class NewsLine extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if (NewsLine.mapPost != null) {
-            switch (item.getItemId()) {
-                case R.id.remove_post:
-                    pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
-                    break;
-                case R.id.download:
-                    AndroidDownloader androidDownloader = new AndroidDownloader(this);
-                    Uri uri = null;
+        switch (item.getItemId()) {
+            case R.id.remove_post:
+                try {
+                    JSONObject postId = new JSONObject();
+                    postId.put("postId", NewsLine.mapPost.second.getPostId());
 
-                    if (NewsLine.mapPost.second.getResourceImg() != null) {
-                        uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
-                    } else if (NewsLine.mapPost.second.getResourceVideo() != null) {
-                        uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
+                    Services.sendToDeletePost(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.code() == 200) {
+                                pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
+                            }
+
+                            assert response.body() != null;
+                            String responseStr = response.body();
+                            Errors.deletePost(getApplicationContext(), responseStr);
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("onFailure: (sendToDeletePost)", t.getMessage());
+                        }
+                    }, postId.toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: (sendToDeletePost)", e.getMessage());
+                }
+                break;
+            case R.id.download:
+                AndroidDownloader androidDownloader = new AndroidDownloader(this);
+                Uri uri = null;
+
+                if (NewsLine.mapPost.second.getResourceImg() != null) {
+                    uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
+                } else if (NewsLine.mapPost.second.getResourceVideo() != null) {
+                    uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
+                }
+
+                if (NewsLine.mapPost.second.getMetadata() != null) {
+                    try {
+                        JSONObject object = new JSONObject(NewsLine.mapPost.second.getMetadata());
+                        androidDownloader.downloadFile(uri, object.getString("Extension"), NewsLine.mapPost.second.getDescription());
+                    } catch (JSONException e) {
+                        Log.d("JSONException (getMetadata): ", e.getMessage());
                     }
-
-                    if (NewsLine.mapPost.second.getMetadata() != null) {
-//                        try {
-//                            JSONObject object = new JSONObject(NewsLine.mapPost.second.getMetadata());
-//                            androidDownloader.downloadFile(uri, "JPG", NewsLine.mapPost.second.getDescription()); // TODO object.getString("Extension"), NewsLine.mapPost.second.getDescription()
-//                        } catch (JSONException e) {
-//                            Log.d("JSONException (getMetadata): ", e.getMessage());
-//                        }
-
-                        androidDownloader.downloadFile(uri, "JPG", NewsLine.mapPost.second.getDescription());
-                    }
-                    break;
-                case R.id.copy_link_media:
-                    System.out.println("copy link to media content"); // TODO: copy link to media content
-                    break;
-                case R.id.copy_link:
-                    System.out.println("copy link to post"); // TODO: copy link to post
-                    break;
-                case R.id.copy_post_qr:
-                    System.out.println("copy qr link to post"); // TODO: copy qr link to post
-                    break;
-                case R.id.complain_post:
-                    System.out.println("complain post"); // TODO: complain post
-                    break;
-                default:
-                    super.onContextItemSelected(item);
-                    break;
-            }
-        } else {
-            Toast.makeText(this, resources.getString(R.string.context_error), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.copy_link_media:
+                System.out.println("copy link to media content"); // TODO: copy link to media content
+                break;
+            case R.id.copy_link:
+                System.out.println("copy link to post"); // TODO: copy link to post
+                break;
+            case R.id.copy_post_qr:
+                System.out.println("copy qr link to post"); // TODO: copy qr link to post
+                break;
+            case R.id.complain_post:
+                System.out.println("complain post"); // TODO: complain post
+                break;
+            default:
+                super.onContextItemSelected(item);
+                break;
         }
-
-        NewsLine.mapPost = null;
         return true;
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        pagingView.savePosition();
     }
 
     private void setAnimations() {
@@ -222,12 +256,6 @@ public class NewsLine extends AppCompatActivity {
 
     private void setListeners() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            try {
-                pagingView.setToBegin();
-            } catch (JSONException e) {
-                Log.d("sendToGetAllPosts: ", e.getMessage());
-            }
-
             pagingView.notifyAdapterToClearAll();
             swipeRefreshLayout.setRefreshing(false);
         });
@@ -256,7 +284,7 @@ public class NewsLine extends AppCompatActivity {
 
         // region Bottom menu
         // home
-        imageViewsBottom[0].setOnClickListener(v -> ((NestedScrollView) findViewById(R.id.scroll_view)).scrollTo(0, 0));
+        imageViewsBottom[0].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
 
         // self page
         imageViewsBottom[4].setOnClickListener(v -> startActivity(Intents.getSelfPage()));
@@ -293,7 +321,7 @@ public class NewsLine extends AppCompatActivity {
                 System.out.println(e.getMessage());
             }
 
-            NewsLine.textViews.get(2).setText(resources.getString(R.string.tag_people));
+            NewsLine.textViews.get(2).setText(resources.getString(R.string.tagged_people));
         }
     }
     // endregion

@@ -107,10 +107,10 @@ public class TagPeople {
                     }
                     // endregion
 
-                    String namesWithoutDuplicates = String.join(", ", namesWithoutDuplicatesArray);
+                    String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
                     taggedPeople.setText(resources.getString(R.string.tag_people) + ": " + namesWithoutDuplicates);
 
-                    TransitPost.post.setNickNames(names);
+                    TransitPost.post.setNickNames(namesWithoutDuplicates);
                 });
     }
 

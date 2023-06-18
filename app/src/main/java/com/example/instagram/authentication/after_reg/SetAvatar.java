@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -198,7 +199,7 @@ public class SetAvatar extends AppCompatActivity {
         }
 
         RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes);
-        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getName()); // TODO Andry
+        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getLogin()); // TODO Andry
 
         try {
             Services.sendAva(new Callback<>() {
@@ -207,12 +208,13 @@ public class SetAvatar extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         String responseStr = response.body().toString();
 
-                        if (responseStr.equals("0")) {
-                            Toast.makeText(getApplicationContext(), R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(), R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT).show();
-                        }
+                        // region get token from response
+                        int indexFrom = responseStr.indexOf(":");
+                        String token = responseStr.substring(indexFrom).trim();
+                        // endregion
+
+                        TransitUser.user.setToken(token);
+                        Errors.sendAvatar(getApplicationContext(), responseStr).show();
                     }
                 }
 

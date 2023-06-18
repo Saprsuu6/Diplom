@@ -8,9 +8,9 @@ import retrofit2.Call;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
-public interface SendMultipartPost {
+public interface SendToAddPost {
     @retrofit2.http.Multipart
-    @POST("/addpost") // TODO change servlet
+    @POST("/addPost")
     Call<ResponseBody> STRING_CALL(
             @Part("image") RequestBody file,
             @Nullable @Part("otherInfo") String description

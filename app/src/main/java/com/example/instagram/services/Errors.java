@@ -70,4 +70,22 @@ public class Errors {
         else
             return Toast.makeText(context, R.string.internal_error, Toast.LENGTH_SHORT);
     }
+
+    public static Toast sendAvatar(Context context, String responseStr) {
+        if (responseStr.equals("0")) {
+            return Toast.makeText(context, R.string.successfully_loaded_0, Toast.LENGTH_SHORT);
+        }
+        else {
+            return Toast.makeText(context, R.string.unsuccessfully_loaded_1, Toast.LENGTH_SHORT);
+        }
+    }
+
+    public static Toast deletePost(Context context, String responseStr) {
+        if (responseStr.equals("0")) {
+            return Toast.makeText(context, R.string.successful_delete, Toast.LENGTH_SHORT);
+        }
+        else {
+            return Toast.makeText(context, R.string.unsuccessful_delete, Toast.LENGTH_SHORT);
+        }
+    }
 }

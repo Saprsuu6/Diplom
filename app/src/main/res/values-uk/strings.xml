@@ -59,9 +59,11 @@
     <string name="find_user">Почніть писати нік щоб знайти користувача</string>
     <string name="internal_error">Внутрішня помилка</string>
     <string name="user_are_not_exists">Користувач не існує</string>
-    <string name="tagged_people">Позначені люди</string>
+    <string name="tagged_people">Позначені люди…</string>
     <string name="context_error">Лайкніть пост хочаб один раз ^_^</string>
     <string name="file_loader">Файл завантажен</string>
+    <string name="successful_delete">Вдачне видалення</string>
+    <string name="unsuccessful_delete">Successful delete</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>

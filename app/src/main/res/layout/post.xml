@@ -54,6 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="5dp"
                     android:contentDescription="@string/home"
+                    android:visibility="visible"
                     android:src="@drawable/like_empty_gradient" />
 
                 <ImageView
@@ -165,7 +166,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/tagged_people_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -179,8 +179,16 @@
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         tools:text="@string/tagged_people" />
+
+                    <LinearLayout
+                        android:id="@+id/tagged_people_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="visible"
+                        android:orientation="vertical"
+                        tools:ignore="UselessParent" />
 
                 </LinearLayout>
 
