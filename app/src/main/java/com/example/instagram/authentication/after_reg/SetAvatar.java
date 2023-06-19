@@ -86,8 +86,7 @@ public class SetAvatar extends AppCompatActivity {
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setIntents() {
@@ -116,12 +115,7 @@ public class SetAvatar extends AppCompatActivity {
         setPhoto = findViewById(R.id.set_photo);
         languages = findViewById(R.id.languages);
         buttons = new Button[]{findViewById(R.id.photo_button)};
-        textViews = new TextView[]{findViewById(R.id.add_photo_header),
-                findViewById(R.id.add_photo_info),
-                findViewById(R.id.other_variant),
-                findViewById(R.id.skip),
-                findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in)};
+        textViews = new TextView[]{findViewById(R.id.add_photo_header), findViewById(R.id.add_photo_info), findViewById(R.id.other_variant), findViewById(R.id.skip), findViewById(R.id.reg_question), findViewById(R.id.link_log_in)};
     }
 
     @SuppressLint({"ClickableViewAccessibility", "IntentReset"})
@@ -159,38 +153,35 @@ public class SetAvatar extends AppCompatActivity {
             finish();
         });
 
-        textViews[3].setOnClickListener( v -> {
+        textViews[3].setOnClickListener(v -> {
             startActivity(Intents.getNewsList());
             finish();
         });
     }
 
-    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent data = result.getData();
-                    assert data != null;
-                    Uri selectedImageUri = data.getData();
+    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data = result.getData();
+            assert data != null;
+            Uri selectedImageUri = data.getData();
 
-                    extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+            extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
 
-                    try {
-                        InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+            try {
+                InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
 
-                        // region Get image bytes
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            imageBytes = imageStream.readAllBytes();
-                        }
-                        //endregion
-
-                        sendAvaToBackEnd();
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage());
-                    }
+                // region Get image bytes
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    imageBytes = imageStream.readAllBytes();
                 }
+                //endregion
+
+                sendAvaToBackEnd();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
             }
-    );
+        }
+    });
 
     private void sendAvaToBackEnd() {
         if (imageBytes.length == 0) {
@@ -199,7 +190,7 @@ public class SetAvatar extends AppCompatActivity {
         }
 
         RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes);
-        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getLogin()); // TODO Andry
+        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getLogin());
 
         try {
             Services.sendAva(new Callback<>() {
@@ -207,13 +198,6 @@ public class SetAvatar extends AppCompatActivity {
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String responseStr = response.body().toString();
-
-                        // region get token from response
-                        int indexFrom = responseStr.indexOf(":");
-                        String token = responseStr.substring(indexFrom).trim();
-                        // endregion
-
-                        TransitUser.user.setToken(token);
                         Errors.sendAvatar(getApplicationContext(), responseStr).show();
                     }
                 }
@@ -228,7 +212,6 @@ public class SetAvatar extends AppCompatActivity {
         }
 
         startActivity(Intents.getNewsList());
-        // TODO or find contacts
         finish();
     }
 

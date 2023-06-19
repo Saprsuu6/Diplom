@@ -130,8 +130,8 @@ public class User {
         otherInfo.setPreferInterfaceLanguage(Locale.getDefault().getLanguage());
     }
 
-    public User(String name, String nickName, String phoneNumber, String password, String email) {
-        this.login = name;
+    public User(String login, String nickName, String phoneNumber, String password, String email) {
+        this.login = login;
         this.nickName = nickName;
         this.phoneNumber = phoneNumber;
         this.password = password;
@@ -162,7 +162,7 @@ public class User {
 
     public JSONObject getJSONToCheck() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("login", nickName);
+        jsonObject.put("login", login);
         jsonObject.put("password", password);
 
         return jsonObject;
@@ -170,14 +170,14 @@ public class User {
 
     public JSONObject getJSONLogin() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("login", nickName);
+        jsonObject.put("login", login);
 
         return jsonObject;
     }
 
     public JSONObject getJSONAfterForgotPassword() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("login", nickName);
+        jsonObject.put("login", login);
         jsonObject.put("code", emailCode);
         jsonObject.put("newPassword", password);
         jsonObject.put("repeatPassword", passwordRepeat);

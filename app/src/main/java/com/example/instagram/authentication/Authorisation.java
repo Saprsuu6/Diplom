@@ -99,23 +99,29 @@ public class Authorisation extends AppCompatActivity {
         boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
 
         if (rememberMeFlag) {
-            TransitUser.user.setNickName(com.example.instagram.services.SharedPreferences.loadStringSP(this, "nickName"));
+            TransitUser.user.setLogin(com.example.instagram.services.SharedPreferences.loadStringSP(this, "login"));
             TransitUser.user.setPhoneNumber(com.example.instagram.services.SharedPreferences.loadStringSP(this, "phone"));
-            TransitUser.user.setEmailCode(com.example.instagram.services.SharedPreferences.loadStringSP(this, "email"));
+            TransitUser.user.setEmail(com.example.instagram.services.SharedPreferences.loadStringSP(this, "email"));
             TransitUser.user.setPassword(com.example.instagram.services.SharedPreferences.loadStringSP(this, "password"));
 
             Services.authorizeUser(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    assert response.body() != null;
-                    Errors.authoriseUser(getApplicationContext(), response.body()).show();
+                    if (response.isSuccessful() && response.body() != null) {
+                        String responseStr = response.body();
 
-                    TransitUser.user.setLogin(editTexts[0].getText().toString());
-                    if (response.body().contains("0")) {
-                        startActivity(Intents.getNewsList());
-                        finish();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
+                        // region get token from response
+                        int indexFrom = responseStr.indexOf(":");
+                        String token = responseStr.substring(indexFrom + 1).trim();
+                        // endregion
+
+                        TransitUser.user.setToken(token);
+                        if (response.body().contains("0")) {
+                            startActivity(Intents.getNewsList());
+                            finish();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -268,7 +274,7 @@ public class Authorisation extends AppCompatActivity {
                         TransitUser.user.setPhoneNumber(editTexts[0].getText().toString());
                     } else if (loginTypes.getSelectedItem().equals("Username") || loginTypes.getSelectedItem().equals("Ім\\'я корисувача")) {
                         Validations.validateUserName(editTexts[0].getText().toString(), resources);
-                        TransitUser.user.setNickName(editTexts[0].getText().toString());
+                        TransitUser.user.setLogin(editTexts[0].getText().toString());
                     } else if (loginTypes.getSelectedItem().equals("Email")) {
                         Validations.validateEmail(editTexts[0].getText().toString(), textViews[4].getText().toString(), resources);
                         TransitUser.user.setEmail(editTexts[0].getText().toString());
@@ -280,7 +286,7 @@ public class Authorisation extends AppCompatActivity {
 
                     if (rememberMe.isChecked()) {
                         com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", rememberMe.isChecked());
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "nickName", TransitUser.user.getNickName());
+                        com.example.instagram.services.SharedPreferences.saveSP(this, "login", TransitUser.user.getLogin());
                         com.example.instagram.services.SharedPreferences.saveSP(this, "phone", TransitUser.user.getPhoneNumber());
                         com.example.instagram.services.SharedPreferences.saveSP(this, "email", TransitUser.user.getEmail());
                         com.example.instagram.services.SharedPreferences.saveSP(this, "password", TransitUser.user.getPassword());
@@ -288,15 +294,22 @@ public class Authorisation extends AppCompatActivity {
                     Services.authorizeUser(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            assert response.body() != null;
-                            Errors.authoriseUser(getApplicationContext(), response.body()).show();
+                            if (response.isSuccessful() && response.body() != null) {
+                                String responseStr = response.body();
 
-                            TransitUser.user.setLogin(editTexts[0].getText().toString());
-                            if (response.body().contains("0")) {
-                                startActivity(Intents.getNewsList());
-                                finish();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
+                                // region get token from response
+                                int indexFrom = responseStr.indexOf(":");
+                                String token = responseStr.substring(indexFrom + 1).trim();
+                                // endregion
+
+                                TransitUser.user.setToken(token);
+                                TransitUser.user.setLogin(editTexts[0].getText().toString());
+                                if (response.body().contains("0")) {
+                                    startActivity(Intents.getNewsList());
+                                    finish();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
 
@@ -315,7 +328,7 @@ public class Authorisation extends AppCompatActivity {
 
         // forgot password
         textViews[0].setOnClickListener(v -> {
-            if (TransitUser.user.getNickName() != null) {
+            if (TransitUser.user.getLogin() != null) {
                 try {
                     Services.sendToForgotPassword(new Callback<>() {
                         @Override

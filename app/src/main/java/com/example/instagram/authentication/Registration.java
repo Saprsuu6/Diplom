@@ -24,6 +24,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetName;
+import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.GetEthernetInfo;
 import com.example.instagram.services.Intents;
@@ -85,8 +86,7 @@ public class Registration extends AppCompatActivity {
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setRememberMe() {
@@ -100,13 +100,8 @@ public class Registration extends AppCompatActivity {
         rememberMe = findViewById(R.id.remember_flag);
         editTexts = new EditText[]{findViewById(R.id.phone_or_email)};
         buttons = new Button[]{findViewById(R.id.reg_log_in)};
-        checkBoxes = new CheckBox[]{findViewById(R.id.receive_news_letters),
-                findViewById(R.id.hide_phone),
-                findViewById(R.id.hide_email)};
-        textViews = new TextView[]{findViewById(R.id.reg_phone),
-                findViewById(R.id.reg_email), findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in), findViewById(R.id.country_code),
-                findViewById(R.id.email_name), findViewById(R.id.remember_title)};
+        checkBoxes = new CheckBox[]{findViewById(R.id.receive_news_letters), findViewById(R.id.hide_phone), findViewById(R.id.hide_email)};
+        textViews = new TextView[]{findViewById(R.id.reg_phone), findViewById(R.id.reg_email), findViewById(R.id.reg_question), findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name), findViewById(R.id.remember_title)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
     }
 
@@ -125,9 +120,7 @@ public class Registration extends AppCompatActivity {
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked);
-        });
+        rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked));
 
         textViews[0].setOnClickListener(v -> {
             setDefaultTextBoxSettings(editTexts[0]);
@@ -162,6 +155,7 @@ public class Registration extends AppCompatActivity {
                     TransitUser.user.getOtherInfo().setHideEmail(checkBoxes[2].isChecked());
                     TransitUser.user.getOtherInfo().setIpAddress(GetEthernetInfo.getNetworkInfo());
 
+                    RegistrationActivities.activityList.add(this);
                     startActivity(Intents.getSetName());
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());

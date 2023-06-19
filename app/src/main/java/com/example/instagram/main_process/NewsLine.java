@@ -19,7 +19,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +31,7 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
@@ -46,9 +46,6 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -67,9 +64,9 @@ public class NewsLine extends AppCompatActivity {
     private Localisation localisation;
     private Spinner languages;
     // endregion
-    public static List<TextView> textViews = new ArrayList<>();
     private FindUser findUser;
     static public Pair<Integer, Post> mapPost;
+    boolean valueSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +124,7 @@ public class NewsLine extends AppCompatActivity {
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     Log.d("sendToGetAva: (onFailure)", t.getMessage());
                 }
-            }, "Andry"); // TODO TransitUser.user.getLogin()
+            }, TransitUser.user.getLogin());
         } catch (JSONException e) {
             Log.d("sendToGetAva: (JSONException)", e.getMessage());
         }
@@ -150,11 +147,29 @@ public class NewsLine extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-
         MenuInflater inflater = getMenuInflater();
 
         if (v.getId() == R.id.post_context) {
-            inflater.inflate(R.menu.post_context_menu, menu);
+            inflater.inflate(TransitUser.user.getLogin().equals(NewsLine.mapPost.second.getAuthor()) ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
+
+//            try {
+//                Services.sentToDeleteAccess(new Callback<>() {
+//                    @Override
+//                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+//                        if (response.isSuccessful() && response.body() != null) {
+//                            boolean hasPost = Boolean.parseBoolean(response.body());
+//                            inflater.inflate(hasPost ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+//                        Log.d("sentToDeleteAccess: (onFailure)", t.getMessage());
+//                    }
+//                }, NewsLine.mapPost.second.getPostId(), TransitUser.user.getLogin());
+//            } catch (JSONException e) {
+//                Log.d("sentToDeleteAccess: (onFailure)", e.getMessage());
+//            }
         }
     }
 
@@ -166,17 +181,17 @@ public class NewsLine extends AppCompatActivity {
                 try {
                     JSONObject postId = new JSONObject();
                     postId.put("postId", NewsLine.mapPost.second.getPostId());
+                    postId.put("token", TransitUser.user.getToken());
 
                     Services.sendToDeletePost(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.code() == 200) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                String responseStr = response.body();
+                                Errors.deletePost(getApplicationContext(), responseStr).show();
+
                                 pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
                             }
-
-                            assert response.body() != null;
-                            String responseStr = response.body();
-                            Errors.deletePost(getApplicationContext(), responseStr);
                         }
 
                         @Override
@@ -245,7 +260,7 @@ public class NewsLine extends AppCompatActivity {
         newsLine = findViewById(R.id.news_list);
         languages = findViewById(R.id.languages);
         imageViewsTop = new ImageView[]{findViewById(R.id.logo), findViewById(R.id.change_main_theme), findViewById(R.id.change_theme), findViewById(R.id.direct)};
-        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
+        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page), findViewById(R.id.sing_out), findViewById(R.id.close_app)};
     }
 
     private void chooseTheme() {
@@ -285,9 +300,15 @@ public class NewsLine extends AppCompatActivity {
         // region Bottom menu
         // home
         imageViewsBottom[0].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
-
         // self page
         imageViewsBottom[4].setOnClickListener(v -> startActivity(Intents.getSelfPage()));
+        // close app
+        imageViewsBottom[5].setOnClickListener(v -> {
+            DeleteApplicationCache.deleteCache(getApplicationContext());
+            finishAffinity();
+        });
+        // close app
+        imageViewsBottom[6].setOnClickListener(v -> finishAffinity());
         // endregion
 
         // set system theme on label
@@ -308,21 +329,7 @@ public class NewsLine extends AppCompatActivity {
 
     // region Localisation
     private void setStringResources() {
-        if (NewsLine.textViews.size() > 0) {
-            NewsLine.textViews.get(0).setText(resources.getString(R.string.amount_likes_title));
-
-            try {
-                String dateStr = NewsLine.textViews.get(1).getText().toString();
-                Date newDate = DateFormatting.formatDate(dateStr);
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-                NewsLine.textViews.get(1).setText(DateFormatting.formatDate(newDate));
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            NewsLine.textViews.get(2).setText(resources.getString(R.string.tagged_people));
-        }
+        pagingView.notifyAllLibrary();
     }
     // endregion
 }

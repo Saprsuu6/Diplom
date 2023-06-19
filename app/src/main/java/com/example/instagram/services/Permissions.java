@@ -14,10 +14,11 @@ public class Permissions {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setPadding(40, 0, 40, 0);
 
-        CheckBox phoneBookCheckBox = getPhoneBookPermission(context, resources);
+        // TODO add phone book
+        //CheckBox phoneBookCheckBox = getPhoneBookPermission(context, resources);
         CheckBox mediaCheckBox = mediaPermission(context, resources);
 
-        linearLayout.addView(phoneBookCheckBox);
+        //linearLayout.addView(phoneBookCheckBox);
         linearLayout.addView(mediaCheckBox);
 
         return new AlertDialog.Builder(context)
@@ -25,7 +26,7 @@ public class Permissions {
                 .setCancelable(false)
                 .setView(linearLayout)
                 .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> {
-                    TransitUser.user.getOtherInfo().setPhoneBookPermission(phoneBookCheckBox.isChecked());
+                    //TransitUser.user.getOtherInfo().setPhoneBookPermission(phoneBookCheckBox.isChecked());
                     TransitUser.user.getOtherInfo().setMediaPermission(mediaCheckBox.isChecked());
                 });
     }

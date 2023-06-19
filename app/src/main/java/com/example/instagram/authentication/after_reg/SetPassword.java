@@ -24,6 +24,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.CreateNewPassword;
+import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.Validator;
 import com.example.instagram.services.Validations;
@@ -195,6 +196,7 @@ public class SetPassword extends AppCompatActivity {
                     TransitUser.user.setPassword(editTexts[0].getText().toString().trim());
                     TransitUser.user.setPasswordRepeat(editTexts[1].getText().toString().trim());
 
+                    RegistrationActivities.activityList.add(this);
                     startActivity(Intents.getSetBirthday());
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());

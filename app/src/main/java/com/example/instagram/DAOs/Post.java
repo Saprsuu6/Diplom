@@ -147,7 +147,7 @@ public class Post {
 
     public JSONObject crateOtherInfo() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("author", "Andry"); // TODO TransitUser.user.getLogin()
+        jsonObject.put("author", TransitUser.user.getLogin());
         jsonObject.put("description", description);
         jsonObject.put("metadata", metadata);
 

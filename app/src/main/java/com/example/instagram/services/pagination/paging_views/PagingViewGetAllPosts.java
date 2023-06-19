@@ -64,6 +64,11 @@ public class PagingViewGetAllPosts extends PagingView {
     }
 
     @SuppressLint("NotifyDataSetChanged")
+    public void notifyAllLibrary() {
+        paginationAdapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearAll() {
         paginationAdapter.getPostsLibrary().getDataArrayList().clear();
         paginationAdapter.notifyDataSetChanged();

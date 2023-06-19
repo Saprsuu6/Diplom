@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +30,7 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.Services;
 
@@ -78,8 +80,7 @@ public class SetBirthday extends AppCompatActivity {
     }
 
     private void setIntents() {
-        if (Intents.getSetAvatar() == null)
-            Intents.setSetAvatar(new Intent(this, SetAvatar.class));
+        if (Intents.getSetAvatar() == null) Intents.setSetAvatar(new Intent(this, SetAvatar.class));
 
         if (Intents.getAuthorisation() == null)
             Intents.setAuthorisation(new Intent(this, Authorisation.class));
@@ -93,8 +94,7 @@ public class SetBirthday extends AppCompatActivity {
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
 
@@ -103,9 +103,7 @@ public class SetBirthday extends AppCompatActivity {
         languages = findViewById(R.id.languages);
         editTexts = new EditText[]{findViewById(R.id.birth_date)};
         buttons = new Button[]{findViewById(R.id.next)};
-        textViews = new TextView[]{findViewById(R.id.let_info),
-                findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in)};
+        textViews = new TextView[]{findViewById(R.id.let_info), findViewById(R.id.reg_question), findViewById(R.id.link_log_in)};
     }
 
     private void setAnimations() {
@@ -142,10 +140,7 @@ public class SetBirthday extends AppCompatActivity {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         editTexts[0].setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    SetBirthday.this,
-                    android.R.style.Theme_DeviceDefault_Dialog,
-                    setListener, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(SetBirthday.this, android.R.style.Theme_DeviceDefault_Dialog, setListener, year, month, day);
 
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
             datePickerDialog.show();
@@ -175,14 +170,22 @@ public class SetBirthday extends AppCompatActivity {
                     try {
                         Services.addUser(new Callback<>() {
                             @Override
-                            public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
-                                assert Objects.requireNonNull(response).body() != null;
-                                Errors.registrationUser(getApplicationContext(), response.body()).show();
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    String responseStr = response.body();
+
+                                    // region get token from response
+                                    int indexFrom = responseStr.indexOf(":");
+                                    String token = responseStr.substring(indexFrom + 1).trim();
+                                    // endregion
+
+                                    TransitUser.user.setToken(token);
+                                    Errors.registrationUser(getApplicationContext(), response.body()).show();
+                                }
                             }
 
                             @Override
-                            public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
-                                assert t != null;
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                                 System.out.println(t.getMessage());
                             }
                         });
@@ -190,6 +193,7 @@ public class SetBirthday extends AppCompatActivity {
                         System.out.println(e.getMessage());
                     }
 
+                    RegistrationActivities.deleteActivities();
                     startActivity(Intents.getSetAvatar());
                 }
             } else {

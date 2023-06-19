@@ -26,6 +26,7 @@ import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -123,7 +124,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, data.getPostId(), "Andry"); // TODO TransitUser.user.getLogin()
+                }, data.getPostId(), TransitUser.user.getLogin());
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -156,7 +157,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, data.getPostId(), "Andry"); // TODO TransitUser.user.getLogin()
+                }, data.getPostId(), TransitUser.user.getLogin());
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -180,12 +181,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     @Override
     public int getItemCount() {
         return postsLibrary.getDataArrayList().size();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void deleteByPosition(int position) {
-        this.postsLibrary.getDataArrayList().remove(position);
-        notifyDataSetChanged();
     }
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
@@ -231,10 +226,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             taggedPeople = itemView.findViewById(R.id.tagged_people);
 
             hours = itemView.findViewById(R.id.hours);
-
-            NewsLine.textViews.add(amountLikesTitle);
-            NewsLine.textViews.add(hours);
-            NewsLine.textViews.add(taggedPeople);
 
             setListeners();
         }
@@ -305,7 +296,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 try {
                     JSONObject object = new JSONObject();
                     object.put("postId", postsLibrary.getDataArrayList().get(position).getPostId());
-                    object.put("login", "Andry"); // TODO TransitUser.user.getLogin()
+                    object.put("login", TransitUser.user.getLogin());
                     object.put("isLiked", like_flag);
 
                     Services.sendToLikeUnlikePost(new Callback<>() {
@@ -350,7 +341,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 try {
                     JSONObject object = new JSONObject();
                     object.put("postId", postsLibrary.getDataArrayList().get(position).getPostId());
-                    object.put("login", "Andry"); // TODO TransitUser.user.getLogin()
+                    object.put("login", TransitUser.user.getLogin());
                     object.put("isSaved", bookmark_flag);
 
                     Services.sendToSaveUnsavedPost(new Callback<>() {

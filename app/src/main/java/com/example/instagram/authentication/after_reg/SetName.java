@@ -22,6 +22,7 @@ import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
 
 import java.util.Locale;
@@ -111,7 +112,7 @@ public class SetName extends AppCompatActivity {
         buttons[0].setOnClickListener(v -> {
             if (editTexts[0].length() != 0) {
                 TransitUser.user.setLogin(editTexts[0].getText().toString().trim());
-
+                RegistrationActivities.activityList.add(this);
                 startActivity(Intents.getSetPassword());
             } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
