@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -206,15 +208,14 @@ public class CreatePost extends AppCompatActivity {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hours = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
 
-        textViews[3].setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, setListener, year, month, day);
+        TimePickerDialog.OnTimeSetListener timeSetListener = (view, hourOfDay, minute) -> {
 
-            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
-            datePickerDialog.show();
-        });
+        };
 
-        setListener = (view, year1, month1, dayOfMonth) -> {
+        DatePickerDialog.OnDateSetListener dateSetListener = (view, year1, month1, dayOfMonth) -> {
             selectedDate = Calendar.getInstance();
             selectedDate.set(year1, month1, dayOfMonth);
 
@@ -227,6 +228,17 @@ public class CreatePost extends AppCompatActivity {
                 Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
             }
         };
+
+        textViews[3].setOnClickListener(v -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Localisation.chosenLocale.getCountry().equals("EN"));
+            DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, dateSetListener, year, month, day);
+
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            datePickerDialog.show();
+
+            timePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            timePickerDialog.show();
+        });
 
         imageViews[0].setOnClickListener(v -> finish());
 

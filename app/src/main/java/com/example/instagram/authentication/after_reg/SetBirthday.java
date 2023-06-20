@@ -193,8 +193,8 @@ public class SetBirthday extends AppCompatActivity {
                         System.out.println(e.getMessage());
                     }
 
-                    RegistrationActivities.deleteActivities();
                     startActivity(Intents.getSetAvatar());
+                    RegistrationActivities.deleteActivities();
                 }
             } else {
                 Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
@@ -204,6 +204,7 @@ public class SetBirthday extends AppCompatActivity {
         textViews[2].setOnClickListener(v -> {
             startActivity(Intents.getAuthorisation());
             finish();
+            RegistrationActivities.deleteActivities();
         });
     }
 

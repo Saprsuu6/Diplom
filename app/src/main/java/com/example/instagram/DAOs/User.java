@@ -144,18 +144,15 @@ public class User {
     public JSONObject getJSON() throws JSONException {
 
         JSONObject userBody = new JSONObject();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("login", login);
-        jsonObject.put("password", password);
-        jsonObject.put("name", login);
-        jsonObject.put("surname", login);
-        jsonObject.put("phone", phoneNumber);
-        jsonObject.put("email", email);
-        jsonObject.put("avatar", "avatar");
-        jsonObject.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
-        jsonObject.put("bio", description);
-
-        userBody.put("userBody", jsonObject);
+        userBody.put("login", login);
+        userBody.put("password", password);
+        userBody.put("name", login);
+        userBody.put("surname", login);
+        userBody.put("phone", phoneNumber);
+        userBody.put("email", email);
+        userBody.put("avatar", "avatar");
+        userBody.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
+        userBody.put("bio", description);
 
         return userBody;
     }

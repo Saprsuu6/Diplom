@@ -9,6 +9,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -176,6 +177,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
         holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
         // endregion
+
+        holder.post_layout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_news_line));
     }
 
     @Override
@@ -184,6 +187,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     }
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
+        private final LinearLayout post_layout;
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
         private final TextView taggedPeople;
@@ -204,6 +208,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
 
         public ViewHolderPosts(@NonNull View itemView) {
             super(itemView);
+
+            post_layout = itemView.findViewById(R.id.post_layout);
 
             avaView = itemView.findViewById(R.id.post_author_page);
             nick = itemView.findViewById(R.id.nick_view);

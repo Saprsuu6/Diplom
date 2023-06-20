@@ -201,7 +201,7 @@ public class CreateNewPassword extends AppCompatActivity {
                     TransitUser.user.setPassword(editTexts[0].getText().toString().trim());
                     TransitUser.user.setPasswordRepeat(editTexts[1].getText().toString().trim());
 
-                    Services.sendNewPasswordAfterForgot(new Callback<String>() {
+                    Services.sendNewPasswordAfterForgot(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             assert response.body() != null;

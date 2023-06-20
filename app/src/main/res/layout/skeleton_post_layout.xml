@@ -11,14 +11,14 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="3dp"
+        android:paddingVertical="5dp"
         tools:ignore="UselessParent">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/post_author_page"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginHorizontal="10dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="5dp"
             android:contentDescription="@string/avatar"
             android:scaleType="centerCrop"
             android:src="@color/for_skeleton" />

@@ -104,6 +104,7 @@
                         app:shimmer_animation_duration="1200">
 
                         <LinearLayout
+                            android:id="@+id/skeletons_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">

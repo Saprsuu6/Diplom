@@ -66,7 +66,6 @@ public class NewsLine extends AppCompatActivity {
     // endregion
     private FindUser findUser;
     static public Pair<Integer, Post> mapPost;
-    boolean valueSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,25 +150,6 @@ public class NewsLine extends AppCompatActivity {
 
         if (v.getId() == R.id.post_context) {
             inflater.inflate(TransitUser.user.getLogin().equals(NewsLine.mapPost.second.getAuthor()) ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
-
-//            try {
-//                Services.sentToDeleteAccess(new Callback<>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-//                        if (response.isSuccessful() && response.body() != null) {
-//                            boolean hasPost = Boolean.parseBoolean(response.body());
-//                            inflater.inflate(hasPost ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-//                        Log.d("sentToDeleteAccess: (onFailure)", t.getMessage());
-//                    }
-//                }, NewsLine.mapPost.second.getPostId(), TransitUser.user.getLogin());
-//            } catch (JSONException e) {
-//                Log.d("sentToDeleteAccess: (onFailure)", e.getMessage());
-//            }
         }
     }
 

@@ -7,7 +7,6 @@ import com.example.instagram.services.interfaces.SendToAddUser;
 import com.example.instagram.services.interfaces.SendToCheckExistUser;
 import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
 import com.example.instagram.services.interfaces.SendToCheckUserCode;
-import com.example.instagram.services.interfaces.SendToDeleteAccess;
 import com.example.instagram.services.interfaces.SendToDeletePost;
 import com.example.instagram.services.interfaces.SendToForgotPassword;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
@@ -30,7 +29,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://0e41-62-16-0-217.ngrok-free.app";
+    public final static String BASE_URL = "https://2d8b-2a09-bac5-5979-52d-00-84-76.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     // registration user
@@ -144,13 +143,6 @@ public class Services {
 
     public static void sendToGetIsSaved(Callback<String> callback, String postId, String login) throws JSONException {
         SendToGetIsSaved mainInterface = retrofit.create(SendToGetIsSaved.class);
-
-        Call<String> call = mainInterface.STRING_CALL(postId, login);
-        call.enqueue(callback);
-    }
-
-    public static void sentToDeleteAccess(Callback<String> callback, String postId, String login) throws JSONException {
-        SendToDeleteAccess mainInterface = retrofit.create(SendToDeleteAccess.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId, login);
         call.enqueue(callback);

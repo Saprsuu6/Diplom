@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,8 +35,7 @@ public class PagingViewGetAllPosts extends PagingView {
     private PaginationAdapterPosts paginationAdapter;
     private static final int paginationAmount = 3;
 
-    public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView,
-                                 ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
+    public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
 
         // initialise adapter
