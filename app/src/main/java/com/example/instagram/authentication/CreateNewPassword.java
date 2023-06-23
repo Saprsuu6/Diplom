@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetPassword;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -67,7 +68,7 @@ public class CreateNewPassword extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        setAnimations(createNewPassword).start();
+        Animation.getAnimations(createNewPassword).start();
         setListeners();
     }
 
@@ -98,12 +99,6 @@ public class CreateNewPassword extends AppCompatActivity {
                 findViewById(R.id.create_new_password_info), findViewById(R.id.reg_question),
                 findViewById(R.id.link_log_in)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
-    }
-
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
     }
 
     private void setListeners() {
@@ -233,10 +228,10 @@ public class CreateNewPassword extends AppCompatActivity {
     private void setValidationError(boolean temp, String message) {
         if (temp) {
             imageViews[0].setVisibility(View.VISIBLE);
-            setAnimations(imageViews[0]).start();
+            Animation.getAnimations(imageViews[0]).start();
         } else {
             imageViews[0].setVisibility(View.GONE);
-            setAnimations(imageViews[0]).stop();
+            Animation.getAnimations(imageViews[0]).stop();
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);

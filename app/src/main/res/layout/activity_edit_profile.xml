@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/edit_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_list_main"
+    android:orientation="vertical"
+    android:gravity="top|center"
+    android:theme="@style/Theme.Instagram.System"
+    tools:context=".main_process.EditProfile">
+
+    <include layout="@layout/languages_spinner" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/close" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_weight="5"
+            android:gravity="center"
+            android:text="@string/change_your_info_to_be_individual" />
+
+        <ImageView
+            android:id="@+id/done"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/done" />
+    </LinearLayout>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ava"
+        android:layout_margin="15dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_name"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="text"
+            tools:hint="@string/login_hint_username"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_surname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_surname"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="text"
+            tools:hint="@string/login_hint_surname"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/info_for_phone"
+        style="@style/Authentication_EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Login"
+        android:inputType="phone"
+        android:visibility="gone"
+        tools:hint="@string/login_hint_phone"
+        tools:ignore="LabelFor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_email"
+            style="@style/Authentication_EditText"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="textEmailAddress"
+            tools:hint="@string/login_hint_email"
+            tools:ignore="LabelFor" />
+
+        <TextView
+            android:id="@+id/email_name"
+            style="@style/Authentication_Button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/gmail" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/info_for_bio"
+        style="@style/Authentication_EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Login"
+        android:inputType="textMultiLine"
+        tools:hint="@string/login_hint_bio"
+        tools:ignore="LabelFor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_birthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/birth_date"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Password"
+            android:inputType="date"
+            tools:hint="@string/birthday_hint"
+            tools:ignore="LabelFor" />
+    </LinearLayout>
+
+</LinearLayout>

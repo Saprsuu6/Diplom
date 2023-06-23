@@ -1,10 +1,7 @@
 package com.example.instagram.main_process;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
-
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -20,19 +17,21 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.FindUser;
+import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.TransitUser;
-import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
-import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCells;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 
 import org.json.JSONException;
@@ -56,14 +55,11 @@ public class SelfPage extends AppCompatActivity {
     private ImageView[] imageViewsBottom;
     private PagingViewGetAllPostsInCells pagingView;
     private FindUser findUser;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_self_page);
         setUiVisibility();
-
-        setIntents();
         findViews();
 
         // region find users
@@ -76,6 +72,9 @@ public class SelfPage extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
+        setIntents();
+
+        Animation.getAnimations(selfPage).start();
         setListeners();
         registerForContextMenu(imageViews[2]);
         LoadAvatar();
@@ -90,7 +89,16 @@ public class SelfPage extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (textViews != null) {
+            setInfo();
+        }
         Localisation.setFirstLocale(languages);
+    }
+
+    private void setIntents() {
+        if (Intents.getEditProfile() == null)
+            Intents.setEditProfile(new Intent(this, EditProfile.class));
     }
 
     private void LoadAvatar() {
@@ -104,6 +112,7 @@ public class SelfPage extends AppCompatActivity {
 
                         // set ava
                         Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[3]);
+                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
                     }
                 }
 
@@ -111,7 +120,7 @@ public class SelfPage extends AppCompatActivity {
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     Log.d("sendToGetAva: (onFailure)", t.getMessage());
                 }
-            }, TransitUser.user.getLogin());
+            }, SelfPage.userPage.getLogin());
         } catch (JSONException e) {
             Log.d("sendToGetAva: (JSONException)", e.getMessage());
         }
@@ -121,10 +130,6 @@ public class SelfPage extends AppCompatActivity {
     private void setUiVisibility() {
         Window w = getWindow();
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void setIntents() {
-        // TODO: set new intents
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -144,8 +149,8 @@ public class SelfPage extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                System.out.println("settings"); // TODO: settings
-                return true;
+                startActivity(Intents.getEditProfile());
+                break;
             case R.id.statistic:
                 System.out.println("statistic"); // TODO: statistic
                 return true;
@@ -155,18 +160,43 @@ public class SelfPage extends AppCompatActivity {
             case R.id.favorites:
                 System.out.println("favorites"); // TODO: favorites
                 return true;
+            case R.id.link:
+                System.out.println("link"); // TODO: favorites
+                return true;
+            case R.id.qr_link:
+                System.out.println("qr_link"); // TODO: favorites
+                return true;
+            case R.id.log_out:
+                DeleteApplicationCache.deleteCache(getApplicationContext());
+                finishAffinity();
+                break;
+            case R.id.complain:
+                System.out.println("complain"); // TODO: favorites
+                return true;
             default:
                 return super.onContextItemSelected(item);
         }
+
+        return true;
     }
 
+    @SuppressLint("SetTextI18n")
+    private void setInfo() {
+        textViews[0].setText(SelfPage.userPage.getLogin());
+        textViews[1].setText(SelfPage.userPage.getNickName());
+        textViews[2].setText(SelfPage.userPage.getSurname().equals("") ? "-----" : SelfPage.userPage.getSurname());
+        textViews[3].setText(SelfPage.userPage.getDescription());
+        textViews[5].setText(Integer.toString(SelfPage.userPage.getAmountPosts()));
+        textViews[7].setText("101");
+        textViews[9].setText("102");
+    }
 
     private void findViews() {
         resources = getResources();
         selfPage = findViewById(R.id.self_page_activity);
         languages = findViewById(R.id.languages);
         imageViews = new ImageView[]{findViewById(R.id.back), findViewById(R.id.change_main_theme), findViewById(R.id.user_context), findViewById(R.id.avatar)};
-        textViews = new TextView[]{findViewById(R.id.nick_name), findViewById(R.id.user_name), findViewById(R.id.user_description), findViewById(R.id.amount_posts_title), findViewById(R.id.amount_posts), findViewById(R.id.amount_followings_title), findViewById(R.id.amount_followings), findViewById(R.id.amount_followers_title), findViewById(R.id.amount_followers)};
+        textViews = new TextView[]{findViewById(R.id.nick_name), findViewById(R.id.user_name), findViewById(R.id.user_surname), findViewById(R.id.user_description), findViewById(R.id.amount_posts_title), findViewById(R.id.amount_posts), findViewById(R.id.amount_followings_title), findViewById(R.id.amount_followings), findViewById(R.id.amount_followers_title), findViewById(R.id.amount_followers)};
         imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
     }
 
@@ -206,16 +236,14 @@ public class SelfPage extends AppCompatActivity {
             SelfPage.userPage = null;
         });
         // self page
-        imageViewsBottom[4].setOnClickListener(v -> {
-            (findViewById(R.id.scroll_view)).scrollTo(0, 0);
-        });
+        imageViewsBottom[4].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
     }
 
     // region Localisation
     private void setStringResources() {
-        textViews[3].setText(resources.getString(R.string.posts));
-        textViews[5].setText(resources.getString(R.string.followings));
-        textViews[7].setText(resources.getString(R.string.followers));
+        textViews[4].setText(resources.getString(R.string.posts));
+        textViews[6].setText(resources.getString(R.string.followings));
+        textViews[8].setText(resources.getString(R.string.followers));
     }
     // endregion
 }

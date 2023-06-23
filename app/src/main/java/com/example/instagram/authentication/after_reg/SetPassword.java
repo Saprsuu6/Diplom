@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
@@ -24,6 +25,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.CreateNewPassword;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.Validator;
@@ -59,7 +61,7 @@ public class SetPassword extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        setAnimations(setPassword).start();
+        Animation.getAnimations(setPassword).start();
         setListeners();
     }
 
@@ -92,12 +94,6 @@ public class SetPassword extends AppCompatActivity {
                 findViewById(R.id.reg_question),
                 findViewById(R.id.link_log_in)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
-    }
-
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
     }
 
     private void setListeners() {
@@ -213,10 +209,10 @@ public class SetPassword extends AppCompatActivity {
     private void setValidationError(boolean temp, String message) {
         if (temp) {
             imageViews[0].setVisibility(View.VISIBLE);
-            setAnimations(imageViews[0]).start();
+            Animation.getAnimations(imageViews[0]).start();
         } else {
             imageViews[0].setVisibility(View.GONE);
-            setAnimations(imageViews[0]).stop();
+            Animation.getAnimations(imageViews[0]).stop();
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);

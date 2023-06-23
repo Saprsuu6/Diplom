@@ -28,6 +28,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -85,7 +86,7 @@ public class Authorisation extends AppCompatActivity {
         setLoginTypes();
 
         setListeners();
-        setAnimations(authorisation).start();
+        Animation.getAnimations(authorisation).start();
 
         if (!TransitUser.user.getOtherInfo().isPhoneBookPermission() || !TransitUser.user.getOtherInfo().isMediaPermission())
             setPermissions();
@@ -135,11 +136,6 @@ public class Authorisation extends AppCompatActivity {
         return false;
     }
 
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
-    }
 
     private void setIntents() {
         Intents.setRegistration(new Intent(this, Registration.class));
@@ -357,10 +353,10 @@ public class Authorisation extends AppCompatActivity {
     private void setValidationError(boolean temp, String message) {
         if (temp) {
             imageViews[0].setVisibility(View.VISIBLE);
-            setAnimations(imageViews[0]).start();
+            Animation.getAnimations(imageViews[0]).start();
         } else {
             imageViews[0].setVisibility(View.GONE);
-            setAnimations(imageViews[0]).stop();
+            Animation.getAnimations(imageViews[0]).stop();
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);

@@ -27,8 +27,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitComment;
@@ -41,6 +44,7 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -76,8 +80,8 @@ public class Comments extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
+        Animation.getAnimations(comments).start();
         setListeners();
-        setAnimations();
         LoadAvatar();
 
         pagingView = new PagingViewGetAllComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
@@ -151,14 +155,6 @@ public class Comments extends AppCompatActivity {
                 break;
         }
         return true;
-    }
-
-    private void setAnimations() {
-        if (ThemesBackgrounds.background == Backgrounds.Background0.getValue()) {
-            AnimationDrawable animationDrawable = (AnimationDrawable) comments.getBackground();
-            animationDrawable.setExitFadeDuration(4000);
-            animationDrawable.start();
-        }
     }
 
     private void setUiVisibility() {
@@ -313,6 +309,35 @@ public class Comments extends AppCompatActivity {
             if (reply.getVisibility() == View.VISIBLE) {
                 reply.setVisibility(View.GONE);
                 Comments.toReply = null;
+            }
+        });
+
+        imageViews[1].setOnClickListener(v -> {
+            try {
+                Services.sendToGetCurrentUser(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            JSONObject user;
+
+                            try {
+                                user = new JSONObject(response.body());
+
+                                SelfPage.userPage = User.getPublicUser(user, TransitUser.user.getLogin());
+                                startActivity(Intents.getSelfPage());
+                            } catch (JSONException | ParseException e) {
+                                Log.d("JSONException", e.getMessage());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                    }
+                }, TransitUser.user.getLogin());
+            } catch (JSONException e) {
+                Log.d("JSONException: ", e.getMessage());
             }
         });
 

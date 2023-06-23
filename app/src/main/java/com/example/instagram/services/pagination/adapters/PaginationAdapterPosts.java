@@ -22,8 +22,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Services;
@@ -32,7 +34,10 @@ import com.example.instagram.services.TransitUser;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -167,15 +172,15 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         }
         // endregion
         // region set other text info
-        holder.nick.setText(data.getAuthor());
+        holder.login.setText(data.getAuthor());
         holder.taggedPeople.setText(context.getResources().getString(R.string.tagged_people));
         holder.amountLikesTitle.setText(R.string.amount_likes_title);
         holder.authorNickname.setText(data.getAuthor());
         holder.description.setText(data.getDescription());
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
-        //holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
-        holder.hours.setText("10/1-/1/");
+        holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
+        //holder.hours.setText("10/1-/1/");
         // endregion
 
         holder.post_layout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
@@ -191,7 +196,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
         private final TextView taggedPeople;
-        private final TextView nick;
+        private final TextView login;
+        // TODO add name
         private final ImageView content;
         private final ImageView like;
         private final ImageView comment;
@@ -212,7 +218,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             post_layout = itemView.findViewById(R.id.post_layout);
 
             avaView = itemView.findViewById(R.id.post_author_page);
-            nick = itemView.findViewById(R.id.nick_view);
+            login = itemView.findViewById(R.id.nick_view);
 
             postContext = itemView.findViewById(R.id.post_context);
             activity.registerForContextMenu(postContext); // post context registration
@@ -244,44 +250,73 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
             });
 
             taggedPeople.setOnClickListener(v -> {
-                if (taggedPeopleLayout.getChildCount() > 1) {
-                    taggedPeopleLayout.setVisibility(taggedPeopleLayout.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
-                } else {
-                    String id = postsLibrary.getDataArrayList().get(getAdapterPosition()).getPostId();
-                    // region get tagged people
-                    try {
-                        Services.sendToGetTaggedPeople(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                if (response.isSuccessful() && response.code() == 200) {
-                                    try {
-                                        assert response.body() != null;
-                                        JSONObject logins = new JSONObject(response.body());
+                String id = postsLibrary.getDataArrayList().get(getAdapterPosition()).getPostId();
 
-                                        for (int i = 0; i < logins.length(); i++) {
-                                            String login = logins.getString(Integer.toString(i));
-                                            TextView taggedPerson = new TextView(context);
-                                            taggedPerson.setTextSize(18);
-                                            taggedPerson.setText(login);
+                if (taggedPeopleLayout.getChildCount() > 0) taggedPeopleLayout.removeAllViews();
+                // region get tagged people
+                try {
+                    Services.sendToGetTaggedPeople(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.code() == 200) {
+                                try {
+                                    assert response.body() != null;
+                                    JSONObject logins = new JSONObject(response.body());
 
-                                            taggedPeopleLayout.addView(taggedPerson);
-                                        }
-                                    } catch (JSONException e) {
-                                        Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
+                                    for (int i = 0; i < logins.length(); i++) {
+                                        String login = logins.getString(Integer.toString(i));
+                                        TextView taggedPerson = new TextView(context);
+                                        taggedPerson.setTextSize(18);
+                                        taggedPerson.setText(login);
+
+                                        // set user page
+                                        taggedPerson.setOnClickListener(v1 -> {
+                                            try {
+                                                Services.sendToGetCurrentUser(new Callback<>() {
+                                                    @Override
+                                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                                        if (response.isSuccessful() && response.body() != null) {
+                                                            JSONObject user;
+
+                                                            try {
+                                                                user = new JSONObject(response.body());
+
+                                                                SelfPage.userPage = User.getPublicUser(user, login);
+                                                                context.startActivity(Intents.getSelfPage());
+                                                            } catch (JSONException |
+                                                                     ParseException e) {
+                                                                Log.d("JSONException", e.getMessage());
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                                                    }
+                                                }, login);
+                                            } catch (JSONException e) {
+                                                Log.d("JSONException: ", e.getMessage());
+                                            }
+                                        });
+
+                                        taggedPeopleLayout.addView(taggedPerson);
                                     }
+                                } catch (JSONException e) {
+                                    Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
                                 }
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Log.d("JSONException: (sendToGetTaggedPeople)", t.getMessage());
-                            }
-                        }, id);
-                    } catch (JSONException e) {
-                        Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
-                    }
-                    // endregion
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("JSONException: (sendToGetTaggedPeople)", t.getMessage());
+                        }
+                    }, id);
+                } catch (JSONException e) {
+                    Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
                 }
+                // endregion
             });
 
             like.setOnClickListener(v -> {
@@ -368,8 +403,97 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 // TODO: send
             });
 
+            setSelfPages();
+        }
+
+        private void setSelfPages() {
             avaView.setOnClickListener(v -> {
-                // TODO get user
+                try {
+                    Services.sendToGetCurrentUser(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                JSONObject user;
+
+                                try {
+                                    user = new JSONObject(response.body());
+
+                                    SelfPage.userPage = User.getPublicUser(user, login.getText().toString());
+                                    context.startActivity(Intents.getSelfPage());
+                                } catch (JSONException | ParseException e) {
+                                    Log.d("JSONException", e.getMessage());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                        }
+                    }, login.getText().toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
+                }
+            });
+
+            login.setOnClickListener(v -> {
+                try {
+                    Services.sendToGetCurrentUser(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                JSONObject user;
+
+                                try {
+                                    user = new JSONObject(response.body());
+
+                                    SelfPage.userPage = User.getPublicUser(user, login.getText().toString());
+                                    context.startActivity(Intents.getSelfPage());
+                                } catch (JSONException | ParseException e) {
+                                    Log.d("JSONException", e.getMessage());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                        }
+                    }, login.getText().toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
+                }
+            });
+
+            // TODO add name
+
+            authorNickname.setOnClickListener(v -> {
+                try {
+                    Services.sendToGetCurrentUser(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                JSONObject user;
+
+                                try {
+                                    user = new JSONObject(response.body());
+
+                                    SelfPage.userPage = User.getPublicUser(user, login.getText().toString());
+                                    context.startActivity(Intents.getSelfPage());
+                                } catch (JSONException | ParseException e) {
+                                    Log.d("JSONException", e.getMessage());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                        }
+                    }, login.getText().toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
+                }
             });
         }
     }

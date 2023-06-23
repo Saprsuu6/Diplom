@@ -17,8 +17,12 @@ public class Intents {
     private static Intent selfPage;
     private static Intent chatList;
     private static Intent createNewPost;
+    private static Intent editProfile;
 
     //region getters
+    public static Intent getEditProfile() {
+        return editProfile;
+    }
     public static Intent getCreateNewPost() {
         return createNewPost;
     }
@@ -77,6 +81,10 @@ public class Intents {
 
     //endregion
     // region setters
+    public static void setEditProfile(Intent editProfile) {
+        Intents.editProfile = editProfile;
+    }
+
     public static void setCreateNewPost(Intent createNewPost) {
         Intents.createNewPost = createNewPost;
     }

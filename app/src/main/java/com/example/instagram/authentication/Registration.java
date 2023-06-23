@@ -24,6 +24,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetName;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.GetEthernetInfo;
@@ -66,8 +67,8 @@ public class Registration extends AppCompatActivity {
 
         setListeners();
         toggleContentEmail();
-        //toggleContentPhoneNumber();
-        setAnimations(registration).start();
+
+        Animation.getAnimations(registration).start();
     }
 
     private void setIntents() {
@@ -228,19 +229,13 @@ public class Registration extends AppCompatActivity {
         editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg, getTheme()));
     }
 
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
-    }
-
     private void setValidationError(boolean temp, String message) {
         if (temp) {
             imageViews[0].setVisibility(View.VISIBLE);
-            setAnimations(imageViews[0]).start();
+            Animation.getAnimations(imageViews[0]).start();
         } else {
             imageViews[0].setVisibility(View.GONE);
-            setAnimations(imageViews[0]).stop();
+            Animation.getAnimations(imageViews[0]).stop();
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);

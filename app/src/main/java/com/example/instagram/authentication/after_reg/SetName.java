@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
@@ -53,7 +54,7 @@ public class SetName extends AppCompatActivity {
         languages.setAdapter(localisation.getAdapter());
 
         setListeners();
-        setAnimations();
+        Animation.getAnimations(setName).start();
     }
 
     private void setIntents() {
@@ -84,12 +85,6 @@ public class SetName extends AppCompatActivity {
         textViews = new TextView[]{findViewById(R.id.let_info),
                 findViewById(R.id.let_name_info), findViewById(R.id.reg_question),
                 findViewById(R.id.link_log_in)};
-    }
-
-    private void setAnimations() {
-        AnimationDrawable animationDrawable = (AnimationDrawable) setName.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        animationDrawable.start();
     }
 
     private void setListeners() {

@@ -44,6 +44,9 @@
     <string name="remember_me">Remember me</string>
     <string name="login_hint_phone">Phone number</string>
     <string name="login_hint_username">Username</string>
+    <string name="login_hint_surname">Surname</string>
+    <string name="login_hint_bio">Bio</string>
+    <string name="change_info">Change info</string>
     <string name="login_hint_email">Email</string>
     <string name="password_hint">Password</string>
     <string name="password_hint_repeat">Repeat password</string>
@@ -165,7 +168,7 @@
     <string name="password_error_spec_symbols">Password has to include one special character @$!%*?&amp;</string>
     <string name="password_repeat_error">Password mismatch</string>
 
-<!--    add avatar errors-->
+    <!--    add avatar errors-->
     <string name="successfully_loaded_0">Successfully loaded…</string>
     <string name="unsuccessfully_loaded_1">Unsuccessfully loaded</string>
     <string name="files_not_supported_2">Files not supported</string>
@@ -181,17 +184,17 @@
     <string name="add_user_3">Birthday can not be empty</string>
     <string name="add_user_4">Body was null</string>
 
-<!--    authorise-->
+    <!--    authorise-->
     <string name="authorise_0">Access allowed</string>
     <string name="authorise_1">Access denied</string>
     <string name="authorise_2">Body was null</string>
     <string name="authorise_3">Birthday can not be empty</string>
 
-<!--    forgot_password_code-->
+    <!--    forgot_password_code-->
     <string name="forgot_password_code_0">Code is being sent</string>
     <string name="forgot_password_code_1">Code has been sent already, please, try later</string>
 
-<!--    after restore password-->
+    <!--    after restore password-->
     <string name="after_restore_0">Password is changed successfully</string>
     <string name="after_restore_1">Incorrect code</string>
     <string name="after_restore_2">Incorrect login</string>
@@ -199,9 +202,12 @@
     <string name="after_restore_4">Passwords are not equal</string>
     <string name="after_restore_5">Passwords can not match previous one</string>
 
-<!--    enter code-->
+    <!--    enter code-->
     <string name="enter_code_0">Access allowed</string>
     <string name="enter_code_1">Access denied, attempts is rest: </string>
     <string name="enter_code_2">Access denied, attempts is out, please, ask admins of clickshot</string>
+
+    <!-- change user info -->
+    <string name="change_your_info_to_be_individual">Change your info to be individual</string>
 
 </resources>

@@ -7,6 +7,7 @@ import com.example.instagram.services.interfaces.SendToAddPost;
 import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendToAddUser;
 import com.example.instagram.services.interfaces.SendToChangeComment;
+import com.example.instagram.services.interfaces.SendToChangeUser;
 import com.example.instagram.services.interfaces.SendToCheckExistUser;
 import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
 import com.example.instagram.services.interfaces.SendToCheckUserCode;
@@ -16,6 +17,7 @@ import com.example.instagram.services.interfaces.SendToForgotPassword;
 import com.example.instagram.services.interfaces.SendToGetAllComments;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
+import com.example.instagram.services.interfaces.SendToGetCurrentUser;
 import com.example.instagram.services.interfaces.SendToGetIsLiked;
 import com.example.instagram.services.interfaces.SendToGetIsSaved;
 import com.example.instagram.services.interfaces.SendToGetPostsOfUser;
@@ -35,7 +37,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://0c7f-2a09-bac5-597e-52d-00-84-8c.ngrok-free.app";
+    public final static String BASE_URL = "https://cb07-2a09-bac5-597c-52d-00-84-6f.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback) throws IOException, JSONException {
@@ -191,6 +193,20 @@ public class Services {
         SendToGetPostsOfUser mainInterface = retrofit.create(SendToGetPostsOfUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(from, amount, login);
+        call.enqueue(callback);
+    }
+
+    public static void sendToGetCurrentUser(Callback<String> callback, String login) throws JSONException {
+        SendToGetCurrentUser mainInterface = retrofit.create(SendToGetCurrentUser.class);
+
+        Call<String> call = mainInterface.STRING_CALL(login);
+        call.enqueue(callback);
+    }
+
+    public static void sendToChangeUser(Callback<String> callback, String body) throws JSONException {
+        SendToChangeUser mainInterface = retrofit.create(SendToChangeUser.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 }

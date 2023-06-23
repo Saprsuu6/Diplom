@@ -52,15 +52,6 @@
             android:contentDescription="@string/avatar"
             android:scaleType="centerCrop"
             android:src="@color/for_skeleton" />
-
-        <ImageView
-            android:id="@+id/sing_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-
-            android:contentDescription="@string/add_post"
-            android:src="@drawable/sign_out" />
     </LinearLayout>
 
 </LinearLayout>

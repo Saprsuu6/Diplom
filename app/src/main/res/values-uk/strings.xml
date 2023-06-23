@@ -3,6 +3,9 @@
     <string name="remember_me">Запам\'ятати мене</string>
     <string name="login_hint_phone">Номер телефону</string>
     <string name="login_hint_username">Ім\'я корисувача</string>
+    <string name="login_hint_surname">Фамілія\'я корисувача</string>
+    <string name="login_hint_bio">Про себе</string>
+    <string name="change_info">Змінити інформацію</string>>
     <string name="login_hint_email">Email</string>
     <string name="password_hint">Пароль</string>
     <string name="password_hint_repeat">Повторіть пароль</string>
@@ -169,5 +172,8 @@
     <string name="enter_code_0">Доступ дозволено</string>
     <string name="enter_code_1">Доступ заборонено, спроби залишилися:</string>
     <string name="enter_code_2">У доступі відмовлено, спроб немає, запитайте адмінів про Clickshot</string>
+
+    <!-- change user info -->
+    <string name="change_your_info_to_be_individual">Змініть інформацію на сторінці щоб бути індивідуальним</string>
 
 </resources>

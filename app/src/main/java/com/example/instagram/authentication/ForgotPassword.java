@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.Intents;
@@ -65,10 +66,8 @@ public class ForgotPassword extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        //setLoginTypes();
-
         setListeners();
-        setAnimations(forgotPassword).start();
+        Animation.getAnimations(forgotPassword).start();
 
         handler = new Handler();
         runnable = checkUsedLink();
@@ -136,12 +135,6 @@ public class ForgotPassword extends AppCompatActivity {
         editTexts = new EditText[]{findViewById(R.id.code)};
         textViews = new TextView[]{findViewById(R.id.question), findViewById(R.id.forgot_info)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
-    }
-
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
     }
 
     private void setListeners() {
@@ -212,10 +205,10 @@ public class ForgotPassword extends AppCompatActivity {
     private void setValidationError(boolean temp, String message) {
         if (temp) {
             imageViews[0].setVisibility(View.VISIBLE);
-            setAnimations(imageViews[0]).start();
+            Animation.getAnimations(imageViews[0]).start();
         } else {
             imageViews[0].setVisibility(View.GONE);
-            setAnimations(imageViews[0]).stop();
+            Animation.getAnimations(forgotPassword).stop();
         }
 
         TooltipCompat.setTooltipText(imageViews[0], message);

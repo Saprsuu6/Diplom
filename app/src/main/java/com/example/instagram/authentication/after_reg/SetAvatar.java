@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
@@ -80,7 +81,7 @@ public class SetAvatar extends AppCompatActivity {
         languages.setAdapter(localisation.getAdapter());
 
         setListeners();
-        setAnimations();
+        Animation.getAnimations(setPhoto).start();
     }
 
     private void setUiVisibility() {
@@ -102,12 +103,6 @@ public class SetAvatar extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(languages);
-    }
-
-    private void setAnimations() {
-        AnimationDrawable animationDrawable = (AnimationDrawable) setPhoto.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        animationDrawable.start();
     }
 
     private void findViews() {

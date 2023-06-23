@@ -1,8 +1,10 @@
 package com.example.instagram.services.pagination.adapters;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +22,22 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
+import com.example.instagram.main_process.SelfPage;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.PostInDialog;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TransitPost;
+import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 import com.google.android.flexbox.FlexboxLayout;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PaginationAdapterPostsCells extends RecyclerView.Adapter<PaginationAdapterPostsCells.ViewHolderPostsCells> {
     @Nullable
@@ -34,6 +47,7 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     private final Point size;
     private PagingViewGetAllPostsInCells pagingView;
     private final PostInDialog postInDialog = new PostInDialog();
+
     public PostsLibrary getPostsLibrary() {
         return postsLibrary;
     }
@@ -92,7 +106,44 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     }
 
     private View.OnClickListener postInDialog(Post post) {
-        return v -> postInDialog.getPostDialog(context, post, pagingView).show();
+        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post, pagingView);
+
+        if (TransitUser.user.getLogin().equals(SelfPage.userPage.getLogin())) {
+            builder.setNegativeButton(context.getApplicationContext().getString(R.string.remove_post), (dialog, which) -> {
+                AlertDialog.Builder negativeButton = new AlertDialog.Builder(context).setMessage(context.getApplicationContext().getString(R.string.remove_post_question)).setPositiveButton(context.getApplicationContext().getString(R.string.yes), (dialog1, which1) -> {
+                    TransitPost.postsToDeleteFromOtherPage.add(post);
+                    JSONObject body = new JSONObject();
+
+                    try {
+                        body.put("postId", post.getPostId());
+                        body.put("token", TransitUser.user.getToken());
+
+                        Services.sendToDeletePost(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    String responseStr = response.body();
+                                    Errors.delete(context, responseStr).show();
+
+                                    SelfPage.userPage.setAmountPosts(SelfPage.userPage.getAmountPosts() - 1);
+                                    pagingView.notifyAdapterToClearAll();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                Log.d("onFailure: (sendToDeletePost)", t.getMessage());
+                            }
+                        }, body.toString());
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).setNegativeButton(context.getApplicationContext().getString(R.string.no), null);
+                negativeButton.show();
+            });
+        }
+
+        return v -> builder.show();
     }
 
     @Override

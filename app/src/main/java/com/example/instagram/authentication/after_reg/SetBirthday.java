@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
@@ -46,7 +47,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SetBirthday extends AppCompatActivity {
-    private final int yearOffset = 13;
+    public static final int yearOffset = 13;
     private Resources resources;
     private LinearLayout setBirthday;
     // region localisation
@@ -74,7 +75,7 @@ public class SetBirthday extends AppCompatActivity {
 
         editTexts[0].setInputType(InputType.TYPE_NULL);
 
-        setAnimations();
+        Animation.getAnimations(setBirthday).start();
         setListeners();
     }
 
@@ -104,13 +105,6 @@ public class SetBirthday extends AppCompatActivity {
         buttons = new Button[]{findViewById(R.id.next)};
         textViews = new TextView[]{findViewById(R.id.let_info), findViewById(R.id.reg_question), findViewById(R.id.link_log_in)};
     }
-
-    private void setAnimations() {
-        AnimationDrawable animationDrawable = (AnimationDrawable) setBirthday.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        animationDrawable.start();
-    }
-
 
     @SuppressLint("ClickableViewAccessibility")
     private void setListeners() {
@@ -155,7 +149,7 @@ public class SetBirthday extends AppCompatActivity {
                 Toast.makeText(this, R.string.birthday_error_age, Toast.LENGTH_SHORT).show();
             } else {
                 editTexts[0].setText(DateFormatting.formatDate(selectedDate));
-                editTexts[0].setTextColor(resources.getColor(R.color.black, getTheme()));
+                //editTexts[0].setTextColor(resources.getColor(R.color.black, getTheme()));
             }
         };
 

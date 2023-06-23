@@ -28,8 +28,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.Errors;
@@ -48,6 +50,7 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -88,6 +91,7 @@ public class NewsLine extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
+        Animation.getAnimations(newsLine).start();
         setListeners();
         LoadAvatar();
 
@@ -97,7 +101,6 @@ public class NewsLine extends AppCompatActivity {
     private void setIntents() {
         Intents.setComments(new Intent(this, Comments.class));
         Intents.setSelfPage(new Intent(this, SelfPage.class));
-        Intents.setChatList(new Intent(this, ChatList.class));
         Intents.setCreateNewPost(new Intent(this, CreatePost.class));
     }
 
@@ -146,8 +149,6 @@ public class NewsLine extends AppCompatActivity {
         ThemesBackgrounds.setThemeContent(resources, imageViewsTop[1], getApplicationContext());
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
         ThemesBackgrounds.loadBackground(this, newsLine);
-
-        setAnimations();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -230,14 +231,6 @@ public class NewsLine extends AppCompatActivity {
         return true;
     }
 
-    private void setAnimations() {
-        if (ThemesBackgrounds.background == Backgrounds.Background0.getValue()) {
-            AnimationDrawable animationDrawable = (AnimationDrawable) newsLine.getBackground();
-            animationDrawable.setExitFadeDuration(4000);
-            animationDrawable.start();
-        }
-    }
-
     private void setUiVisibility() {
         Window w = getWindow();
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
@@ -249,7 +242,7 @@ public class NewsLine extends AppCompatActivity {
         newsLine = findViewById(R.id.news_list);
         languages = findViewById(R.id.languages);
         imageViewsTop = new ImageView[]{findViewById(R.id.logo), findViewById(R.id.change_main_theme), findViewById(R.id.change_theme), findViewById(R.id.direct)};
-        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page), findViewById(R.id.sing_out)};
+        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
     }
 
     private void chooseTheme() {
@@ -293,13 +286,32 @@ public class NewsLine extends AppCompatActivity {
         imageViewsBottom[0].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
         // self page
         imageViewsBottom[4].setOnClickListener(v -> {
-            startActivity(Intents.getSelfPage());
-            SelfPage.userPage = TransitUser.user;
-        });
-        // close app
-        imageViewsBottom[5].setOnClickListener(v -> {
-            DeleteApplicationCache.deleteCache(getApplicationContext());
-            finishAffinity();
+            try {
+                Services.sendToGetCurrentUser(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            JSONObject user;
+
+                            try {
+                                user = new JSONObject(response.body());
+
+                                SelfPage.userPage = User.getPublicUser(user, TransitUser.user.getLogin());
+                                startActivity(Intents.getSelfPage());
+                            } catch (JSONException | ParseException e) {
+                                Log.d("JSONException", e.getMessage());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                    }
+                }, TransitUser.user.getLogin());
+            } catch (JSONException e) {
+                Log.d("JSONException: ", e.getMessage());
+            }
         });
         // endregion
 

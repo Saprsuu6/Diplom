@@ -5,6 +5,7 @@ import com.example.instagram.services.DateFormatting;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,6 +23,10 @@ public class User {
         return login;
     }
 
+    public String getSurname() {
+        return surname;
+    }
+
     public String getNickName() {
         return nickName;
     }
@@ -32,6 +37,17 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+    public int getAmountPosts() {
+        return amountPosts;
+    }
+
+    public int getAmountSubscribers() {
+        return amountSubscribers;
+    }
+
+    public int getAmountSubscribing() {
+        return amountSubscribing;
     }
 
     public String getEmail() {
@@ -75,6 +91,17 @@ public class User {
     public void setLogin(String name) {
         this.login = name;
     }
+    public void setAmountPosts(int amountPosts) {
+        this.amountPosts = amountPosts;
+    }
+
+    public void setAmountSubscribers(int amountSubscribers) {
+        this.amountSubscribers = amountSubscribers;
+    }
+
+    public void setAmountSubscribing(int amountSubscribing) {
+        this.amountSubscribing = amountSubscribing;
+    }
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
@@ -96,6 +123,10 @@ public class User {
         this.birthday = birthday;
     }
 
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
@@ -109,17 +140,22 @@ public class User {
     }
 
     // endregion
-    private String login;
+    private String login = "Andry";
     private String nickName;
+
+    private String surname;
     private String emailCode;
-    private String phoneNumber = "NO_PHONE";
+    private String phoneNumber = "";
     private String password;
     private String passwordRepeat;
     private String email = "empty@i.ua";
     private Date birthday;
     private String avatar;
     private String token;
-    private String description = "NO_BIO";
+    private String description = "";
+    private int amountPosts;
+    private int amountSubscribers;
+    private int amountSubscribing;
 
     private UserOtherInfo otherInfo = new UserOtherInfo();
 
@@ -147,7 +183,7 @@ public class User {
         userBody.put("login", login);
         userBody.put("password", password);
         userBody.put("name", login);
-        userBody.put("surname", login);
+        userBody.put("surname", "");
         userBody.put("phone", phoneNumber);
         userBody.put("email", email);
         userBody.put("avatar", "avatar");
@@ -178,6 +214,33 @@ public class User {
         jsonObject.put("code", emailCode);
         jsonObject.put("newPassword", password);
         jsonObject.put("repeatPassword", passwordRepeat);
+
+        return jsonObject;
+    }
+
+    public static User getPublicUser(JSONObject user, String login) throws JSONException, ParseException {
+        User selfPageUser = new User();
+
+        selfPageUser.setLogin(login);
+        selfPageUser.setAmountPosts(user.getInt("postsAmount"));
+        selfPageUser.setSurname(user.getString("surname"));
+        selfPageUser.setNickName(user.getString("name"));
+        selfPageUser.setDescription(user.getString("bio"));
+        Date date = DateFormatting.formatDateFromStandard(user.getString("birthday"));
+        selfPageUser.setBirthday(date);
+
+        // TODO add birthday, subscribing, subscribers
+        return selfPageUser;
+    }
+
+    public JSONObject getToChange() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", nickName);
+        jsonObject.put("surname", surname);
+        // TODO decide how to send new ava
+        jsonObject.put("email", email);
+        jsonObject.put("bio", description);
+        jsonObject.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
 
         return jsonObject;
     }

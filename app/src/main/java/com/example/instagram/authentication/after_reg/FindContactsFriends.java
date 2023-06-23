@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.pagination.paging_views.PagingViewFindUsers;
@@ -54,7 +55,7 @@ public class FindContactsFriends extends AppCompatActivity {
         languages.setAdapter(localisation.getAdapter());
 
         setListeners();
-        setAnimations();
+        Animation.getAnimations(findContactsFriends).start();
 
         try {
             PagingViewFindUsers pagingView = new PagingViewFindUsers(findViewById(R.id.scroll_view),
@@ -80,12 +81,6 @@ public class FindContactsFriends extends AppCompatActivity {
         Window w = getWindow();
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void setAnimations() {
-        AnimationDrawable animationDrawable = (AnimationDrawable) findContactsFriends.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        animationDrawable.start();
     }
 
     private void findViews() {

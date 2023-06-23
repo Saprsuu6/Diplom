@@ -11,6 +11,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.SharedPreferences;
 import com.example.instagram.services.TransitComment;
@@ -18,6 +19,7 @@ import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCells;
 import com.example.instagram.services.pagination.PagingView;
+import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPostsCells;
 
 import org.json.JSONArray;
@@ -115,7 +117,7 @@ public class PagingViewGetAllPostsInCells extends PagingView {
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     Log.d("sendToGetPostsOfUser: ", t.getMessage());
                 }
-            }, PaginationCurrentForAllPostsInCells.current, PaginationCurrentForAllPostsInCells.amountOfPagination, TransitUser.user.getLogin());
+            }, PaginationCurrentForAllPostsInCells.current, PaginationCurrentForAllPostsInCells.amountOfPagination, SelfPage.userPage.getLogin());
         }
     }
 }

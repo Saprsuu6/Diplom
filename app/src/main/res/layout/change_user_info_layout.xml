@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_list_main"
+    android:orientation="vertical"
+    android:theme="@style/Theme.Instagram.System">
+
+    <TextView
+        style="@style/Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:gravity="center"
+        android:text="@string/change_your_info_to_be_individual" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_name"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="text"
+            tools:hint="@string/login_hint_username"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_surname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_surname"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="text"
+            tools:hint="@string/login_hint_surname"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/info_for_phone"
+        style="@style/Authentication_EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Login"
+        android:inputType="phone"
+        android:visibility="gone"
+        tools:hint="@string/login_hint_phone"
+        tools:ignore="LabelFor" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_email"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="textEmailAddress"
+            tools:hint="@string/login_hint_email"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_bio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/info_for_bio"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="textMultiLine"
+            tools:hint="@string/login_hint_bio"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/validation_error_birthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/validation_alert"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/validation_error"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/birth_date"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Password"
+            android:inputType="datetime"
+            tools:hint="@string/birthday_hint"
+            tools:ignore="LabelFor" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/photo_button"
+        style="@style/Authentication_Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="@string/add_photo_btn_info" />
+</LinearLayout>

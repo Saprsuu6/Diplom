@@ -33,6 +33,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
@@ -95,7 +96,7 @@ public class CreatePost extends AppCompatActivity {
         languages.setAdapter(localisation.getAdapter());
 
         setListeners();
-        setAnimations(createNewPost).start();
+        Animation.getAnimations(createNewPost).start();
 
         openGallery();
     }
@@ -104,12 +105,6 @@ public class CreatePost extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(languages);
-    }
-
-    private AnimationDrawable setAnimations(View view) {
-        AnimationDrawable animationDrawable = (AnimationDrawable) view.getBackground();
-        animationDrawable.setExitFadeDuration(4000);
-        return animationDrawable;
     }
 
     private void setIntents() {
@@ -196,8 +191,9 @@ public class CreatePost extends AppCompatActivity {
                 getBaseContext().getResources().updateConfiguration(configuration, null);
                 setStringResources();
 
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+
                 if (selectedDate != null) {
-                    DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
                     textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
                 }
             }
@@ -216,17 +212,19 @@ public class CreatePost extends AppCompatActivity {
         int minutes = calendar.get(Calendar.MINUTE);
 
         TimePickerDialog.OnTimeSetListener timeSetListener = (view, hourOfDay, minute) -> {
+            selectedDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            selectedDate.set(Calendar.MINUTE, minute);
 
+            TransitPost.post.setPostponePublication(selectedDate.getTime());
         };
 
         DatePickerDialog.OnDateSetListener dateSetListener = (view, year1, month1, dayOfMonth) -> {
             selectedDate = Calendar.getInstance();
             selectedDate.set(year1, month1, dayOfMonth);
 
-            DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+            //DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
             if (year >= year1 && month >= month1 && dayOfMonth >= day) {
-                TransitPost.post.setPostponePublication(selectedDate.getTime());
                 textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
             } else {
                 Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
@@ -234,14 +232,13 @@ public class CreatePost extends AppCompatActivity {
         };
 
         textViews[3].setOnClickListener(v -> {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Localisation.chosenLocale.getCountry().equals("EN"));
             DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, dateSetListener, year, month, day);
-
-            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
-            datePickerDialog.show();
+            TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Localisation.chosenLocale.getCountry().equals("EN"));
 
             timePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
             timePickerDialog.show();
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            datePickerDialog.show();
         });
 
         imageViews[0].setOnClickListener(v -> finish());

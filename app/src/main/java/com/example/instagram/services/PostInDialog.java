@@ -17,13 +17,16 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
+import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import retrofit2.Call;
@@ -52,6 +55,14 @@ public class PostInDialog {
 
         this.context = context;
 
+        setViews(view);
+        setContent(post);
+        setListeners(post);
+
+        return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), null);
+    }
+
+    private void setViews(View view) {
         postLike = view.findViewById(R.id.post_like);
         comments = view.findViewById(R.id.comment);
         send = view.findViewById(R.id.send_post);
@@ -65,41 +76,6 @@ public class PostInDialog {
         taggedPeople = view.findViewById(R.id.tagged_people);
         taggedPeopleLayout = view.findViewById(R.id.tagged_people_layout);
         date = view.findViewById(R.id.hours);
-
-        setContent(post);
-        setListeners(post);
-
-        return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), null).setNegativeButton(context.getApplicationContext().getString(R.string.remove_post), (dialog, which) -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context).setMessage(context.getApplicationContext().getString(R.string.remove_post_question)).setPositiveButton(context.getApplicationContext().getString(R.string.yes), (dialog1, which1) -> {
-                TransitPost.postsToDeleteFromOtherPage.add(post);
-                JSONObject body = new JSONObject();
-
-                try {
-                    body.put("postId", post.getPostId());
-                    body.put("token", TransitUser.user.getToken());
-
-                    Services.sendToDeletePost(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                String responseStr = response.body();
-                                Errors.delete(context, responseStr).show();
-
-                                pagingView.notifyAdapterToClearAll();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("onFailure: (sendToDeletePost)", t.getMessage());
-                        }
-                    }, body.toString());
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }).setNegativeButton(context.getApplicationContext().getString(R.string.no), null);
-            builder.show();
-        });
     }
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
@@ -217,6 +193,36 @@ public class PostInDialog {
                                         TextView taggedPerson = new TextView(context);
                                         taggedPerson.setTextSize(18);
                                         taggedPerson.setText(login);
+
+                                        taggedPerson.setOnClickListener(v1 -> {
+                                            try {
+                                                Services.sendToGetCurrentUser(new Callback<>() {
+                                                    @Override
+                                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                                        if (response.isSuccessful() && response.body() != null) {
+                                                            JSONObject user;
+
+                                                            try {
+                                                                user = new JSONObject(response.body());
+
+                                                                SelfPage.userPage = User.getPublicUser(user, login);
+                                                                context.startActivity(Intents.getSelfPage());
+                                                            } catch (JSONException |
+                                                                     ParseException e) {
+                                                                Log.d("JSONException", e.getMessage());
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                                                    }
+                                                }, login);
+                                            } catch (JSONException e) {
+                                                Log.d("JSONException: ", e.getMessage());
+                                            }
+                                        });
 
                                         taggedPeopleLayout.addView(taggedPerson);
                                     }

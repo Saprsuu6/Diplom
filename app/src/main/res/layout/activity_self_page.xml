@@ -99,6 +99,14 @@
                     tools:text="UserName" />
 
                 <TextView
+                    android:id="@+id/user_surname"
+                    style="@style/Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    tools:text="UserSurname" />
+
+                <TextView
                     android:id="@+id/user_description"
                     style="@style/Text"
                     android:layout_width="match_parent"
