@@ -187,15 +187,24 @@ public class SelfPage extends AppCompatActivity {
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        imageViews[0].setOnClickListener(v -> finish());
+        imageViews[0].setOnClickListener(v -> {
+            finish();
+            SelfPage.userPage = null;
+        });
 
         // initialize menu bottom
         BottomMenu.setListeners(this, new ImageView[]{imageViewsBottom[1], imageViewsBottom[2], imageViewsBottom[3]}, findUser);
 
         // home
-        imageViewsBottom[0].setOnClickListener(v -> finish());
+        imageViewsBottom[0].setOnClickListener(v -> {
+            finish();
+            SelfPage.userPage = null;
+        });
         // back
-        imageViews[0].setOnClickListener(v -> finish());
+        imageViews[0].setOnClickListener(v -> {
+            finish();
+            SelfPage.userPage = null;
+        });
         // self page
         imageViewsBottom[4].setOnClickListener(v -> {
             (findViewById(R.id.scroll_view)).scrollTo(0, 0);
