@@ -1,5 +1,6 @@
 package com.example.instagram.services.pagination.paging_views;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -12,6 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.services.Services;
 import com.example.instagram.services.SharedPreferences;
+import com.example.instagram.services.TransitComment;
+import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
+import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCells;
 import com.example.instagram.services.pagination.PagingView;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPostsCells;
 
@@ -25,17 +30,16 @@ import retrofit2.Response;
 
 public class PagingViewGetAllPostsInCells extends PagingView {
     private PaginationAdapterPostsCells paginationAdapter;
-    private int lastPosition;
-    private static final int paginationAmount = 3;
     private final LinearLayoutManager manager;
+    public static boolean isEnd = false;
 
-    public PagingViewGetAllPostsInCells(NestedScrollView scrollView, RecyclerView recyclerView,
-                                        ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
+    public PagingViewGetAllPostsInCells(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
+        isEnd = false;
+        PaginationCurrentForAllPostsInCells.resetCurrent();
 
         // initialise adapter
-        assert activity != null;
-        paginationAdapter = new PaginationAdapterPostsCells(context, activity, postsLibrary);
+        paginationAdapter = new PaginationAdapterPostsCells(context, activity, postsLibrary, this);
 
         // set layout manager
         manager = new LinearLayoutManager(context);
@@ -44,94 +48,74 @@ public class PagingViewGetAllPostsInCells extends PagingView {
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
-        loadPosition();
-        setListeners();
-
         try {
-            setToBegin();
+            getData();
         } catch (JSONException e) {
-            System.out.println(e.getMessage());
+            Log.d("JSONException: ", e.getMessage());
         }
     }
 
-    public void loadPosition() {
-        int position = SharedPreferences.loadIntSP(context, "lastNewsPositionSelfPage");
-        recyclerView.scrollToPosition(position);
-    }
+    // region notifiers
+    @SuppressLint("NotifyDataSetChanged")
+    public void notifyAdapterToClearAll() {
+        paginationAdapter.getPostsLibrary().getDataArrayList().clear();
+        paginationAdapter.notifyDataSetChanged();
 
-    public void savePosition() {
-        if (SharedPreferences.loadIntSP(context, "lastNewsPositionSelfPage") == 0)
-            SharedPreferences.saveSP(context, "lastNewsPositionSelfPage", lastPosition);
-    }
+        PagingViewGetAllPostsInCells.isEnd = false;
+        PaginationCurrentForAllPostsInCells.resetCurrent();
 
-    private void setListeners() {
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                lastPosition = manager.findLastVisibleItemPosition();
-            }
-        });
+        try {
+            getData();
+        } catch (JSONException e) {
+            Log.d("sendToGetAllPosts: ", e.getMessage());
+        }
     }
+    // endregion
 
     @Override
     protected void setPaginationAdapter() {
         assert activity != null;
-        paginationAdapter = new PaginationAdapterPostsCells(context, activity, postsLibrary);
+        paginationAdapter = new PaginationAdapterPostsCells(context, activity, postsLibrary, this);
         recyclerView.setAdapter(paginationAdapter);
     }
 
     @Override
     protected void getData() throws JSONException {
-        startSkeletonAnim();
+        if (!PagingViewGetAllPostsInCells.isEnd) {
+            startSkeletonAnim();
 
-        Services.sendToGetAllPosts(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String body = response.body();
+            Services.sendToGetPostsOfUser(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String body = response.body();
 
-                    if (!body.equals("[]")) {
-                        try {
-                            postsLibrary.setDataArrayList(new JSONArray(body));
-                            setPaginationAdapter();
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
+                        if (!body.equals("[]")) {
+                            try {
+                                JSONArray jsonArray = new JSONArray(body);
+
+                                if (jsonArray.length() < PaginationCurrentForAllPostsInCells.amountOfPagination) {
+                                    PagingViewGetAllPostsInCells.isEnd = true;
+                                }
+
+                                isBusy = false;
+                                PaginationCurrentForAllPostsInCells.nextCurrent();
+                                postsLibrary.setDataArrayList(jsonArray);
+                                setPaginationAdapter();
+                            } catch (JSONException e) {
+                                Log.d("JSONException: ", e.getMessage());
+                            }
                         }
+
+                        stopSkeletonAnim();
                     }
-
-                    stopSkeletonAnim();
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                Log.d("sendToGetAllPosts: ", t.getMessage());
-            }
-        }, PagingViewGetAllPostsInCells.paginationAmount, null);
-    }
-
-    public void setToBegin()throws JSONException {
-        startSkeletonAnim();
-
-        Services.sendToGetAllPosts(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        getData();
-                    } catch (JSONException e) {
-                        Log.d("sendToGetAllPosts: ", e.getMessage());
-                    }
-
-                    stopSkeletonAnim();
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    Log.d("sendToGetPostsOfUser: ", t.getMessage());
                 }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                Log.d("sendToGetAllPosts: ", t.getMessage());
-            }
-        }, PagingViewGetAllPostsInCells.paginationAmount, "begin");
+            }, PaginationCurrentForAllPostsInCells.current, PaginationCurrentForAllPostsInCells.amountOfPagination, TransitUser.user.getLogin());
+        }
     }
 }

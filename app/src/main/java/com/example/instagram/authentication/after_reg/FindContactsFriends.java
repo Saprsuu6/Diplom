@@ -52,7 +52,6 @@ public class FindContactsFriends extends AppCompatActivity {
 
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
-        Localisation.setFirstLocale(languages);
 
         setListeners();
         setAnimations();
@@ -68,8 +67,8 @@ public class FindContactsFriends extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setIntents() {

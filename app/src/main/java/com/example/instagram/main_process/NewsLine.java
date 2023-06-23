@@ -37,7 +37,9 @@ import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
@@ -86,16 +88,10 @@ public class NewsLine extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setListeners();
         LoadAvatar();
 
-        try {
-            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
-        }
+        pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
     }
 
     private void setIntents() {
@@ -135,6 +131,18 @@ public class NewsLine extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        Localisation.setFirstLocale(languages);
+
+        if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
+            pagingView.notifyAdapterToClearPosts();
+            TransitPost.postsToDeleteFromOtherPage.clear();
+        }
+
+        if (TransitPost.postsToChangeFromOtherPage.size() > 0) {
+            pagingView.notifyAdapterToReplacePosts();
+            TransitPost.postsToChangeFromOtherPage.clear();
+        }
+
         ThemesBackgrounds.setThemeContent(resources, imageViewsTop[1], getApplicationContext());
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
         ThemesBackgrounds.loadBackground(this, newsLine);
@@ -158,17 +166,18 @@ public class NewsLine extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.remove_post:
+                JSONObject body = new JSONObject();
+
                 try {
-                    JSONObject postId = new JSONObject();
-                    postId.put("postId", NewsLine.mapPost.second.getPostId());
-                    postId.put("token", TransitUser.user.getToken());
+                    body.put("postId", NewsLine.mapPost.second.getPostId());
+                    body.put("token", TransitUser.user.getToken());
 
                     Services.sendToDeletePost(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 String responseStr = response.body();
-                                Errors.deletePost(getApplicationContext(), responseStr).show();
+                                Errors.delete(getApplicationContext(), responseStr).show();
 
                                 pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
                             }
@@ -178,7 +187,7 @@ public class NewsLine extends AppCompatActivity {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             Log.d("onFailure: (sendToDeletePost)", t.getMessage());
                         }
-                    }, postId.toString());
+                    }, body.toString());
                 } catch (JSONException e) {
                     Log.d("JSONException: (sendToDeletePost)", e.getMessage());
                 }
@@ -240,7 +249,7 @@ public class NewsLine extends AppCompatActivity {
         newsLine = findViewById(R.id.news_list);
         languages = findViewById(R.id.languages);
         imageViewsTop = new ImageView[]{findViewById(R.id.logo), findViewById(R.id.change_main_theme), findViewById(R.id.change_theme), findViewById(R.id.direct)};
-        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page), findViewById(R.id.sing_out), findViewById(R.id.close_app)};
+        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page), findViewById(R.id.sing_out)};
     }
 
     private void chooseTheme() {
@@ -249,11 +258,13 @@ public class NewsLine extends AppCompatActivity {
         permissionsDialog.create().show();
     }
 
+    private void showAgain() {
+        pagingView.notifyAdapterToClearAll();
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
     private void setListeners() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            pagingView.notifyAdapterToClearAll();
-            swipeRefreshLayout.setRefreshing(false);
-        });
+        swipeRefreshLayout.setOnRefreshListener(this::showAgain);
 
         AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -281,14 +292,15 @@ public class NewsLine extends AppCompatActivity {
         // home
         imageViewsBottom[0].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
         // self page
-        imageViewsBottom[4].setOnClickListener(v -> startActivity(Intents.getSelfPage()));
+        imageViewsBottom[4].setOnClickListener(v -> {
+            startActivity(Intents.getSelfPage());
+            SelfPage.userPage = TransitUser.user;
+        });
         // close app
         imageViewsBottom[5].setOnClickListener(v -> {
             DeleteApplicationCache.deleteCache(getApplicationContext());
             finishAffinity();
         });
-        // close app
-        imageViewsBottom[6].setOnClickListener(v -> finishAffinity());
         // endregion
 
         // set system theme on label

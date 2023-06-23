@@ -59,8 +59,6 @@ public class SetPassword extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setAnimations(setPassword).start();
         setListeners();
     }
@@ -75,8 +73,8 @@ public class SetPassword extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setUiVisibility() {

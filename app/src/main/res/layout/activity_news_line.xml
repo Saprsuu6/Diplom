@@ -93,6 +93,7 @@
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="true"
                         tools:ignore="RtlSymmetry"
+                        tools:itemCount="1"
                         tools:listitem="@layout/list_item_post" />
 
                     <io.supercharge.shimmerlayout.ShimmerLayout

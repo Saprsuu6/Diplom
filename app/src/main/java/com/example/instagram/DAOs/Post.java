@@ -11,6 +11,27 @@ import org.json.JSONObject;
 import java.util.Date;
 
 public class Post {
+    public Post clone(Post post) {
+        Post clone = new Post();
+        clone.setPostId(post.getPostId());
+        clone.setDateOfAdd(post.getDateOfAdd());
+        clone.setAuthor(post.getAuthor());
+        clone.setDescription(post.getDescription());
+        clone.setLikes(post.getLikes());
+        clone.setResourceImg(post.getResourceImg());
+        clone.setResourceVideo(post.getResourceVideo());
+
+        if (metadata != null) clone.setMetadata(post.getMetadata());
+        if (postponePublication != null)
+            clone.setPostponePublication(post.getPostponePublication());
+
+        clone.setTaggedPeople(post.getTaggedPeople());
+        clone.setLiked(post.isLiked());
+        clone.setSaved(post.getSaved());
+
+        return clone;
+    }
+
     private String postId;
     private Date dateOfAdd;
     private String author;
@@ -25,7 +46,20 @@ public class Post {
     private String taggedPeople;
     private Boolean isLiked = null;
     private Boolean isSaved = null;
+
     // region setters
+    public void setTaggedPeople(String taggedPeople) {
+        this.taggedPeople = taggedPeople;
+    }
+
+    public void setLiked(Boolean liked) {
+        isLiked = liked;
+    }
+
+    public void setSaved(Boolean saved) {
+        isSaved = saved;
+    }
+
     public void setLiked(boolean liked) {
         isLiked = liked;
     }
@@ -33,6 +67,7 @@ public class Post {
     public void setSaved(boolean saved) {
         isSaved = saved;
     }
+
     public void setPostId(String postId) {
         this.postId = postId;
     }
@@ -75,6 +110,19 @@ public class Post {
 
     // endregion
     // region getters
+
+    public String getTaggedPeople() {
+        return taggedPeople;
+    }
+
+    public Boolean getLiked() {
+        return isLiked;
+    }
+
+    public Boolean getSaved() {
+        return isSaved;
+    }
+
     public Boolean isLiked() {
         return isLiked;
     }

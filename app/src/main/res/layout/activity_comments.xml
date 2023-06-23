@@ -6,11 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_list_main"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".main_process.Comments">
 
-    <include layout="@layout/languages_spinner"/>
+    <include layout="@layout/languages_spinner" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,6 +20,7 @@
         tools:ignore="UseCompoundDrawables,UselessParent">
 
         <ImageView
+            android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="@string/back"
@@ -36,57 +37,97 @@
 
     </LinearLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="true"
-                android:visibility="gone"
-                tools:ignore="RtlSymmetry" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <io.supercharge.shimmerlayout.ShimmerLayout
-                android:id="@+id/skeleton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:visibility="gone"
-                app:shimmer_animation_duration="1200">
-
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:nestedScrollingEnabled="true"
+                    tools:ignore="RtlSymmetry"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/list_item_comment" />
 
-                    <include layout="@layout/skeleton_left_message" />
+                <io.supercharge.shimmerlayout.ShimmerLayout
+                    android:id="@+id/skeleton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible"
+                    app:shimmer_animation_duration="1200">
 
-                    <include layout="@layout/skeleton_right_message" />
+                    <LinearLayout
+                        android:id="@+id/skeletons_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                    <include layout="@layout/skeleton_left_message" />
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_right_message" />
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_left_message" />
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_right_message" />
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-                </LinearLayout>
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-            </io.supercharge.shimmerlayout.ShimmerLayout>
+                        <include layout="@layout/skeleton_chat_comment_layout" />
 
-        </LinearLayout>
+                    </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+                </io.supercharge.shimmerlayout.ShimmerLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/reply_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#4D000000"
+        android:gravity="left|center"
+        android:orientation="horizontal"
+        android:padding="15dp"
+        android:visibility="gone"
+        tools:ignore="RtlHardcoded">
+
+        <TextView
+            android:id="@+id/replayed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="0dp"
+            android:textColor="@color/white_secondary"
+            android:textSize="18sp"
+            tools:text="Author: Andry" />
+
+        <ImageView
+            android:id="@+id/close_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/close_reply"
+            android:src="@drawable/close_reply" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -97,7 +138,7 @@
         android:paddingVertical="10dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/self_page"
+            android:id="@+id/author_ava"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginHorizontal="15dp"
@@ -107,21 +148,22 @@
 
         <EditText
             android:id="@+id/comment_add"
-            android:textColorHint="@color/white_secondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:autofillHints="Comment"
             android:background="@null"
             android:hint="@string/add_comment"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColorHint="@color/white_secondary" />
 
         <ImageView
+            android:id="@+id/send"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="15dp"
-            android:src="@drawable/send_message"
-            android:contentDescription="@string/send_comment" />
+            android:contentDescription="@string/send_comment"
+            android:src="@drawable/send_message" />
 
     </LinearLayout>
 

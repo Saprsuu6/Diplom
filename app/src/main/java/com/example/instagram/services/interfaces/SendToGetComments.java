@@ -1,15 +1,13 @@
 package com.example.instagram.services.interfaces;
 
-import androidx.annotation.Nullable;
-
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-public interface SendToGetAllPosts {
-    @GET("/posts")
+public interface SendToGetComments {
+    @GET("/comments")
     Call<String> STRING_CALL(
-            @Query("from") int from,
+            @Query("postId") int postId,
             @Query("amount") int amount
     );
 }

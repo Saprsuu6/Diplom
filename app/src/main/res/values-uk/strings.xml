@@ -64,6 +64,14 @@
     <string name="file_loader">Файл завантажен</string>
     <string name="successful_delete">Вдачне видалення</string>
     <string name="unsuccessful_delete">Successful delete</string>
+    <string name="reply">Відповісти</string>
+    <string name="author">Автор</string>
+    <string name="comment_has_been_sent">Коментар був відправлен</string>
+    <string name="answer_to">Відповідь на</string>
+    <string name="change_comment">Змінити коментар</string>
+    <string name="remove_post_question">Ви точно бажаеэте видалити пост?</string>
+    <string name="yes">Так</string>
+    <string name="no">Ні</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>
@@ -87,11 +95,12 @@
     <string name="qr_code">QR код</string>
     <string name="setting_context">Налаштування</string>
     <string name="statistic_context">Статистика</string>
-    <string name="archive_context">Архів</string>
     <string name="saved_context">Збережене</string>
-    <string name="orders_and_payments_context">Замовлення та платежі</string>
     <string name="favorites_context">Предпочетаемое</string>
     <string name="ur_contacts_context">Контактні данні</string>
+    <string name="log_out">Вихід</string>
+    <string name="link_to_page">Скопіювати посилання на сторінку</string>
+    <string name="qr_link_to_page">Скопіювати QR посилання на сторінку</string>
 
     <!--    Permissions-->
     <string name="phone_book_permission">Дозволити доступ до телефонної книги</string>

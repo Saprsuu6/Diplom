@@ -70,8 +70,7 @@ public class Authorisation extends AppCompatActivity {
         findViews();
         setIntents();
         try {
-            if (setRememberMe())
-                return;
+            if (setRememberMe()) return;
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -83,15 +82,12 @@ public class Authorisation extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setLoginTypes();
 
         setListeners();
         setAnimations(authorisation).start();
 
-        if (!TransitUser.user.getOtherInfo().isPhoneBookPermission()
-                || !TransitUser.user.getOtherInfo().isMediaPermission())
+        if (!TransitUser.user.getOtherInfo().isPhoneBookPermission() || !TransitUser.user.getOtherInfo().isMediaPermission())
             setPermissions();
     }
 
@@ -153,8 +149,8 @@ public class Authorisation extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setPermissions() {
@@ -170,10 +166,13 @@ public class Authorisation extends AppCompatActivity {
         loginTypes = findViewById(R.id.login_type);
         rememberMe = findViewById(R.id.remember_flag);
         editTexts = new EditText[]{findViewById(R.id.auth_login), findViewById(R.id.auth_pass)};
+
+        // TODO delete someday
+        editTexts[0].setText("Andry");
+        editTexts[1].setText("MyNewPass2929!");
+
         buttons = new Button[]{findViewById(R.id.auth_eye), findViewById(R.id.auth_log_in)};
-        textViews = new TextView[]{findViewById(R.id.auth_forgot_pass), findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name),
-                findViewById(R.id.remember_title)};
+        textViews = new TextView[]{findViewById(R.id.auth_forgot_pass), findViewById(R.id.reg_question), findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name), findViewById(R.id.remember_title)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
     }
 

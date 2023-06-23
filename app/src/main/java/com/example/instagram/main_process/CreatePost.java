@@ -94,12 +94,16 @@ public class CreatePost extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setListeners();
         setAnimations(createNewPost).start();
 
         openGallery();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private AnimationDrawable setAnimations(View view) {

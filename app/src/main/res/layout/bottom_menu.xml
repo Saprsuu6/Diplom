@@ -61,16 +61,6 @@
 
             android:contentDescription="@string/add_post"
             android:src="@drawable/sign_out" />
-
-        <ImageView
-            android:id="@+id/close_app"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-
-            android:contentDescription="@string/add_post"
-            android:src="@drawable/close" />
-
     </LinearLayout>
 
 </LinearLayout>

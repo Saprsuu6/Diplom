@@ -54,8 +54,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="5dp"
                     android:contentDescription="@string/home"
-                    android:visibility="visible"
-                    android:src="@drawable/like_empty_gradient" />
+                    android:src="@drawable/like_empty_gradient"
+                    android:visibility="visible" />
 
                 <ImageView
                     android:id="@+id/comment"
@@ -186,8 +186,8 @@
                         android:id="@+id/tagged_people_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="visible"
                         android:orientation="vertical"
+                        android:visibility="visible"
                         tools:ignore="UselessParent" />
 
                 </LinearLayout>

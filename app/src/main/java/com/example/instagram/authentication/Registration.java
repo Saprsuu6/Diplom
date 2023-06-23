@@ -64,8 +64,6 @@ public class Registration extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setListeners();
         toggleContentEmail();
         //toggleContentPhoneNumber();
@@ -80,8 +78,8 @@ public class Registration extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setUiVisibility() {

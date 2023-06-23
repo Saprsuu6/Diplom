@@ -2,7 +2,7 @@ package com.example.instagram.services.themes_and_backgrounds;
 
 import com.example.instagram.R;
 
-public enum Backgrounds {
+public enum  Backgrounds {
     Background0(R.drawable.gradient_list_main),
     Background1(R.drawable.gradient_1),
     Background2(R.drawable.gradient_2),

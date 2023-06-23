@@ -30,7 +30,7 @@
             tools:ignore="RtlHardcoded">
 
             <ImageView
-                android:id="@+id/go_to_the_news_line"
+                android:id="@+id/back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/back"
@@ -188,70 +188,6 @@
 
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="TODO"
-                    android:src="@drawable/add_post" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="TODO"
-                    android:src="@drawable/add_post" />
-
-            </LinearLayout>
-
-            <!--            <LinearLayout-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="match_parent"-->
-            <!--                android:background="@drawable/self_page_background"-->
-            <!--                android:orientation="vertical"-->
-            <!--                tools:ignore="UselessParent">-->
-
-            <!--                <androidx.recyclerview.widget.RecyclerView-->
-            <!--                    android:id="@+id/recycler_view"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:nestedScrollingEnabled="true"-->
-            <!--                    tools:ignore="RtlSymmetry"-->
-            <!--                    tools:listitem="@layout/list_item_post_self_page" />-->
-
-            <!--                <io.supercharge.shimmerlayout.ShimmerLayout-->
-            <!--                    android:id="@+id/skeleton"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:layout_gravity="center_horizontal"-->
-            <!--                    android:visibility="visible"-->
-            <!--                    app:shimmer_animation_duration="1200">-->
-
-            <!--                    <LinearLayout-->
-            <!--                        android:layout_width="match_parent"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:orientation="vertical">-->
-
-            <!--                        <include layout="@layout/skeleton_post_self_profile" />-->
-
-            <!--                        <include layout="@layout/skeleton_post_self_profile" />-->
-
-            <!--                        <include layout="@layout/skeleton_post_self_profile" />-->
-
-            <!--                        <include layout="@layout/skeleton_post_self_profile" />-->
-
-            <!--                    </LinearLayout>-->
-
-            <!--                </io.supercharge.shimmerlayout.ShimmerLayout>-->
-
-            <!--            </LinearLayout> android:background="@drawable/self_page_background"-->
 
             <LinearLayout
                 android:layout_width="match_parent"

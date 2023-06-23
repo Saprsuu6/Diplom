@@ -1,18 +1,24 @@
 package com.example.instagram.services;
 
 import com.example.instagram.services.interfaces.SendAva;
+import com.example.instagram.services.interfaces.SendToAddNewAnswer;
+import com.example.instagram.services.interfaces.SendToAddNewComment;
 import com.example.instagram.services.interfaces.SendToAddPost;
 import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendToAddUser;
+import com.example.instagram.services.interfaces.SendToChangeComment;
 import com.example.instagram.services.interfaces.SendToCheckExistUser;
 import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
 import com.example.instagram.services.interfaces.SendToCheckUserCode;
+import com.example.instagram.services.interfaces.SendToDeleteComment;
 import com.example.instagram.services.interfaces.SendToDeletePost;
 import com.example.instagram.services.interfaces.SendToForgotPassword;
+import com.example.instagram.services.interfaces.SendToGetAllComments;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
 import com.example.instagram.services.interfaces.SendToGetIsLiked;
 import com.example.instagram.services.interfaces.SendToGetIsSaved;
+import com.example.instagram.services.interfaces.SendToGetPostsOfUser;
 import com.example.instagram.services.interfaces.SendToGetTaggedPeople;
 import com.example.instagram.services.interfaces.SendToLikeUnlikePost;
 import com.example.instagram.services.interfaces.SendToSaveUnsavedPost;
@@ -29,10 +35,9 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://2d8b-2a09-bac5-5979-52d-00-84-76.ngrok-free.app";
+    public final static String BASE_URL = "https://0c7f-2a09-bac5-597e-52d-00-84-8c.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-    // registration user
     public static void addUser(Callback<String> callback) throws IOException, JSONException {
         // create main interface
         SendToAddUser mainInterface = retrofit.create(SendToAddUser.class);
@@ -49,7 +54,6 @@ public class Services {
         call.enqueue(callback);
     }
 
-    // send login to find user
     public static void sendToForgotPassword(Callback<String> callback) throws Exception {
         SendToForgotPassword mainInterface = retrofit.create(SendToForgotPassword.class);
 
@@ -92,10 +96,10 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendToGetAllPosts(Callback<String> callback, int amount, String scroll) {
+    public static void sendToGetAllPosts(Callback<String> callback, int from, int amount) {
         SendToGetAllPosts mainInterface = retrofit.create(SendToGetAllPosts.class);
 
-        Call<String> call = mainInterface.STRING_CALL(amount, scroll);
+        Call<String> call = mainInterface.STRING_CALL(from, amount);
         call.enqueue(callback);
     }
 
@@ -145,6 +149,48 @@ public class Services {
         SendToGetIsSaved mainInterface = retrofit.create(SendToGetIsSaved.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId, login);
+        call.enqueue(callback);
+    }
+
+    public static void sendToAddNewComment(Callback<String> callback, String comment) throws JSONException {
+        SendToAddNewComment mainInterface = retrofit.create(SendToAddNewComment.class);
+
+        Call<String> call = mainInterface.STRING_CALL(comment);
+        call.enqueue(callback);
+    }
+
+    public static void sendToGetAllComments(Callback<String> callback, int from, int amount, String postId) {
+        SendToGetAllComments mainInterface = retrofit.create(SendToGetAllComments.class);
+
+        Call<String> call = mainInterface.STRING_CALL(from, amount, postId);
+        call.enqueue(callback);
+    }
+
+    public static void sendToDeleteComment(Callback<String> callback, String body) throws JSONException {
+        SendToDeleteComment mainInterface = retrofit.create(SendToDeleteComment.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToAddNewAnswer(Callback<String> callback, String body) throws JSONException {
+        SendToAddNewAnswer mainInterface = retrofit.create(SendToAddNewAnswer.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToChangeComment(Callback<String> callback, String body) throws JSONException {
+        SendToChangeComment mainInterface = retrofit.create(SendToChangeComment.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToGetPostsOfUser(Callback<String> callback, int from, int amount, String login) {
+        SendToGetPostsOfUser mainInterface = retrofit.create(SendToGetPostsOfUser.class);
+
+        Call<String> call = mainInterface.STRING_CALL(from, amount, login);
         call.enqueue(callback);
     }
 }

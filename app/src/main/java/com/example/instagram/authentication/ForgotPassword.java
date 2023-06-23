@@ -65,8 +65,6 @@ public class ForgotPassword extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         //setLoginTypes();
 
         setListeners();
@@ -120,8 +118,8 @@ public class ForgotPassword extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setUiVisibility() {

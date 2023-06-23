@@ -7,7 +7,6 @@
     android:layout_marginVertical="5dp"
     app:cardCornerRadius="15dp">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,21 +15,11 @@
         android:padding="8dp"
         tools:ignore="UselessParent">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom"
-            android:layout_marginEnd="10dp"
-            android:contentDescription="@string/avatar"
-            android:scaleType="centerCrop"
-            android:src="@color/for_skeleton" />
-
         <View
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_marginHorizontal="10dp"
-            android:backgroundTint="@color/for_skeleton"
-            android:background="@drawable/left_message" />
+            android:background="@drawable/message_cell_left" />
 
     </LinearLayout>
 

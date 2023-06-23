@@ -35,15 +35,20 @@
         <activity
             android:name=".main_process.SelfPage"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked" >
+        </activity>
         <activity
             android:name=".main_process.Comments"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name=".main_process.NewsLine"
             android:exported="true"
-            android:screenOrientation="locked" />
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name=".authentication.after_reg.FindContactsFriends"
             android:exported="true"

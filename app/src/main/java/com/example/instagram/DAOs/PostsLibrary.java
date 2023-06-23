@@ -7,16 +7,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class PostsLibrary {
-    private final ArrayList<Post> dataArrayList = new ArrayList<>();
+    private final ArrayList<Post> posts = new ArrayList<>();
 
     public ArrayList<Post> getDataArrayList() {
-        return dataArrayList;
+        return posts;
     }
 
     public void setDataArrayList(JSONArray array) throws JSONException {
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
-            dataArrayList.add(new Post(object));
+            posts.add(new Post(object));
         }
     }
 }

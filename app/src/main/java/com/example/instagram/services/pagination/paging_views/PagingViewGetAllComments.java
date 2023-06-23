@@ -11,35 +11,38 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.instagram.DAOs.Post;
+import com.example.instagram.DAOs.Comment;
+import com.example.instagram.main_process.Comments;
+import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitComment;
-import com.example.instagram.services.TransitPost;
+import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
 import com.example.instagram.services.pagination.PagingView;
-import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
+import com.example.instagram.services.pagination.adapters.PaginationAdapterComments;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Comment;
 
+import java.text.ParseException;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import io.supercharge.shimmerlayout.ShimmerLayout;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PagingViewGetAllPosts extends PagingView {
-    private PaginationAdapterPosts paginationAdapter;
+public class PagingViewGetAllComments extends PagingView {
+    private PaginationAdapterComments paginationAdapter;
     public static boolean isEnd = false;
 
-    public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
+    public PagingViewGetAllComments(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
+        isEnd = false;
+        PaginationCurrentForAllComments.resetCurrent();
 
         // initialise adapter
-        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
+        paginationAdapter = new PaginationAdapterComments(activity, context, commentsLibrary);
 
         // set layout manager
         LinearLayoutManager manager = new LinearLayoutManager(context);
@@ -57,32 +60,18 @@ public class PagingViewGetAllPosts extends PagingView {
 
     // region notifiers
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAdapterToReplacePosts() {
-        for (Post post : TransitPost.postsToChangeFromOtherPage) {
-            for (int i = 0; i < paginationAdapter.getPostsLibrary().getDataArrayList().size(); i++) {
-                Post postToReplace = paginationAdapter.getPostsLibrary().getDataArrayList().get(i);
-
-                if (postToReplace.getPostId().equals(post.getPostId())) {
-                    paginationAdapter.getPostsLibrary().getDataArrayList().remove(i);
-                    paginationAdapter.getPostsLibrary().getDataArrayList().add(i, post.clone(post));
-                }
-            }
+    public void notifyAdapterToClearByPosition(List<String> deleteId) {
+        if (deleteId != null) {
+            paginationAdapter.getCommentsLibrary().getCommentList().removeIf(commentToDelete -> deleteId.stream().anyMatch(item -> item.equals(commentToDelete.getCommentId())));
+            List<Comment> comments = paginationAdapter.getCommentsLibrary().getCommentList();
+            paginationAdapter.notifyDataSetChanged();
         }
-        paginationAdapter.notifyDataSetChanged();
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAdapterToClearPosts() {
-        // TODO debug logic
-        paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> TransitPost.postsToDeleteFromOtherPage.stream().anyMatch(item -> item.getPostId().equals(postDuplicate.getPostId())));
-        paginationAdapter.notifyDataSetChanged();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void notifyAdapterToClearByPosition(int position) {
-        Post post = paginationAdapter.getPostsLibrary().getDataArrayList().get(position);
-        paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> Objects.equals(postDuplicate.getPostId(), post.getPostId()));
-        paginationAdapter.notifyDataSetChanged();
+    public void notifyLibraryByPosition(int position, String text) {
+        paginationAdapter.getCommentsLibrary().getCommentList().get(position).setContent(text);
+        paginationAdapter.notifyItemChanged(position);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -92,11 +81,8 @@ public class PagingViewGetAllPosts extends PagingView {
 
     @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearAll() {
-        paginationAdapter.getPostsLibrary().getDataArrayList().clear();
+        paginationAdapter.getCommentsLibrary().getCommentList().clear();
         paginationAdapter.notifyDataSetChanged();
-
-        PagingViewGetAllPosts.isEnd = false;
-        PaginationCurrentForAllPosts.resetCurrent();
 
         try {
             getData();
@@ -104,20 +90,20 @@ public class PagingViewGetAllPosts extends PagingView {
             Log.d("sendToGetAllPosts: ", e.getMessage());
         }
     }
-    // endregion
+    //endregion
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
+        paginationAdapter = new PaginationAdapterComments(activity, context, commentsLibrary);
         recyclerView.setAdapter(paginationAdapter);
     }
 
     @Override
     protected void getData() throws JSONException {
-        if (!PagingViewGetAllPosts.isEnd) {
+        if (!PagingViewGetAllComments.isEnd) {
             startSkeletonAnim();
 
-            Services.sendToGetAllPosts(new Callback<>() {
+            Services.sendToGetAllComments(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
@@ -127,15 +113,15 @@ public class PagingViewGetAllPosts extends PagingView {
                             try {
                                 JSONArray jsonArray = new JSONArray(body);
 
-                                if (jsonArray.length() < PaginationCurrentForAllPosts.amountOfPagination) {
-                                    PagingViewGetAllPosts.isEnd = true;
+                                if (jsonArray.length() < PaginationCurrentForAllComments.amountOfPagination) {
+                                    PagingViewGetAllComments.isEnd = true;
                                 }
 
                                 isBusy = false;
-                                PaginationCurrentForAllPosts.nextCurrent();
-                                postsLibrary.setDataArrayList(jsonArray);
+                                PaginationCurrentForAllComments.nextCurrent();
+                                commentsLibrary.setDataArrayList(jsonArray);
                                 setPaginationAdapter();
-                            } catch (JSONException e) {
+                            } catch (JSONException | ParseException e) {
                                 throw new RuntimeException(e);
                             }
                         }
@@ -145,9 +131,9 @@ public class PagingViewGetAllPosts extends PagingView {
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAllPosts: ", t.getMessage());
+                    Log.d("sendToGetAllComments: ", t.getMessage());
                 }
-            }, PaginationCurrentForAllPosts.current, PaginationCurrentForAllPosts.amountOfPagination);
+            }, PaginationCurrentForAllComments.current, PaginationCurrentForAllComments.amountOfPagination, NewsLine.mapPost.second.getPostId());
         }
     }
 }

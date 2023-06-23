@@ -44,21 +44,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
-                    <include layout="@layout/skeleton_chat_layout" />
+                    <include layout="@layout/skeleton_chat_comment_layout" />
 
                 </LinearLayout>
 

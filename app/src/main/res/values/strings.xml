@@ -13,10 +13,15 @@
     <string name="validation_error" translatable="false">validation_error</string>
     <string name="close" translatable="false">close</string>
     <string name="done" translatable="false">done</string>
+    <string name="close_reply" translatable="false">close_reply</string>
+
     <string name="user_are_not_exists">User are not exists</string>
     <string name="tagged_people">Tagged people…</string>
     <string name="successful_delete">Successful delete</string>
     <string name="unsuccessful_delete">Successful delete</string>
+    <string name="reply">Reply</string>
+    <string name="author">Author</string>
+    <string name="comment_has_been_sent">Comment has been sent</string>
 
     <string name="search" translatable="false">search</string>
     <string name="add_post" translatable="false">add_post</string>
@@ -96,6 +101,11 @@
     <string name="internal_error">Internal error</string>
     <string name="context_error">Like post at least one time ^_^</string>
     <string name="file_loader">File is loaded</string>
+    <string name="answer_to">Answer to</string>
+    <string name="change_comment">Change comment</string>
+    <string name="remove_post_question">Do you really want to delete post?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>
@@ -127,11 +137,12 @@
     <string name="qr_code">QR code</string>
     <string name="setting_context">Settings</string>
     <string name="statistic_context">Statistic</string>
-    <string name="archive_context">Archive</string>
     <string name="saved_context">Saved</string>
-    <string name="orders_and_payments_context">Orders and payments</string>
     <string name="favorites_context">Favorites</string>
     <string name="ur_contacts_context">Your contacts</string>
+    <string name="log_out">Log out</string>
+    <string name="link_to_page">Copy link to page</string>
+    <string name="qr_link_to_page">Copy qr link to page</string>
 
     <!-- New post -->
     <string name="new_post">New Post</string>

@@ -52,8 +52,6 @@ public class SetName extends AppCompatActivity {
         localisation = new Localisation(this);
         languages.setAdapter(localisation.getAdapter());
 
-        Localisation.setFirstLocale(languages);
-
         setListeners();
         setAnimations();
     }
@@ -68,8 +66,8 @@ public class SetName extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Localisation.setFirstLocale(languages);
         super.onResume();
+        Localisation.setFirstLocale(languages);
     }
 
     private void setUiVisibility() {

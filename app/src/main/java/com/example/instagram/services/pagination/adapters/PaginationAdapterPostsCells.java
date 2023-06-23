@@ -7,6 +7,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -21,6 +22,9 @@ import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.services.PostInDialog;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
+import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+import com.google.android.flexbox.FlexboxLayout;
 
 public class PaginationAdapterPostsCells extends RecyclerView.Adapter<PaginationAdapterPostsCells.ViewHolderPostsCells> {
     @Nullable
@@ -28,11 +32,17 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     private final Context context;
     private final PostsLibrary postsLibrary;
     private final Point size;
+    private PagingViewGetAllPostsInCells pagingView;
+    private final PostInDialog postInDialog = new PostInDialog();
+    public PostsLibrary getPostsLibrary() {
+        return postsLibrary;
+    }
 
-    public PaginationAdapterPostsCells(Context context, Activity activity, PostsLibrary postsLibrary) {
+    public PaginationAdapterPostsCells(Context context, @Nullable Activity activity, PostsLibrary postsLibrary, PagingViewGetAllPostsInCells pagingView) {
         this.activity = activity;
         this.context = context;
         this.postsLibrary = postsLibrary;
+        this.pagingView = pagingView;
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         size = new Point();
@@ -43,90 +53,63 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     @Override
     public ViewHolderPostsCells onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post_self_page_cell, parent, false); // don't forget to change
-
         return new PaginationAdapterPostsCells.ViewHolderPostsCells(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderPostsCells holder, int position) {
-        Post data1 = postsLibrary.getDataArrayList().get(position);
-        Post data2 = postsLibrary.getDataArrayList().get(position + 1);
-        Post data3 = postsLibrary.getDataArrayList().get(position + 2);
+        for (int i = 0; i < PaginationCurrentForAllComments.amountOfPagination; i++) {
+            if (i < postsLibrary.getDataArrayList().size()) {
+                Post data = postsLibrary.getDataArrayList().get(i);
 
-        // prepare all posts in row
-        ImageView image1 = setImage(data1, holder);
-        ImageView image2 = setImage(data2, holder);
-        ImageView image3 = setImage(data3, holder);
+                ImageView image = setImage(data, holder);
+                holder.flexboxLayout.addView(image);
 
-        // set size for cells
-        holder.cellsContainerParams.height = size.x / 3;
+                image.setOnClickListener(postInDialog(data));
+            } else {
+                break;
+            }
+        }
 
-        holder.cellsContainer.addView(image1);
-        holder.cellsContainer.addView(image2);
-        holder.cellsContainer.addView(image3);
-
-        image1.setOnClickListener(postInDialog());
-        image2.setOnClickListener(postInDialog());
-        image3.setOnClickListener(postInDialog());
+        holder.flexboxLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
     private ImageView setImage(Post data, @NonNull ViewHolderPostsCells holder) {
         ImageView image = new ImageView(context);
-        image.setLayoutParams(holder.cellsContainerParams);
+        image.setLayoutParams(holder.imageParams);
+        image.setPadding(3, 3, 3, 3);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image.setPadding(2, 2, 0, 2);
 
-        assert data.getResourceImg() != null;
         if (data.getResourceImg().equals("")) {
             // set image
             Glide.with(context).load(Services.BASE_URL + data.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
-
         } else {
+            // set video
             Glide.with(context).load(Services.BASE_URL + data.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
         }
 
         return image;
     }
 
-    private View.OnClickListener postInDialog() {
-        // TODO: load post info
-        return v -> PostInDialog.getPostDialog(context, context.getResources()).show();
+    private View.OnClickListener postInDialog(Post post) {
+        return v -> postInDialog.getPostDialog(context, post, pagingView).show();
     }
 
     @Override
     public int getItemCount() {
-        return postsLibrary.getDataArrayList().size() > 0 ? 1 : 0;
+        return postsLibrary.getDataArrayList().size() > 1 ? 1 : 0;
     }
-
-    // region SharedPreferences
-    //Сохраняет флажок в SharedPreferences
-    public void saveSP(String key, boolean value) {
-        com.example.instagram.services.SharedPreferences.saveSP(context, key, value);
-    }
-
-    //Загружает нажатый флажок из SharedPreferences
-    public boolean loadSP(String key) {
-        return com.example.instagram.services.SharedPreferences.loadBoolSP(context, key);
-    }
-
-    //Удаляет нажатый флажок из SharedPreferences
-    public void deleteSp(String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(context, key);
-    }
-    // endregion SharedPreferences
 
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {
-        private final LinearLayout cellsContainer;
-        private final LinearLayout.LayoutParams cellsContainerParams;
+        private final FlexboxLayout flexboxLayout;
+        private final LinearLayout.LayoutParams imageParams;
 
         public ViewHolderPostsCells(@NonNull View itemView) {
             super(itemView);
 
-            cellsContainer = itemView.findViewById(R.id.cells_container);
+            flexboxLayout = itemView.findViewById(R.id.layout);
 
-            cellsContainerParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT // TODO: change to dynamic value
-            );
-            cellsContainerParams.weight = 1;
+            imageParams = new LinearLayout.LayoutParams(size.x / 3, size.x / 3);
         }
     }
 }

@@ -5,9 +5,7 @@ import com.example.instagram.services.DateFormatting;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class User {
@@ -15,9 +13,11 @@ public class User {
     public String getToken() {
         return token;
     }
+
     public String getPasswordRepeat() {
         return passwordRepeat;
     }
+
     public String getLogin() {
         return login;
     }
@@ -67,6 +67,7 @@ public class User {
     public void setPasswordRepeat(String passwordRepeat) {
         this.passwordRepeat = passwordRepeat;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -119,8 +120,7 @@ public class User {
     private String avatar;
     private String token;
     private String description = "NO_BIO";
-    private List<User> subscribers;
-    private List<User> subscribings;
+
     private UserOtherInfo otherInfo = new UserOtherInfo();
 
     public User() {

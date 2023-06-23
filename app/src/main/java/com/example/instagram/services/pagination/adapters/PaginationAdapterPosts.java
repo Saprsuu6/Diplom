@@ -57,7 +57,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     @Override
     public PaginationAdapterPosts.ViewHolderPosts onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false); // don't forget to change
-
         return new ViewHolderPosts(view);
     }
 
@@ -175,10 +174,11 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         holder.description.setText(data.getDescription());
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
-        holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
+        //holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
+        holder.hours.setText("10/1-/1/");
         // endregion
 
-        holder.post_layout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_news_line));
+        holder.post_layout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
     @Override
@@ -322,15 +322,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 // endregion
             });
 
-            comment.setOnClickListener(v -> {
-                Intent intent = Intents.getComments();
-                context.startActivity(intent);
-            });
-
-            send.setOnClickListener(v -> {
-                // TODO: send
-            });
-
             bookmark.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (!bookmark_flag) {
@@ -365,6 +356,20 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     Log.d("sendToSaveUnsavedPost: (JSONException)", e.getMessage());
                 }
                 // endregion
+            });
+
+            comment.setOnClickListener(v -> {
+                NewsLine.mapPost = new Pair<>(getAdapterPosition(), postsLibrary.getDataArrayList().get(getAdapterPosition()));
+                Intent intent = Intents.getComments();
+                context.startActivity(intent);
+            });
+
+            send.setOnClickListener(v -> {
+                // TODO: send
+            });
+
+            avaView.setOnClickListener(v -> {
+                // TODO get user
             });
         }
     }

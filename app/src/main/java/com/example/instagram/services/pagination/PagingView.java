@@ -10,9 +10,9 @@ import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram.DAOs.CommentsLibrary;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
-import com.example.instagram.services.SharedPreferences;
 
 import org.json.JSONException;
 
@@ -21,13 +21,14 @@ import io.supercharge.shimmerlayout.ShimmerLayout;
 abstract public class PagingView {
     private final LinearLayout skeletonsLayout;
     private final ShimmerLayout shimmerLayout;
-    private final int scrollOffset = 2;
     protected final RecyclerView recyclerView;
     protected final Context context;
+    protected boolean isBusy = false;
 
     @Nullable
     protected final Activity activity;
     protected final PostsLibrary postsLibrary = new PostsLibrary();
+    protected final CommentsLibrary commentsLibrary = new CommentsLibrary();
 
     public PagingView(NestedScrollView scrollView, RecyclerView recyclerView,
                       ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
@@ -39,17 +40,18 @@ abstract public class PagingView {
         skeletonsLayout = (LinearLayout) shimmerLayout.getChildAt(0);
 
         scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            int positionLastChild = v.getChildAt(0).getMeasuredHeight();
-            int height = v.getMeasuredHeight();
+            if (!isBusy) {
+                int positionLastChild = v.getChildAt(0).getMeasuredHeight();
+                int height = v.getMeasuredHeight();
 
-            int bottom = positionLastChild - height;
-            int bottomWithOffset = bottom / scrollOffset;
-
-            if (scrollY == bottom || bottomWithOffset >= oldScrollY && bottomWithOffset <= scrollY) { // when rich last item position
-                try {
-                    getData();
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                int bottom = positionLastChild - height;
+                if (scrollY == bottom) {
+                    try {
+                        isBusy = true;
+                        getData();
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
             }
         });
@@ -58,7 +60,7 @@ abstract public class PagingView {
     protected void startSkeletonAnim() {
         shimmerLayout.setVisibility(View.VISIBLE);
         shimmerLayout.startShimmerAnimation();
-        skeletonsLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_news_line));
+        skeletonsLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
     protected void stopSkeletonAnim() {

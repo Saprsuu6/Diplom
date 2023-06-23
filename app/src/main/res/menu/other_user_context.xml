@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/settings"
-        android:title="@string/setting_context" />
-    <item
         android:id="@+id/statistic"
         android:title="@string/statistic_context" />
-    <item
-        android:id="@+id/saved"
-        android:title="@string/saved_context" />
-    <item
-        android:id="@+id/favorites"
-        android:title="@string/favorites_context" />
     <item
         android:id="@+id/link"
         android:title="@string/link_to_page" />
@@ -19,6 +10,6 @@
         android:id="@+id/qr_link"
         android:title="@string/qr_link_to_page" />
     <item
-        android:id="@+id/log_out"
-        android:title="@string/log_out" />
+        android:id="@+id/complain"
+        android:title="@string/complain_post" />
 </menu>
