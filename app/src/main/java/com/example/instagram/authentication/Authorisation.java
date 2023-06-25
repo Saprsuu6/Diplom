@@ -168,7 +168,7 @@ public class Authorisation extends AppCompatActivity {
         editTexts[1].setText("MyNewPass2929!");
 
         buttons = new Button[]{findViewById(R.id.auth_eye), findViewById(R.id.auth_log_in)};
-        textViews = new TextView[]{findViewById(R.id.auth_forgot_pass), findViewById(R.id.reg_question), findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name), findViewById(R.id.remember_title)};
+        textViews = new TextView[]{findViewById(R.id.auth_forgot_pass), findViewById(R.id.reg_question), findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name)};
         imageViews = new ImageView[]{findViewById(R.id.validation_error)};
     }
 
@@ -328,8 +328,9 @@ public class Authorisation extends AppCompatActivity {
                     Services.sendToForgotPassword(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            assert response.body() != null;
-                            Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
+                            if (response.isSuccessful() && response.body() != null) {
+                                Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
+                            }
                         }
 
                         @Override

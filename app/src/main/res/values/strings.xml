@@ -9,12 +9,22 @@
     <string name="video" translatable="false">video</string>
     <string name="back" translatable="false">back</string>
     <string name="send_comment" translatable="false">send_comment</string>
-    <string name="profille_context" translatable="false">settings</string>
+    <string name="profile_context" translatable="false">settings</string>
     <string name="validation_error" translatable="false">validation_error</string>
     <string name="close" translatable="false">close</string>
     <string name="done" translatable="false">done</string>
     <string name="close_reply" translatable="false">close_reply</string>
+    <string name="mime_image" translatable="false">image</string>
+    <string name="mime_video" translatable="false">video</string>
+    <string name="mime_audio" translatable="false">mpeg</string>
+    <string name="mime_text_plain" translatable="false">text/plain</string>
+    <string name="description" translatable="false">description</string>
+    <string name="root_folder" translatable="false">/media/</string>
+    <string name="prev" translatable="false">Prev</string>
+    <string name="play_stop" translatable="false">PlayStop</string>
+    <string name="next" translatable="false">Next</string>
 
+    <string name="email_successfully_changed">Email has been changed</string>
     <string name="user_are_not_exists">User are not exists</string>
     <string name="tagged_people">Tagged people…</string>
     <string name="successful_delete">Successful delete</string>
@@ -30,6 +40,7 @@
     <string name="app_name" translatable="false">ClickShot</string>
     <string name="label" translatable="false">Label</string>
     <string name="avatar" translatable="false">Avatar</string>
+    <string name="email_are_not_valid">Email is not valid</string>
 
     <!--    Localisation-->
     <string name="en" translatable="false">English</string>
@@ -109,6 +120,10 @@
     <string name="remove_post_question">Do you really want to delete post?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="video_btn">video</string>
+    <string name="image_btn">image</string>
+    <string name="audio_btn">audio</string>
+    <string name="tiramisu_or_better">image</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>
@@ -210,4 +225,9 @@
     <!-- change user info -->
     <string name="change_your_info_to_be_individual">Change your info to be individual</string>
 
+    <!--   email code-->
+    <string name="incorrect_code_1">Incorrect code</string>
+    <string name="incorrect_token_2">Incorrect token</string>
+    <string name="empty_3">Email can not be empty</string>
+    <string name="match_4">Email can not match previous one</string>
 </resources>

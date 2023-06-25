@@ -42,7 +42,7 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
         Post data = postsLibrary.getDataArrayList().get(position);
 
         // set image
-        Glide.with(context).load(data.getResourceImg())
+        Glide.with(context).load(data.getResourceMedia())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.avaView);
 

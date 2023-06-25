@@ -33,6 +33,7 @@ import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONException;
 
@@ -43,6 +44,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SelfPage extends AppCompatActivity {
+    private FlexboxLayout flexboxLayout;
     public static User userPage;
     private Resources resources;
     private LinearLayout selfPage;
@@ -55,6 +57,7 @@ public class SelfPage extends AppCompatActivity {
     private ImageView[] imageViewsBottom;
     private PagingViewGetAllPostsInCells pagingView;
     private FindUser findUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +97,12 @@ public class SelfPage extends AppCompatActivity {
             setInfo();
         }
         Localisation.setFirstLocale(languages);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (flexboxLayout != null) flexboxLayout.removeAllViews();
     }
 
     private void setIntents() {
@@ -183,20 +192,31 @@ public class SelfPage extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void setInfo() {
         textViews[0].setText(SelfPage.userPage.getLogin());
-        textViews[1].setText(SelfPage.userPage.getNickName());
-        textViews[2].setText(SelfPage.userPage.getSurname().equals("") ? "-----" : SelfPage.userPage.getSurname());
-        textViews[3].setText(SelfPage.userPage.getDescription());
+
+        if (SelfPage.userPage.getNickName().equals("")) textViews[1].setVisibility(View.GONE);
+        else textViews[1].setText(SelfPage.userPage.getNickName());
+
+        if (SelfPage.userPage.getSurname().equals("")) textViews[2].setVisibility(View.GONE);
+        else textViews[2].setText(SelfPage.userPage.getSurname());
+
+        if (SelfPage.userPage.getDescription().equals("")) textViews[3].setVisibility(View.GONE);
+        else textViews[3].setText(SelfPage.userPage.getDescription());
+
         textViews[5].setText(Integer.toString(SelfPage.userPage.getAmountPosts()));
         textViews[7].setText("101");
         textViews[9].setText("102");
+        textViews[10].setText(SelfPage.userPage.getEmail());
+
+        textViews[11].setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
 
     private void findViews() {
+        flexboxLayout = findViewById(R.id.layout);
         resources = getResources();
         selfPage = findViewById(R.id.self_page_activity);
         languages = findViewById(R.id.languages);
         imageViews = new ImageView[]{findViewById(R.id.back), findViewById(R.id.change_main_theme), findViewById(R.id.user_context), findViewById(R.id.avatar)};
-        textViews = new TextView[]{findViewById(R.id.nick_name), findViewById(R.id.user_name), findViewById(R.id.user_surname), findViewById(R.id.user_description), findViewById(R.id.amount_posts_title), findViewById(R.id.amount_posts), findViewById(R.id.amount_followings_title), findViewById(R.id.amount_followings), findViewById(R.id.amount_followers_title), findViewById(R.id.amount_followers)};
+        textViews = new TextView[]{findViewById(R.id.nick_name), findViewById(R.id.user_name), findViewById(R.id.user_surname), findViewById(R.id.user_description), findViewById(R.id.amount_posts_title), findViewById(R.id.amount_posts), findViewById(R.id.amount_followings_title), findViewById(R.id.amount_followings), findViewById(R.id.amount_followers_title), findViewById(R.id.amount_followers), findViewById(R.id.user_email), findViewById(R.id.user_birthday)};
         imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
     }
 
@@ -240,10 +260,13 @@ public class SelfPage extends AppCompatActivity {
     }
 
     // region Localisation
+    @SuppressLint("SetTextI18n")
     private void setStringResources() {
         textViews[4].setText(resources.getString(R.string.posts));
         textViews[6].setText(resources.getString(R.string.followings));
         textViews[8].setText(resources.getString(R.string.followers));
+
+        textViews[11].setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
     // endregion
 }

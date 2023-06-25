@@ -75,11 +75,18 @@
     <string name="remove_post_question">Ви точно бажаеэте видалити пост?</string>
     <string name="yes">Так</string>
     <string name="no">Ні</string>
+    <string name="email_successfully_changed">Email змінен</string>
+    <string name="video_btn">Відео</string>
+    <string name="image_btn">Зображення</string>
+    <string name="audio_btn">Аудіо</string>
+    <string name="tiramisu_or_better">Must be the "Tiramisu" version or newer</string>
+
 
     <!--    User page-->
     <string name="posts">Постів</string>
     <string name="followings">Підписок</string>
     <string name="followers">Підписників</string>
+    <string name="email_are_not_valid">Email не валідний</string>
 
     <!--    Post context-->
     <string name="remove_post">Видалити</string>
@@ -175,5 +182,12 @@
 
     <!-- change user info -->
     <string name="change_your_info_to_be_individual">Змініть інформацію на сторінці щоб бути індивідуальним</string>
+
+    <!--   email code-->
+    <string name="incorrect_code_1">Невірний код</string>
+    <string name="incorrect_token_2">Невірний токен</string>
+    <string name="empty_3">Email не може бути порожнім</string>
+    <string name="match_4">Email не може збігатися з попередньою</string>
+    <string name="int_er">Внутрішня помилка</string>
 
 </resources>

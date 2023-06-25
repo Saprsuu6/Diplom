@@ -29,8 +29,7 @@ public class Validations {
             if (text.length() < 1 || text.length() > 20) {
                 throw new Exception(resources.getString(R.string.username_error_length));
             } else {
-                throw new Exception(resources.getString(R.string.username_error_length)
-                        + ". " + resources.getString(R.string.username_error_spec_symbols));
+                throw new Exception(resources.getString(R.string.username_error_length) + ". " + resources.getString(R.string.username_error_spec_symbols));
             }
         }
     }
@@ -54,8 +53,7 @@ public class Validations {
             } else if (!matcherSpecSymbols.find()) {
                 throw new Exception(resources.getString(R.string.password_error_spec_symbols));
             } else {
-                throw new Exception(resources.getString(R.string.password_error_letters)
-                        + "\t" + resources.getString(R.string.password_error_numbers));
+                throw new Exception(resources.getString(R.string.password_error_letters) + "\t" + resources.getString(R.string.password_error_numbers));
             }
         }
     }

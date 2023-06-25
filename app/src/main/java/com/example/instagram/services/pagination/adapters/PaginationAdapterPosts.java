@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -12,7 +14,10 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +31,7 @@ import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.main_process.SelfPage;
+import com.example.instagram.services.AudioController;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Services;
@@ -33,11 +39,10 @@ import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,13 +74,33 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     @Override
     public void onBindViewHolder(@NonNull PaginationAdapterPosts.ViewHolderPosts holder, int position) {
         Post data = postsLibrary.getDataArrayList().get(position);
+        String mime = data.getMimeType();
+        String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
 
         // region set media content
-        if (data.getResourceImg().equals("")) {
+        if (mime.contains(context.getString(R.string.mime_image))) {
             // set image
-            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.content);
-        } else {
-            Glide.with(context).load(Services.BASE_URL + data.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.content);
+            Glide.with(context).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.contentImg);
+            holder.contentImg.setVisibility(View.VISIBLE);
+        } else if (mime.contains(context.getString(R.string.mime_video))) {
+            // set video
+            Uri videoUri = Uri.parse(mediaPath);
+
+            MediaController mediaController = new MediaController(context);
+
+            holder.contentVideo.setVideoURI(videoUri);
+            mediaController.setAnchorView(holder.contentVideo);
+            holder.contentVideo.setMediaController(mediaController);
+
+            holder.contentVideo.start();
+            holder.contentVideo.requestFocus();
+            holder.contentVideo.setVisibility(View.VISIBLE);
+        } else if (mime.contains(context.getString(R.string.mime_audio))) {
+            // set audio
+            Uri audioUri = Uri.parse(mediaPath);
+            holder.audioControllerLayout.setVisibility(View.VISIBLE);
+            holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, context, audioUri);
+            holder.audioController.initHandler(new Handler());
         }
         // endregion
         // region send request to get avatar
@@ -183,7 +208,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         //holder.hours.setText("10/1-/1/");
         // endregion
 
-        holder.post_layout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
+        holder.postLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
     @Override
@@ -192,13 +217,13 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
     }
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
-        private final LinearLayout post_layout;
+        private final LinearLayout postLayout;
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
         private final TextView taggedPeople;
         private final TextView login;
-        // TODO add name
-        private final ImageView content;
+        private final ImageView contentImg;
+        private final VideoView contentVideo;
         private final ImageView like;
         private final ImageView comment;
         private final ImageView send;
@@ -209,20 +234,37 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         private final TextView authorNickname;
         private final TextView description;
         private final TextView hours;
+        // audio
+        private AudioController audioController;
+        private final LinearLayout audioControllerLayout;
+        private final TextView timeLine;
+        private final SeekBar seekBar;
+        private final ImageView playStop;
+        private final ImageView playPrev;
+        private final ImageView playNext;
         boolean like_flag = false;
         boolean bookmark_flag = false;
 
         public ViewHolderPosts(@NonNull View itemView) {
             super(itemView);
 
-            post_layout = itemView.findViewById(R.id.post_layout);
+            audioControllerLayout = itemView.findViewById(R.id.audio_controller);
+            timeLine = itemView.findViewById(R.id.time_line);
+            seekBar = itemView.findViewById(R.id.seek_bar);
+            playStop = itemView.findViewById(R.id.play_stop);
+            playPrev = itemView.findViewById(R.id.play_prev);
+            playNext = itemView.findViewById(R.id.play_next);
+
+            postLayout = itemView.findViewById(R.id.post_layout);
 
             avaView = itemView.findViewById(R.id.post_author_page);
             login = itemView.findViewById(R.id.nick_view);
 
             postContext = itemView.findViewById(R.id.post_context);
             activity.registerForContextMenu(postContext); // post context registration
-            content = itemView.findViewById(R.id.image_content);
+
+            contentImg = itemView.findViewById(R.id.image_content);
+            contentVideo = itemView.findViewById(R.id.video_content);
 
             like = itemView.findViewById(R.id.post_like);
             comment = itemView.findViewById(R.id.comment);
@@ -244,6 +286,14 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
 
         @SuppressLint({"UseCompatLoadingForDrawables", "NotifyDataSetChanged", "ClickableViewAccessibility"})
         private void setListeners() {
+            contentVideo.setOnClickListener(v -> {
+                if (contentVideo.isPlaying()) {
+                    contentVideo.pause();
+                } else {
+                    contentVideo.start();
+                }
+            });
+
             postContext.setOnTouchListener((v, event) -> {
                 NewsLine.mapPost = new Pair<>(getAdapterPosition(), postsLibrary.getDataArrayList().get(getAdapterPosition()));
                 return false;

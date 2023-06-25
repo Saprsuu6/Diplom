@@ -1,5 +1,7 @@
 package com.example.instagram.DAOs;
 
+import android.webkit.MimeTypeMap;
+
 import androidx.annotation.Nullable;
 
 import com.example.instagram.services.DateFormatting;
@@ -18,8 +20,7 @@ public class Post {
         clone.setAuthor(post.getAuthor());
         clone.setDescription(post.getDescription());
         clone.setLikes(post.getLikes());
-        clone.setResourceImg(post.getResourceImg());
-        clone.setResourceVideo(post.getResourceVideo());
+        clone.setResourceMedia(post.getResourceMedia());
 
         if (metadata != null) clone.setMetadata(post.getMetadata());
         if (postponePublication != null)
@@ -37,9 +38,7 @@ public class Post {
     private String author;
     private String description;
     private int likes;
-    private String resourceImg;
-    private String resourceVideo;
-    @Nullable
+    private String resourceMedia;
     private String metadata;
     @Nullable
     private Date postponePublication;
@@ -96,15 +95,11 @@ public class Post {
         this.description = description;
     }
 
-    public void setResourceImg(String resourceImg) {
-        this.resourceImg = resourceImg;
+    public void setResourceMedia(String resourceMedia) {
+        this.resourceMedia = resourceMedia;
     }
 
-    public void setResourceVideo(String resourceVideo) {
-        this.resourceVideo = resourceVideo;
-    }
-
-    public void setMetadata(@Nullable String metadata) {
+    public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
 
@@ -155,15 +150,10 @@ public class Post {
         return description;
     }
 
-    public String getResourceImg() {
-        return resourceImg;
+    public String getResourceMedia() {
+        return resourceMedia;
     }
 
-    public String getResourceVideo() {
-        return resourceVideo;
-    }
-
-    @Nullable
     public String getMetadata() {
         return metadata;
     }
@@ -185,8 +175,7 @@ public class Post {
         setPostId(object.getString("id"));
         setMetadata(object.getString("metadata"));
 
-        setResourceVideo(object.getString("videoUrl"));
-        setResourceImg(object.getString("imageUrl"));
+        setResourceMedia(object.getString("mediaUrl"));
 
         setDescription(object.getString("description"));
         setAuthor(object.getString("author"));
@@ -206,5 +195,19 @@ public class Post {
     }
 
     public Post() {
+    }
+
+    public String getMimeType() {
+        JSONObject meta;
+        try {
+            meta = new JSONObject(getMetadata());
+            return Post.getMimeTypeFromExtension(meta.getString("Extension"));
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getMimeTypeFromExtension(String extension) {
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
 }

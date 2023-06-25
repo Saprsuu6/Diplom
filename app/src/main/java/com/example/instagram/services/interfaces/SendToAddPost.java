@@ -12,7 +12,7 @@ public interface SendToAddPost {
     @retrofit2.http.Multipart
     @POST("/addPost")
     Call<ResponseBody> STRING_CALL(
-            @Part("image") RequestBody file,
+            @Part("media") RequestBody file,
             @Nullable @Part("otherInfo") String description
     );
 }

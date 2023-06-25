@@ -2,17 +2,11 @@ package com.example.instagram.authentication.after_reg;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -26,7 +20,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
@@ -37,16 +30,15 @@ import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Permissions;
+import com.example.instagram.services.MediaTypes;
+import com.example.instagram.services.OpenMedia;
+import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -128,19 +120,7 @@ public class SetAvatar extends AppCompatActivity {
         };
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        buttons[0].setOnClickListener(v -> {
-            if (TransitUser.user.getOtherInfo().isMediaPermission()) {
-                @SuppressLint("IntentReset") Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-
-                someActivityResultLauncher.launch(intent);
-            } else {
-                AlertDialog.Builder permissionsDialog = Permissions.getPermissionMediaDialog(this, resources);
-                permissionsDialog.setNegativeButton("Cancel", null);
-                permissionsDialog.create().show();
-            }
-        });
+        buttons[0].setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
         textViews[5].setOnClickListener(v -> {
             startActivity(Intents.getAuthorisation());
@@ -156,23 +136,23 @@ public class SetAvatar extends AppCompatActivity {
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == Activity.RESULT_OK) {
             Intent data = result.getData();
-            assert data != null;
-            Uri selectedImageUri = data.getData();
 
-            extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+            if (data != null) {
+                Uri selectedImageUri = data.getData();
 
-            try {
-                InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+                extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
 
-                // region Get image bytes
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    imageBytes = imageStream.readAllBytes();
+                try {
+                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri);
+
+                    if (imageBytes == null) {
+                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
+                    }
+
+                    sendAvaToBackEnd();
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
                 }
-                //endregion
-
-                sendAvaToBackEnd();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
             }
         }
     });
@@ -183,8 +163,8 @@ public class SetAvatar extends AppCompatActivity {
             return;
         }
 
-        RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes);
-        RequestBody nickName = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getLogin());
+        RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
+        RequestBody nickName = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), TransitUser.user.getLogin());
 
         try {
             Services.sendAva(new Callback<>() {

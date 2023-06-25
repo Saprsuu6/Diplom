@@ -3,14 +3,20 @@ package com.example.instagram.services;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 
@@ -22,6 +28,7 @@ import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +47,7 @@ public class PostInDialog {
     private ImageView send;
     private ImageView save;
     private ImageView imageContent;
+    private VideoView videoContent;
     private TextView amountLikesTitle;
     private TextView amountLikes;
     private TextView authorLogin;
@@ -47,8 +55,16 @@ public class PostInDialog {
     private TextView taggedPeople;
     private LinearLayout taggedPeopleLayout;
     private TextView date;
-    boolean like_flag = false;
-    boolean bookmark_flag = false;
+    // audio
+    private AudioController audioController;
+    private LinearLayout audioControllerLayout;
+    private TextView timeLine;
+    private SeekBar seekBar;
+    private ImageView playStop;
+    private ImageView playPrev;
+    private ImageView playNext;
+    private boolean like_flag = false;
+    private boolean bookmark_flag = false;
 
     public AlertDialog.Builder getPostDialog(Context context, Post post, PagingViewGetAllPostsInCells pagingView) {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.post, null, false);
@@ -59,7 +75,9 @@ public class PostInDialog {
         setContent(post);
         setListeners(post);
 
-        return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), null);
+        return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> {
+            if (audioController != null) audioController.clearHandler();
+        });
     }
 
     private void setViews(View view) {
@@ -69,6 +87,7 @@ public class PostInDialog {
         save = view.findViewById(R.id.bookmark);
 
         imageContent = view.findViewById(R.id.image_content);
+        videoContent = view.findViewById(R.id.video_content);
         amountLikesTitle = view.findViewById(R.id.amount_likes_title);
         amountLikes = view.findViewById(R.id.amount_likes);
         authorLogin = view.findViewById(R.id.author_nickname);
@@ -76,16 +95,44 @@ public class PostInDialog {
         taggedPeople = view.findViewById(R.id.tagged_people);
         taggedPeopleLayout = view.findViewById(R.id.tagged_people_layout);
         date = view.findViewById(R.id.hours);
+
+        audioControllerLayout = view.findViewById(R.id.audio_controller);
+        timeLine = view.findViewById(R.id.time_line);
+        seekBar = view.findViewById(R.id.seek_bar);
+        playStop = view.findViewById(R.id.play_stop);
+        playPrev = view.findViewById(R.id.play_prev);
+        playNext = view.findViewById(R.id.play_next);
     }
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     private void setContent(Post post) {
-        if (post.getResourceImg().equals("")) {
+        String mime = post.getMimeType();
+        String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + post.getResourceMedia();
+
+        // region set media content
+        if (mime.contains(context.getString(R.string.mime_image))) {
             // set image
-            Glide.with(context).load(Services.BASE_URL + post.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
-        } else {
+            Glide.with(context).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
+            imageContent.setVisibility(View.VISIBLE);
+        } else if (mime.contains(context.getString(R.string.mime_video))) {
             // set video
-            Glide.with(context).load(Services.BASE_URL + post.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
+            Uri videoUri = Uri.parse(mediaPath);
+
+            MediaController mediaController = new MediaController(context);
+
+            videoContent.setVideoURI(videoUri);
+            mediaController.setAnchorView(videoContent);
+            videoContent.setMediaController(mediaController);
+
+            videoContent.start();
+            videoContent.requestFocus();
+            videoContent.setVisibility(View.VISIBLE);
+        } else if (mime.contains(context.getString(R.string.mime_audio))) {
+            // set audio
+            Uri audioUri = Uri.parse(mediaPath);
+            audioControllerLayout.setVisibility(View.VISIBLE);
+            audioController = new AudioController(timeLine, seekBar, playStop, playPrev, playNext, context, audioUri);
+            audioController.initHandler(new Handler());
         }
 
         // region set other text info
@@ -173,6 +220,14 @@ public class PostInDialog {
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     private void setListeners(Post post) {
+        videoContent.setOnClickListener(v -> {
+            if (videoContent.isPlaying()) {
+                videoContent.pause();
+            } else {
+                videoContent.start();
+            }
+        });
+
         taggedPeople.setOnClickListener(v -> {
             if (taggedPeopleLayout.getChildCount() > 1) {
                 taggedPeopleLayout.setVisibility(taggedPeopleLayout.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);

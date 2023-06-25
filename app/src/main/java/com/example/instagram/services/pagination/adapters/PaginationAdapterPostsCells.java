@@ -1,9 +1,12 @@
 package com.example.instagram.services.pagination.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Point;
+import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -12,6 +15,8 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +28,7 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.main_process.SelfPage;
+import com.example.instagram.services.AudioController;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.PostInDialog;
 import com.example.instagram.services.Services;
@@ -58,9 +64,11 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         this.postsLibrary = postsLibrary;
         this.pagingView = pagingView;
 
-        Display display = activity.getWindowManager().getDefaultDisplay();
         size = new Point();
-        display.getSize(size);
+        if (activity != null) {
+            Display display = activity.getWindowManager().getDefaultDisplay();
+            display.getSize(size);
+        }
     }
 
     @NonNull
@@ -75,11 +83,26 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         for (int i = 0; i < PaginationCurrentForAllComments.amountOfPagination; i++) {
             if (i < postsLibrary.getDataArrayList().size()) {
                 Post data = postsLibrary.getDataArrayList().get(i);
+                View content = null;
 
-                ImageView image = setImage(data, holder);
-                holder.flexboxLayout.addView(image);
+                String mime = data.getMimeType();
+                String mediaPath = Services.BASE_URL + data.getResourceMedia();
 
-                image.setOnClickListener(postInDialog(data));
+                // region set media content
+                if (mime.contains(context.getString(R.string.mime_image))) {
+                    //set image
+                    content = setImage(data, holder);
+                } else if (mime.contains(context.getString(R.string.mime_video))) {
+                    // set image
+                    content = setVideo(data, holder);
+                } else if (mime.contains(context.getString(R.string.mime_audio))) {
+                    // set audio
+                    content = setImageForAudio(holder);
+                }
+                // endregion
+
+                holder.flexboxLayout.addView(content);
+                if (content != null) content.setOnClickListener(postInDialog(data));
             } else {
                 break;
             }
@@ -88,21 +111,42 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
         holder.flexboxLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
-    private ImageView setImage(Post data, @NonNull ViewHolderPostsCells holder) {
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private ImageView setImageForAudio(@NonNull ViewHolderPostsCells holder) {
         ImageView image = new ImageView(context);
-        image.setLayoutParams(holder.imageParams);
+        image.setLayoutParams(holder.mediaParams);
         image.setPadding(3, 3, 3, 3);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-        if (data.getResourceImg().equals("")) {
-            // set image
-            Glide.with(context).load(Services.BASE_URL + data.getResourceVideo()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
-        } else {
-            // set video
-            Glide.with(context).load(Services.BASE_URL + data.getResourceImg()).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
-        }
+        image.setImageDrawable(context.getDrawable(R.drawable.play_cell));
 
         return image;
+    }
+
+    private ImageView setImage(Post data, @NonNull ViewHolderPostsCells holder) {
+        ImageView image = new ImageView(context);
+        image.setLayoutParams(holder.mediaParams);
+        image.setPadding(3, 3, 3, 3);
+        image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        String imagePath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
+
+        Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
+
+        return image;
+    }
+
+    private VideoView setVideo(Post data, @NonNull ViewHolderPostsCells holder) {
+        VideoView video = new VideoView(context);
+        video.setLayoutParams(holder.mediaParams);
+        video.setPadding(3, 3, 3, 3);
+
+        String videoPath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
+        Uri videoUri = Uri.parse(videoPath);
+        video.setVideoURI(videoUri);
+
+        video.start();
+        video.requestFocus();
+
+        return video;
     }
 
     private View.OnClickListener postInDialog(Post post) {
@@ -148,19 +192,24 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     @Override
     public int getItemCount() {
-        return postsLibrary.getDataArrayList().size() > 1 ? 1 : 0;
+        return postsLibrary.getDataArrayList().size() >= 1 ? 1 : 0;
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull ViewHolderPostsCells holder) {
+        super.onViewDetachedFromWindow(holder);
+        holder.flexboxLayout.removeAllViews();
     }
 
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {
         private final FlexboxLayout flexboxLayout;
-        private final LinearLayout.LayoutParams imageParams;
+        private final LinearLayout.LayoutParams mediaParams;
 
         public ViewHolderPostsCells(@NonNull View itemView) {
             super(itemView);
 
             flexboxLayout = itemView.findViewById(R.id.layout);
-
-            imageParams = new LinearLayout.LayoutParams(size.x / 3, size.x / 3);
+            mediaParams = new LinearLayout.LayoutParams(size.x / 3, size.x / 3);
         }
     }
 }

@@ -79,26 +79,25 @@ public class ForgotPassword extends AppCompatActivity {
             try {
                 Services.sendToCheckUsedLickInMail(new Callback<>() {
                     @Override
-                    public void onResponse(@Nullable Call<String> call, @Nullable Response<String> response) {
-                        assert response != null;
-                        assert response.body() != null;
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().contains("0")) {
+                                String responseStr = response.body();
+                                int index = responseStr.indexOf(":");
+                                responseStr = responseStr.substring(index + 1);
 
-                        if (response.body().contains("0")) {
-                            String responseStr = response.body();
-                            int index = responseStr.indexOf(":");
-                            responseStr = responseStr.substring(index + 1);
-
-                            TransitUser.user.setEmailCode(responseStr.trim());
-                            startActivity(Intents.getCreateNewPassword());
-                            handler.removeCallbacks(runnable);
-                            finish();
-                        } else {
-                            handler.postDelayed(runnable, 5000L);
+                                TransitUser.user.setEmailCode(responseStr.trim());
+                                startActivity(Intents.getCreateNewPassword());
+                                handler.removeCallbacks(runnable);
+                                finish();
+                            } else {
+                                handler.postDelayed(runnable, 5000L);
+                            }
                         }
                     }
 
                     @Override
-                    public void onFailure(@Nullable Call<String> call, @Nullable Throwable t) {
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         assert t != null;
                         System.out.println(t.getMessage());
                     }

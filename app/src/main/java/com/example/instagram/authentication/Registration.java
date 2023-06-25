@@ -4,9 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.text.InputType;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -17,58 +17,89 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetName;
+import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.Animation;
-import com.example.instagram.services.RegistrationActivities;
-import com.example.instagram.services.Validations;
+import com.example.instagram.services.Errors;
 import com.example.instagram.services.GetEthernetInfo;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.RegistrationActivities;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
-import java.util.Objects;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Registration extends AppCompatActivity {
+    public class Views {
+        private final LinearLayout registrationLayout;
+        private final EditText fieldToEmail;
+        private final EditText fieldConfirmCode;
+        private final Button confirmCode;
+        private final Button singIn;
+        private final ImageView warning;
+        private final CheckBox receiveEmail;
+        private final CheckBox hideEmail;
+        private final CheckBox rememberMe;
+        private final TextView haveAnAccount;
+        private final TextView emailName;
+        private final TextView haveAnAccountLink;
+        private final Spinner languagesSpinner;
+
+        public Views() {
+            registrationLayout = findViewById(R.id.registration);
+            fieldToEmail = findViewById(R.id.phone_or_email);
+            fieldConfirmCode = findViewById(R.id.info_for_email_code);
+            confirmCode = findViewById(R.id.confirm_code_button);
+            singIn = findViewById(R.id.reg_log_in);
+            receiveEmail = findViewById(R.id.receive_news_letters);
+            hideEmail = findViewById(R.id.hide_email);
+            rememberMe = findViewById(R.id.remember_flag);
+            haveAnAccount = findViewById(R.id.reg_question);
+            haveAnAccountLink = findViewById(R.id.link_log_in);
+            languagesSpinner = findViewById(R.id.languages);
+            warning = findViewById(R.id.validation_error);
+            emailName = findViewById(R.id.email_name);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout registration;
-    private EditText[] editTexts;
-    private Button[] buttons;
-    private TextView[] textViews;
-    private CheckBox[] checkBoxes;
-    private ImageView[] imageViews;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private String infoType;
-    private CheckBox rememberMe;
+    private Views views;
+    private Handler handler;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rgistration);
 
-        setIntents();
-        findViews();
-        setRememberMe();
-
-        setUiVisibility();
+        handler = new Handler();
+        runnable = checkUsedLink();
+        views = new Views();
         resources = getResources();
-
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
+        setRememberMe();
+        setUiVisibility();
+        setIntents();
         setListeners();
-        toggleContentEmail();
 
-        Animation.getAnimations(registration).start();
+        Animation.getAnimations(views.registrationLayout).start();
     }
 
     private void setIntents() {
@@ -80,7 +111,7 @@ public class Registration extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void setUiVisibility() {
@@ -90,18 +121,7 @@ public class Registration extends AppCompatActivity {
 
     private void setRememberMe() {
         boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
-        rememberMe.setChecked(rememberMeFlag);
-    }
-
-    private void findViews() {
-        registration = findViewById(R.id.registration);
-        languages = findViewById(R.id.languages);
-        rememberMe = findViewById(R.id.remember_flag);
-        editTexts = new EditText[]{findViewById(R.id.phone_or_email)};
-        buttons = new Button[]{findViewById(R.id.reg_log_in)};
-        checkBoxes = new CheckBox[]{findViewById(R.id.receive_news_letters), findViewById(R.id.hide_phone), findViewById(R.id.hide_email)};
-        textViews = new TextView[]{findViewById(R.id.reg_phone), findViewById(R.id.reg_email), findViewById(R.id.reg_question), findViewById(R.id.link_log_in), findViewById(R.id.country_code), findViewById(R.id.email_name), findViewById(R.id.remember_title)};
-        imageViews = new ImageView[]{findViewById(R.id.validation_error)};
+        views.rememberMe.setChecked(rememberMeFlag);
     }
 
     private void setListeners() {
@@ -117,45 +137,35 @@ public class Registration extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked));
+        views.rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked));
 
-        textViews[0].setOnClickListener(v -> {
-            setDefaultTextBoxSettings(editTexts[0]);
-            toggleContentPhoneNumber();
+        views.fieldToEmail.addTextChangedListener(new Validator(views.fieldToEmail) {
+            @SuppressLint("UseCompatLoadingForDrawables")
+            @Override
+            public void validate(EditText editText, String text) {
+                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
+
+                try {
+                    Validations.validateEmail(text, views.emailName.getText().toString(), resources);
+                    setValidationError(false, "");
+                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
+                } catch (Exception exception) {
+                    setValidationError(true, exception.getMessage());
+                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
+                }
+            }
         });
 
-        textViews[1].setOnClickListener(v -> {
-            setDefaultTextBoxSettings(editTexts[0]);
-            toggleContentEmail();
-        });
-
-        buttons[0].setOnClickListener(v -> {
-            //ArrayList<PhoneBookContact> contacts = Contacts.getContacts(this);
-
-            if (editTexts[0].length() != 0) {
+        views.singIn.setOnClickListener(v -> {
+            if (views.fieldToEmail.length() != 0) {
                 try {
                     setValidationError(false, "");
 
-                    switch (infoType) {
-                        case "phone":
-                            Validations.validatePhoneNumber(editTexts[0].getText().toString(), textViews[4].getText().toString(), resources);
-                            TransitUser.user.setPhoneNumber(textViews[4].getText() + editTexts[0].getText().toString());
-                            break;
-                        case "email":
-                            Validations.validateEmail(editTexts[0].getText().toString(), textViews[5].getText().toString(), resources);
-                            TransitUser.user.setEmail(editTexts[0].getText().toString() + textViews[5].getText());
-                            break;
-                    }
-
-                    TransitUser.user.getOtherInfo().setReceiveNewsletters(checkBoxes[0].isChecked());
-                    TransitUser.user.getOtherInfo().setHidePhone(checkBoxes[1].isChecked());
-                    TransitUser.user.getOtherInfo().setHideEmail(checkBoxes[2].isChecked());
+                    TransitUser.user.getOtherInfo().setReceiveNewsletters(views.receiveEmail.isChecked());
+                    TransitUser.user.getOtherInfo().setHideEmail(views.hideEmail.isChecked());
                     TransitUser.user.getOtherInfo().setIpAddress(GetEthernetInfo.getNetworkInfo());
-
-                    RegistrationActivities.activityList.add(this);
-                    startActivity(Intents.getSetName());
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
@@ -164,104 +174,122 @@ public class Registration extends AppCompatActivity {
             }
         });
 
-        textViews[3].setOnClickListener(v -> finish());
-    }
+        views.haveAnAccountLink.setOnClickListener(v -> finish());
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void toggleContentPhoneNumber() {
-        editTexts[0].setHint(resources.getString(R.string.phone_reg));
-        textViews[5].setVisibility(View.GONE);
-        textViews[4].setVisibility(View.VISIBLE);
-
-        editTexts[0].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg, getTheme()));
-        editTexts[0].setInputType(InputType.TYPE_CLASS_PHONE);
-        editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void validate(EditText editText, String text) {
-                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
-
+        // send code to email
+        views.singIn.setOnClickListener(v -> {
+            if (views.warning.getVisibility() == View.GONE) {
+                JSONObject body = new JSONObject();
                 try {
-                    Validations.validatePhoneNumber(text, textViews[4].getText().toString(), resources);
-                    setValidationError(false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, Registration.this.getTheme()));
-                } catch (Exception exception) {
-                    setValidationError(true, exception.getMessage());
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, Registration.this.getTheme()));
+                    body.put("login", SelfPage.userPage.getLogin());
+                    body.put("newEmail", views.fieldToEmail.getText().toString());
+                    body.put("token", TransitUser.user.getToken());
+
+                    Services.sendToSendCodeForEmail(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
+                        }
+                    }, body.toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
                 }
             }
         });
 
-        infoType = "phone";
-    }
+        // check code
+        views.confirmCode.setOnClickListener(v -> {
+            if (!RegistrationActivities.activityList.contains(this)) {
+                RegistrationActivities.activityList.add(this);
+            }
 
-    private void toggleContentEmail() {
-        editTexts[0].setHint(resources.getString(R.string.email_reg));
+            if (views.fieldConfirmCode.getText().length() > 0) {
 
-        textViews[4].setVisibility(View.GONE);
-        textViews[5].setVisibility(View.VISIBLE);
-
-        editTexts[0].setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void validate(EditText editText, String text) {
-                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
-
+                JSONObject body = new JSONObject();
                 try {
-                    Validations.validateEmail(text, textViews[5].getText().toString(), resources);
-                    setValidationError(false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, Registration.this.getTheme()));
-                } catch (Exception exception) {
-                    setValidationError(true, exception.getMessage());
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, Registration.this.getTheme()));
+                    body.put("token", TransitUser.user.getToken());
+                    body.put("code", views.confirmCode.getText());
+                    body.put("newEmail", views.fieldToEmail.getText().toString());
+
+                    Services.sendToChangeEmailFinally(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Errors.emailCodes(getApplicationContext(), response.body()).show();
+                                startActivity(Intents.getSetName());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
+                        }
+                    }, body.toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
                 }
             }
         });
-
-        infoType = "email";
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void setDefaultTextBoxSettings(EditText editText) {
-        editText.getText().clear();
-        editText.setTextColor(resources.getColor(R.color.black, getTheme()));
-        editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg, getTheme()));
+    private Runnable checkUsedLink() {
+        return () -> {
+            try {
+                Services.sendToCheckUsedLickInMail(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().contains("0")) {
+                                String responseStr = response.body();
+                                int index = responseStr.indexOf(":");
+                                responseStr = responseStr.substring(index + 1);
+                                views.fieldConfirmCode.setText(responseStr.trim());
+                            } else {
+                                handler.postDelayed(runnable, 5000L);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        System.out.println(t.getMessage());
+                    }
+                });
+
+            } catch (JSONException e) {
+                System.out.println(e.getMessage());
+            }
+        };
     }
 
     private void setValidationError(boolean temp, String message) {
         if (temp) {
-            imageViews[0].setVisibility(View.VISIBLE);
-            Animation.getAnimations(imageViews[0]).start();
+            views.warning.setVisibility(View.VISIBLE);
+            Animation.getAnimations(views.warning).start();
         } else {
-            imageViews[0].setVisibility(View.GONE);
-            Animation.getAnimations(imageViews[0]).stop();
+            views.warning.setVisibility(View.GONE);
+            Animation.getAnimations(views.warning).stop();
         }
 
-        TooltipCompat.setTooltipText(imageViews[0], message);
+        TooltipCompat.setTooltipText(views.warning, message);
     }
 
-    // region Localisation
     private void setStringResources() {
-        buttons[0].setText(resources.getString(R.string.sing_in));
-
-        textViews[0].setText(resources.getString(R.string.phone_reg));
-        textViews[1].setText(resources.getString(R.string.email_reg));
-        textViews[2].setText(resources.getString(R.string.have_an_acc));
-        textViews[3].setText(resources.getString(R.string.log_in));
-        textViews[4].setText(resources.getString(R.string.code));
-
-        if (textViews[4].getVisibility() == View.VISIBLE) {
-            editTexts[0].setHint(resources.getString(R.string.phone_reg));
-        } else if (textViews[5].getVisibility() == View.VISIBLE) {
-            editTexts[0].setHint(resources.getString(R.string.email_reg));
-        }
-
-        textViews[6].setText(resources.getString(R.string.remember_me));
-
-        checkBoxes[0].setText(resources.getString(R.string.check_receive_news_letters));
-        checkBoxes[1].setText(resources.getString(R.string.check_hide_phone));
-        checkBoxes[2].setText(resources.getString(R.string.check_hide_email));
+        views.haveAnAccountLink.setText(resources.getString(R.string.log_in));
+        views.haveAnAccount.setText(resources.getString(R.string.have_an_acc));
+        views.receiveEmail.setText(resources.getString(R.string.check_receive_news_letters));
+        views.hideEmail.setText(resources.getString(R.string.check_hide_email));
+        views.rememberMe.setText(resources.getString(R.string.remember_me));
+        views.singIn.setText(resources.getString(R.string.sing_in));
+        views.fieldToEmail.setHint(resources.getString(R.string.email_reg));
+        views.fieldConfirmCode.setHint(resources.getString(R.string.confirm_code));
+        views.confirmCode.setHint(resources.getString(R.string.confirm_code));
     }
-    // endregion
 }

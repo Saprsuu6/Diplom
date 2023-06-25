@@ -4,9 +4,9 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
-public interface SendToForgotPassword {
-    @POST("/confirm")
+public interface SendToChangeEmailFinally {
+    @POST("/changeEmail")
     Call<String> STRING_CALL(
-            @Body String user
+            @Body String body
     );
 }

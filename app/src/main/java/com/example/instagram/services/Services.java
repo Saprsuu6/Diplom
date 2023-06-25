@@ -1,19 +1,19 @@
 package com.example.instagram.services;
 
 import com.example.instagram.services.interfaces.SendAva;
+import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendToAddNewAnswer;
 import com.example.instagram.services.interfaces.SendToAddNewComment;
 import com.example.instagram.services.interfaces.SendToAddPost;
-import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendToAddUser;
 import com.example.instagram.services.interfaces.SendToChangeComment;
+import com.example.instagram.services.interfaces.SendToChangeEmailFinally;
 import com.example.instagram.services.interfaces.SendToChangeUser;
 import com.example.instagram.services.interfaces.SendToCheckExistUser;
 import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
 import com.example.instagram.services.interfaces.SendToCheckUserCode;
 import com.example.instagram.services.interfaces.SendToDeleteComment;
 import com.example.instagram.services.interfaces.SendToDeletePost;
-import com.example.instagram.services.interfaces.SendToForgotPassword;
 import com.example.instagram.services.interfaces.SendToGetAllComments;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
@@ -24,6 +24,7 @@ import com.example.instagram.services.interfaces.SendToGetPostsOfUser;
 import com.example.instagram.services.interfaces.SendToGetTaggedPeople;
 import com.example.instagram.services.interfaces.SendToLikeUnlikePost;
 import com.example.instagram.services.interfaces.SendToSaveUnsavedPost;
+import com.example.instagram.services.interfaces.SendToSendCodeToEmail;
 
 import org.json.JSONException;
 
@@ -37,7 +38,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://cb07-2a09-bac5-597c-52d-00-84-6f.ngrok-free.app";
+    public final static String BASE_URL = "https://0046-2a09-bac1-7540-18-00-84-82.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback) throws IOException, JSONException {
@@ -57,7 +58,7 @@ public class Services {
     }
 
     public static void sendToForgotPassword(Callback<String> callback) throws Exception {
-        SendToForgotPassword mainInterface = retrofit.create(SendToForgotPassword.class);
+        SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
 
         Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONLogin().toString());
         call.enqueue(callback);
@@ -205,6 +206,20 @@ public class Services {
 
     public static void sendToChangeUser(Callback<String> callback, String body) throws JSONException {
         SendToChangeUser mainInterface = retrofit.create(SendToChangeUser.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToSendCodeForEmail(Callback<String> callback, String body) throws JSONException {
+        SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToChangeEmailFinally(Callback<String> callback, String body) throws JSONException {
+        SendToChangeEmailFinally mainInterface = retrofit.create(SendToChangeEmailFinally.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);

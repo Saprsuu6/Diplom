@@ -1,6 +1,7 @@
 package com.example.instagram.DAOs;
 
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,7 +149,7 @@ public class User {
     private String phoneNumber = "";
     private String password;
     private String passwordRepeat;
-    private String email = "empty@i.ua";
+    private String email = "";
     private Date birthday;
     private String avatar;
     private String token;
@@ -225,6 +226,7 @@ public class User {
         selfPageUser.setAmountPosts(user.getInt("postsAmount"));
         selfPageUser.setSurname(user.getString("surname"));
         selfPageUser.setNickName(user.getString("name"));
+        selfPageUser.setEmail(user.getString("email"));
         selfPageUser.setDescription(user.getString("bio"));
         Date date = DateFormatting.formatDateFromStandard(user.getString("birthday"));
         selfPageUser.setBirthday(date);
@@ -234,14 +236,17 @@ public class User {
     }
 
     public JSONObject getToChange() throws JSONException {
+        JSONObject user = new JSONObject();
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", nickName);
         jsonObject.put("surname", surname);
-        // TODO decide how to send new ava
-        jsonObject.put("email", email);
         jsonObject.put("bio", description);
-        jsonObject.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
+        jsonObject.put("birthday", DateFormatting.formatToDateWithTime(birthday));
 
-        return jsonObject;
+        user.put("token", TransitUser.user.token);
+        user.put("user", jsonObject);
+
+        return user;
     }
 }

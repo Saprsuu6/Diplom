@@ -18,6 +18,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -195,13 +196,7 @@ public class NewsLine extends AppCompatActivity {
                 break;
             case R.id.download:
                 AndroidDownloader androidDownloader = new AndroidDownloader(this);
-                Uri uri = null;
-
-                if (NewsLine.mapPost.second.getResourceImg() != null) {
-                    uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
-                } else if (NewsLine.mapPost.second.getResourceVideo() != null) {
-                    uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceImg());
-                }
+                Uri uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceMedia());
 
                 if (NewsLine.mapPost.second.getMetadata() != null) {
                     try {

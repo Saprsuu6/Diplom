@@ -8,26 +8,21 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.text.Editable;
+import android.os.Handler;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,15 +34,15 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
-import com.example.instagram.authentication.Registration;
 import com.example.instagram.authentication.after_reg.SetBirthday;
-import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Permissions;
+import com.example.instagram.services.MediaTypes;
+import com.example.instagram.services.OpenMedia;
+import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.Animation;
 import com.example.instagram.services.TransitUser;
@@ -58,7 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -78,11 +73,14 @@ public class EditProfile extends AppCompatActivity {
     // endregion
     private TextView[] textViews;
     private EditText[] editTexts;
+    private Button[] buttons;
     private ImageView[] imageViews;
     private Calendar selectedDate;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private byte[] imageBytes;
     private String extension;
+    private Handler handler;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +99,12 @@ public class EditProfile extends AppCompatActivity {
 
         setListeners();
         Animation.getAnimations(editProfile);
+
+        setUserInfo();
+
+        handler = new Handler();
+        runnable = checkUsedLink();
+        handler.postDelayed(runnable, 5000L);
     }
 
     @Override
@@ -142,9 +146,19 @@ public class EditProfile extends AppCompatActivity {
     private void findViews() {
         editProfile = findViewById(R.id.edit_profile);
         languages = findViewById(R.id.languages);
-        editTexts = new EditText[]{findViewById(R.id.info_for_name), findViewById(R.id.info_for_surname), findViewById(R.id.info_for_email), findViewById(R.id.info_for_bio), findViewById(R.id.birth_date)};
-        imageViews = new ImageView[]{findViewById(R.id.ava), findViewById(R.id.close), findViewById(R.id.done), findViewById(R.id.ava), findViewById(R.id.validation_error_name), findViewById(R.id.validation_error_surname), findViewById(R.id.validation_error_email), findViewById(R.id.validation_error_birthday)};
+        editTexts = new EditText[]{findViewById(R.id.info_for_name), findViewById(R.id.info_for_surname), findViewById(R.id.info_for_email), findViewById(R.id.info_for_bio), findViewById(R.id.birth_date), findViewById(R.id.info_for_email_code)};
+        imageViews = new ImageView[]{findViewById(R.id.ava), findViewById(R.id.close), findViewById(R.id.done), findViewById(R.id.ava), findViewById(R.id.validation_error_email), findViewById(R.id.validation_error_birthday)};
         textViews = new TextView[]{findViewById(R.id.title), findViewById(R.id.email_name)};
+        buttons = new Button[]{findViewById(R.id.send_new_email), findViewById(R.id.confirm_code_button)};
+    }
+
+    private void setUserInfo() {
+        editTexts[0].setText(SelfPage.userPage.getNickName());
+        editTexts[1].setText(SelfPage.userPage.getSurname());
+
+        editTexts[2].setText(SelfPage.userPage.getEmail());
+        editTexts[3].setText(SelfPage.userPage.getDescription());
+        editTexts[4].setText(DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
 
     @SuppressLint("IntentReset")
@@ -166,39 +180,7 @@ public class EditProfile extends AppCompatActivity {
         languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         imageViews[0].setOnClickListener(v -> finish());
-        // name
-        editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void validate(EditText editText, String text) {
-                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
 
-                if (editTexts[0].length() != 0) {
-                    setValidationError(imageViews[4], false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
-                } else {
-                    setValidationError(imageViews[4], true, getResources().getString(R.string.error_send_password1));
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
-                }
-            }
-        });
-        // surname
-        editTexts[1].addTextChangedListener(new Validator(editTexts[1]) {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void validate(EditText editText, String text) {
-                editTexts[1].setTextColor(resources.getColor(R.color.white, getTheme()));
-
-                if (editTexts[1].length() != 0) {
-                    setValidationError(imageViews[5], false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
-                } else {
-                    setValidationError(imageViews[5], true, getResources().getString(R.string.error_send_password1));
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
-                }
-            }
-        });
-        // surname
         editTexts[2].addTextChangedListener(new Validator(editTexts[2]) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
@@ -206,11 +188,11 @@ public class EditProfile extends AppCompatActivity {
                 editTexts[2].setTextColor(resources.getColor(R.color.white, getTheme()));
 
                 try {
-                    Validations.validateEmail(text, textViews[1].getText().toString(), resources);
-                    setValidationError(imageViews[6], false, "");
+                    Validations.validateEmail(text, "", resources);
+                    setValidationError(imageViews[4], false, "");
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
                 } catch (Exception exception) {
-                    setValidationError(imageViews[6], true, getResources().getString(R.string.error_send_password1));
+                    setValidationError(imageViews[4], true, getResources().getString(R.string.error_send_password1));
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
                 }
             }
@@ -236,36 +218,55 @@ public class EditProfile extends AppCompatActivity {
             DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
             if (year - SetBirthday.yearOffset <= year1) {
-                setValidationError(imageViews[7], true, getResources().getString(R.string.birthday_error_age));
+                setValidationError(imageViews[5], true, getResources().getString(R.string.birthday_error_age));
             } else {
                 editTexts[4].setText(DateFormatting.formatDate(selectedDate));
-                setValidationError(imageViews[7], false, "");
+                setValidationError(imageViews[5], false, "");
             }
         };
         // endregion
 
-        imageViews[0].setOnClickListener(v -> {
-            if (TransitUser.user.getOtherInfo().isMediaPermission()) {
-                @SuppressLint("IntentReset") Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
+        imageViews[0].setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
-                someActivityResultLauncher.launch(intent);
-            } else {
-                AlertDialog.Builder permissionsDialog = Permissions.getPermissionMediaDialog(this, resources);
-                permissionsDialog.setNegativeButton("Cancel", null);
-                permissionsDialog.create().show();
+        imageViews[1].setOnClickListener(v -> {
+            try {
+                Services.sendToGetCurrentUser(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            JSONObject user;
+
+                            try {
+                                user = new JSONObject(response.body());
+
+                                SelfPage.userPage = User.getPublicUser(user, TransitUser.user.getLogin());
+                                finish();
+                            } catch (JSONException | ParseException e) {
+                                Log.d("JSONException", e.getMessage());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
+                    }
+                }, TransitUser.user.getLogin());
+            } catch (JSONException e) {
+                Log.d("JSONException: ", e.getMessage());
             }
         });
 
-        imageViews[1].setOnClickListener(v -> finish());
-
         imageViews[2].setOnClickListener(v -> {
-            if (imageViews[4].getVisibility() == View.GONE && imageViews[5].getVisibility() == View.GONE && imageViews[6].getVisibility() == View.GONE && imageViews[7].getVisibility() == View.GONE) {
+            if (imageViews[4].getVisibility() == View.GONE && imageViews[5].getVisibility() == View.GONE) {
                 SelfPage.userPage.setLogin(editTexts[0].getText().toString().trim());
                 SelfPage.userPage.setSurname(editTexts[1].getText().toString().trim());
-                SelfPage.userPage.setEmail(editTexts[2].getText().toString().trim() + textViews[1].getText());
                 SelfPage.userPage.setDescription(editTexts[3].getText().toString().trim());
+
+                if (selectedDate == null) {
+                    selectedDate = DateFormatting.getCalendar(SelfPage.userPage.getBirthday());
+                }
+
                 SelfPage.userPage.setBirthday(selectedDate.getTime());
 
                 sendAvaToBackEnd();
@@ -277,7 +278,11 @@ public class EditProfile extends AppCompatActivity {
                     Services.sendToChangeUser(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            Log.d("sendToChangeUser: (onResponse) ", response.body()); // TODO
+                            if (response.isSuccessful() && response.body() != null) {
+                                if (response.body().contains("3")) {
+                                    Toast.makeText(getApplicationContext(), getString(R.string.email_are_not_valid), Toast.LENGTH_SHORT).show();
+                                }
+                            }
                         }
 
                         @Override
@@ -289,9 +294,96 @@ public class EditProfile extends AppCompatActivity {
                     Log.d("JSONException", e.getMessage());
                 }
             }
-
-            finish();
         });
+
+        // send code to mail
+        buttons[0].setOnClickListener(v -> {
+            if (SelfPage.userPage.getEmail().equals(editTexts[2].getText().toString())) {
+                JSONObject body = new JSONObject();
+                try {
+                    body.put("login", SelfPage.userPage.getLogin());
+                    body.put("newEmail", editTexts[2].getText().toString());
+                    body.put("token", TransitUser.user.getToken());
+
+                    Services.sendToSendCodeForEmail(new Callback<>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
+                        }
+                    }, body.toString());
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
+                }
+            }
+        });
+
+        // check code
+        buttons[1].setOnClickListener(v -> {
+            if (editTexts[5].getText().length() > 0) {
+                if (!SelfPage.userPage.getEmail().equals(editTexts[2].getText().toString())) {
+                    JSONObject body = new JSONObject();
+                    try {
+                        body.put("token", TransitUser.user.getToken());
+                        body.put("code", editTexts[5].getText());
+                        body.put("newEmail", editTexts[2].getText().toString());
+
+                        Services.sendToChangeEmailFinally(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    Errors.emailCodes(getApplicationContext(), response.body()).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
+                            }
+                        }, body.toString());
+                    } catch (JSONException e) {
+                        Log.d("JSONException: ", e.getMessage());
+                    }
+                }
+            }
+        });
+    }
+
+    // check link
+    private Runnable checkUsedLink() {
+        return () -> {
+            try {
+                Services.sendToCheckUsedLickInMail(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().contains("0")) {
+                                String responseStr = response.body();
+                                int index = responseStr.indexOf(":");
+                                responseStr = responseStr.substring(index + 1);
+                                editTexts[5].setText(responseStr.trim());
+                            } else {
+                                handler.postDelayed(runnable, 5000L);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        System.out.println(t.getMessage());
+                    }
+                });
+
+            } catch (JSONException e) {
+                System.out.println(e.getMessage());
+            }
+        };
     }
 
     private void setValidationError(View view, boolean temp, String message) {
@@ -309,36 +401,41 @@ public class EditProfile extends AppCompatActivity {
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == Activity.RESULT_OK) {
             Intent data = result.getData();
-            assert data != null;
-            Uri selectedImageUri = data.getData();
 
-            extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+            if (data != null) {
+                Uri selectedImageUri = data.getData();
 
-            try {
-                InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+                extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
 
-                // region Get image bytes
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    imageBytes = imageStream.readAllBytes();
+                try {
+                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri);
+
+                    if (imageBytes == null) {
+                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
+                    }
+
+                    //Bitmap ava = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    imageViews[0].setImageURI(selectedImageUri);
+                    //Glide.with(getApplicationContext()).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[0]);
+                } catch (IOException e) {
+                    Log.d("IOException: ", e.getMessage());
                 }
-                //endregion
-
-                Bitmap ava = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                Glide.with(getApplicationContext()).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[0]);
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
             }
         }
     });
 
     private void sendAvaToBackEnd() {
-        if (imageBytes.length == 0) {
-            Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
+        if (imageBytes != null) {
+            if (imageBytes.length == 0) {
+                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
             return;
         }
 
-        RequestBody image = RequestBody.create(MediaType.parse("image/" + extension), imageBytes);
-        RequestBody login = RequestBody.create(MediaType.parse("text/plain"), TransitUser.user.getLogin());
+        RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
+        RequestBody login = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), TransitUser.user.getLogin());
 
         try {
             Services.sendAva(new Callback<>() {
@@ -371,6 +468,11 @@ public class EditProfile extends AppCompatActivity {
         editTexts[2].setHint(resources.getString(R.string.login_hint_email));
         editTexts[3].setHint(resources.getString(R.string.login_hint_bio));
         editTexts[4].setHint(resources.getString(R.string.birthday_hint));
+        editTexts[2].setHint(resources.getString(R.string.login_hint_email));
+        editTexts[5].setHint(resources.getString(R.string.mail_code));
+
+        buttons[0].setText(resources.getString(R.string.send_code));
+        buttons[1].setText(resources.getString(R.string.confirm_code));
     }
 
     // endregion
