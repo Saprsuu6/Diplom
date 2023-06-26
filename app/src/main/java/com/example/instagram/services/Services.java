@@ -38,7 +38,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://0046-2a09-bac1-7540-18-00-84-82.ngrok-free.app";
+    public final static String BASE_URL = "https://b700-2a09-bac5-597c-52d-00-84-89.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback) throws IOException, JSONException {

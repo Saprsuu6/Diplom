@@ -77,6 +77,7 @@ public class PostInDialog {
 
         return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> {
             if (audioController != null) audioController.clearHandler();
+            pagingView.notifyAdapterToClearAll();
         });
     }
 

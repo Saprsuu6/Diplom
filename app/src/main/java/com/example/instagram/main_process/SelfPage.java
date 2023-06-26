@@ -102,7 +102,6 @@ public class SelfPage extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (flexboxLayout != null) flexboxLayout.removeAllViews();
     }
 
     private void setIntents() {
@@ -118,10 +117,9 @@ public class SelfPage extends AppCompatActivity {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
-
-                        // set ava
-                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[3]);
-                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
+                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[3]);
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
                     }
                 }
 

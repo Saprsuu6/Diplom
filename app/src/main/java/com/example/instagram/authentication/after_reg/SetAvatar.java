@@ -48,32 +48,50 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SetAvatar extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout setAvaLayout;
+        private final TextView setAvaTitle;
+        private final TextView setAvaDescription;
+        private final Button openGallery;
+        private final TextView or;
+        private final TextView skip;
+        private final TextView haveAnAccount;
+        private final TextView haveAnAccountLink;
+        private final Spinner languagesSpinner;
+
+        public Views() {
+            setAvaLayout = findViewById(R.id.set_photo);
+            setAvaTitle = findViewById(R.id.add_photo_header);
+            setAvaDescription = findViewById(R.id.add_photo_info);
+            openGallery = findViewById(R.id.photo_button);
+            or = findViewById(R.id.other_variant);
+            skip = findViewById(R.id.skip);
+            haveAnAccount = findViewById(R.id.reg_question);
+            haveAnAccountLink = findViewById(R.id.link_log_in);
+            languagesSpinner = findViewById(R.id.languages);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout setPhoto;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private TextView[] textViews;
-    private Button[] buttons;
-    private byte[] imageBytes;
     private String extension;
+    private byte[] imageBytes;
+    private Views views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_avatar);
-        setUiVisibility();
 
         resources = getResources();
-        setIntents();
-        findViews();
-
+        views = new Views();
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
+        setUiVisibility();
+        setIntents();
         setListeners();
-        Animation.getAnimations(setPhoto).start();
+        Animation.getAnimations(views.setAvaLayout).start();
     }
 
     private void setUiVisibility() {
@@ -82,9 +100,6 @@ public class SetAvatar extends AppCompatActivity {
     }
 
     private void setIntents() {
-        if (Intents.getSetFindContacts() == null)
-            Intents.setSetFindContacts(new Intent(this, FindContactsFriends.class));
-
         if (Intents.getAuthorisation() == null)
             Intents.setAuthorisation(new Intent(this, Authorisation.class));
 
@@ -94,14 +109,7 @@ public class SetAvatar extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
-    }
-
-    private void findViews() {
-        setPhoto = findViewById(R.id.set_photo);
-        languages = findViewById(R.id.languages);
-        buttons = new Button[]{findViewById(R.id.photo_button)};
-        textViews = new TextView[]{findViewById(R.id.add_photo_header), findViewById(R.id.add_photo_info), findViewById(R.id.other_variant), findViewById(R.id.skip), findViewById(R.id.reg_question), findViewById(R.id.link_log_in)};
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     @SuppressLint({"ClickableViewAccessibility", "IntentReset"})
@@ -118,16 +126,16 @@ public class SetAvatar extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        buttons[0].setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
+        views.openGallery.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
-        textViews[5].setOnClickListener(v -> {
+        views.haveAnAccountLink.setOnClickListener(v -> {
             startActivity(Intents.getAuthorisation());
             finish();
         });
 
-        textViews[3].setOnClickListener(v -> {
+        views.skip.setOnClickListener(v -> {
             startActivity(Intents.getNewsList());
             finish();
         });
@@ -189,16 +197,13 @@ public class SetAvatar extends AppCompatActivity {
         finish();
     }
 
-    // region Localisation
     private void setStringResources() {
-        buttons[0].setText(resources.getString(R.string.add_photo_btn_info));
-
-        textViews[0].setText(resources.getString(R.string.add_photo_header));
-        textViews[1].setText(resources.getString(R.string.add_photo_info));
-        textViews[2].setText(resources.getString(R.string.or));
-        textViews[3].setText(resources.getString(R.string.add_btn_skip));
-        textViews[4].setText(resources.getString(R.string.have_an_acc));
-        textViews[5].setText(resources.getString(R.string.log_in));
+        views.openGallery.setText(resources.getString(R.string.add_photo_btn_info));
+        views.setAvaTitle.setText(resources.getString(R.string.add_photo_header));
+        views.setAvaDescription.setText(resources.getString(R.string.add_photo_info));
+        views.or.setText(resources.getString(R.string.or));
+        views.skip.setText(resources.getString(R.string.add_btn_skip));
+        views.haveAnAccount.setText(resources.getString(R.string.have_an_acc));
+        views.haveAnAccountLink.setText(resources.getString(R.string.log_in));
     }
-    // endregion
 }

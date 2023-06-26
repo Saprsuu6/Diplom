@@ -3,7 +3,6 @@ package com.example.instagram.authentication.after_reg;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
@@ -26,35 +24,48 @@ import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
 
-import java.util.Locale;
-import java.util.Objects;
-
 public class SetName extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout setLoginLayout;
+        private final TextView setLoginTitle;
+        private final TextView setLoginDescription;
+        private final EditText setLoginField;
+        private final Button next;
+        private final TextView haveAnAccount;
+        private final TextView haveAnAccountLink;
+        private final Spinner languagesSpinner;
+
+        public Views() {
+            setLoginLayout = findViewById(R.id.set_name);
+            setLoginField = findViewById(R.id.info_for_name);
+            next = findViewById(R.id.let_name_next);
+            setLoginDescription = findViewById(R.id.let_name_info);
+            setLoginTitle = findViewById(R.id.let_info);
+            haveAnAccount = findViewById(R.id.reg_question);
+            haveAnAccountLink = findViewById(R.id.link_log_in);
+            languagesSpinner = findViewById(R.id.languages);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout setName;
-    // region localisation
+    //private LinearLayout setName;
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private TextView[] textViews;
-    private EditText[] editTexts;
-    private Button[] buttons;
+    private Views views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_name);
-        setUiVisibility();
 
         resources = getResources();
-        setIntents();
-        findViews();
-
+        views = new Views();
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
+        setUiVisibility();
+        setIntents();
         setListeners();
-        Animation.getAnimations(setName).start();
+        Animation.getAnimations(views.setLoginLayout).start();
     }
 
     private void setIntents() {
@@ -68,23 +79,12 @@ public class SetName extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void findViews() {
-        setName = findViewById(R.id.set_name);
-        languages = findViewById(R.id.languages);
-        editTexts = new EditText[]{findViewById(R.id.info_for_name)};
-        buttons = new Button[]{findViewById(R.id.let_name_next)};
-        textViews = new TextView[]{findViewById(R.id.let_info),
-                findViewById(R.id.let_name_info), findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in)};
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setListeners() {
@@ -100,11 +100,11 @@ public class SetName extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        buttons[0].setOnClickListener(v -> {
-            if (editTexts[0].length() != 0) {
-                TransitUser.user.setLogin(editTexts[0].getText().toString().trim());
+        views.next.setOnClickListener(v -> {
+            if (views.setLoginField.length() != 0) {
+                TransitUser.user.setLogin(views.setLoginField.getText().toString().trim());
                 RegistrationActivities.activityList.add(this);
                 startActivity(Intents.getSetPassword());
             } else {
@@ -112,22 +112,21 @@ public class SetName extends AppCompatActivity {
             }
         });
 
-        textViews[3].setOnClickListener(v -> {
+        views.haveAnAccountLink.setOnClickListener(v -> {
             startActivity(Intents.getAuthorisation());
             finish();
+            RegistrationActivities.deleteActivities();
         });
     }
 
     // region Localisation
     private void setStringResources() {
-        buttons[0].setText(resources.getString(R.string.next_step));
-
-        textViews[0].setText(resources.getString(R.string.let_name));
-        textViews[1].setText(resources.getString(R.string.let_name_info));
-        textViews[2].setText(resources.getString(R.string.have_an_acc));
-        textViews[3].setText(resources.getString(R.string.log_in));
-
-        editTexts[0].setHint(resources.getString(R.string.name));
+        views.next.setText(resources.getString(R.string.next_step));
+        views.setLoginTitle.setText(resources.getString(R.string.let_name));
+        views.setLoginDescription.setText(resources.getString(R.string.let_name_info));
+        views.haveAnAccount.setText(resources.getString(R.string.have_an_acc));
+        views.haveAnAccountLink.setText(resources.getString(R.string.log_in));
+        views.setLoginField.setHint(resources.getString(R.string.name));
     }
 
     // endregion

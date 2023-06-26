@@ -86,7 +86,6 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
                 View content = null;
 
                 String mime = data.getMimeType();
-                String mediaPath = Services.BASE_URL + data.getResourceMedia();
 
                 // region set media content
                 if (mime.contains(context.getString(R.string.mime_image))) {
@@ -193,12 +192,6 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     @Override
     public int getItemCount() {
         return postsLibrary.getDataArrayList().size() >= 1 ? 1 : 0;
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull ViewHolderPostsCells holder) {
-        super.onViewDetachedFromWindow(holder);
-        holder.flexboxLayout.removeAllViews();
     }
 
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {

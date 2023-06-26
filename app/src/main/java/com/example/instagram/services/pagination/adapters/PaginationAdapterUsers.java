@@ -16,7 +16,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
-import com.example.instagram.authentication.after_reg.FindContactsFriends;
 
 public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapterUsers.ViewHolderUser> {
     //private final Activity activity;
@@ -31,8 +30,7 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
     @NonNull
     @Override
     public PaginationAdapterUsers.ViewHolderUser onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_contacts, parent, false); // don't forget to change
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_contacts, parent, false); // don't forget to change
 
         return new ViewHolderUser(view);
     }
@@ -42,42 +40,20 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
         Post data = postsLibrary.getDataArrayList().get(position);
 
         // set image
-        Glide.with(context).load(data.getResourceMedia())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(holder.avaView);
+        Glide.with(context).load(data.getResourceMedia()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
 
         // set name nickname
         holder.nickView.setText(data.getAuthor());
         holder.nameView.setText(data.getAuthor());
 
         // set button
-        holder.subscribe.setChecked(loadSP(position + "FindFriends"));
-        holder.subscribe.setText(!holder.subscribe.isChecked()
-                ? context.getString(R.string.subscribe_btn)
-                : context.getString(R.string.unsubscribe_btn));
+        holder.subscribe.setText(!holder.subscribe.isChecked() ? context.getString(R.string.subscribe_btn) : context.getString(R.string.unsubscribe_btn));
     }
 
     @Override
     public int getItemCount() {
         return postsLibrary.getDataArrayList().size();
     }
-
-    // region SharedPreferences
-    //Сохраняет флажок в SharedPreferences
-    public void saveSP(String key, boolean value) {
-        com.example.instagram.services.SharedPreferences.saveSP(context, key, value);
-    }
-
-    //Загружает нажатый флажок из SharedPreferences
-    public boolean loadSP(String key) {
-        return com.example.instagram.services.SharedPreferences.loadBoolSP(context, key);
-    }
-
-    //Удаляет нажатый флажок из SharedPreferences
-    public void deleteSp(String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(context, key);
-    }
-    // endregion SharedPreferences
 
     public class ViewHolderUser extends RecyclerView.ViewHolder {
         private final ImageView avaView;
@@ -94,21 +70,9 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
             subscribe = itemView.findViewById(R.id.btn_subscribe);
 
             subscribe.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (subscribe.isChecked()) {
-                    subscribe.setChecked(true);
-                    saveSP(position + "FindFriends", true);
-                } else {
-                    subscribe.setChecked(false);
-                    deleteSp(position + "FindFriends");
-                }
-
-                subscribe.setText(!subscribe.isChecked()
-                        ? context.getString(R.string.subscribe_btn)
-                        : context.getString(R.string.unsubscribe_btn));
+                subscribe.setChecked(subscribe.isChecked());
+                subscribe.setText(!subscribe.isChecked() ? context.getString(R.string.subscribe_btn) : context.getString(R.string.unsubscribe_btn));
             });
-
-            FindContactsFriends.buttons.add(subscribe);
         }
     }
 }

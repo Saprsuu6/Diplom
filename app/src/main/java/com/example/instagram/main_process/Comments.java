@@ -3,7 +3,6 @@ package com.example.instagram.main_process;
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -38,8 +37,6 @@ import com.example.instagram.services.TransitComment;
 import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllComments;
-import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
-import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,35 +51,53 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Comments extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout commentsLayout;
+        private final LinearLayout replyLayout;
+        private final ImageView arrowBack;
+        private final ImageView authorAva;
+        private final ImageView send;
+        private final ImageView closeReply;
+        private final EditText message;
+        private final TextView title;
+        private final Spinner languagesSpinner;
+        private final SwipeRefreshLayout swipeRefreshLayout;
+
+        public Views() {
+            commentsLayout = findViewById(R.id.comments);
+            replyLayout = findViewById(R.id.reply_layout);
+            closeReply = findViewById(R.id.close_reply);
+            arrowBack = findViewById(R.id.back);
+            authorAva = findViewById(R.id.author_ava);
+            send = findViewById(R.id.send);
+            message = findViewById(R.id.comment_add);
+            title = findViewById(R.id.comment_title);
+            languagesSpinner = findViewById(R.id.languages);
+            swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        }
+    }
+
     private PagingViewGetAllComments pagingView;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private Resources resources;
-    private LinearLayout reply;
-    private LinearLayout comments;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private TextView[] textViews;
-    private EditText[] editTexts;
-    private ImageView[] imageViews;
     static public Pair<Integer, Comment> mapComment;
     static public Comment toReply;
+    private Views views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
-        setUiVisibility();
 
-        findViews();
-
+        views = new Views();
+        resources = getResources();
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        Animation.getAnimations(comments).start();
+        setUiVisibility();
         setListeners();
         LoadAvatar();
+        Animation.getAnimations(views.commentsLayout).start();
 
         pagingView = new PagingViewGetAllComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
     }
@@ -90,7 +105,7 @@ public class Comments extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -150,7 +165,7 @@ public class Comments extends AppCompatActivity {
                 }
                 break;
             case R.id.change_comment:
-                editTexts[0].setText(Comments.mapComment.second.getContent());
+                views.message.setText(Comments.mapComment.second.getContent());
                 Comments.mapComment.second.setToChange(true);
                 break;
         }
@@ -162,17 +177,6 @@ public class Comments extends AppCompatActivity {
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    private void findViews() {
-        resources = getResources();
-        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        reply = findViewById(R.id.reply_layout);
-        comments = findViewById(R.id.comments);
-        languages = findViewById(R.id.languages);
-        textViews = new TextView[]{findViewById(R.id.comment_title), findViewById(R.id.replayed)};
-        editTexts = new EditText[]{findViewById(R.id.comment_add)};
-        imageViews = new ImageView[]{findViewById(R.id.send), findViewById(R.id.author_ava), findViewById(R.id.close_reply), findViewById(R.id.back)};
-    }
-
     private void LoadAvatar() {
         // region send request to get avatar
         try {
@@ -181,9 +185,8 @@ public class Comments extends AppCompatActivity {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
-
-                        // set ava
-                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[1]);
+                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.authorAva);
                     }
                 }
 
@@ -202,11 +205,11 @@ public class Comments extends AppCompatActivity {
         PagingViewGetAllComments.isEnd = false;
         PaginationCurrentForAllComments.resetCurrent();
         pagingView.notifyAdapterToClearAll();
-        swipeRefreshLayout.setRefreshing(false);
+        views.swipeRefreshLayout.setRefreshing(false);
     }
 
     private void setListeners() {
-        swipeRefreshLayout.setOnRefreshListener(this::sendNewRequest);
+        views.swipeRefreshLayout.setOnRefreshListener(this::sendNewRequest);
 
         AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -222,10 +225,10 @@ public class Comments extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        imageViews[0].setOnClickListener(v -> {
-            if (editTexts[0].getText().toString().equals("")) {
+        views.send.setOnClickListener(v -> {
+            if (views.message.getText().toString().equals("")) {
                 Toast.makeText(this, getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -235,7 +238,7 @@ public class Comments extends AppCompatActivity {
                 JSONObject changeComment = new JSONObject();
 
                 try {
-                    String newText = editTexts[0].getText().toString();
+                    String newText = views.message.getText().toString();
 
                     JSONObject comment = Comments.mapComment.second.getJSONCommentToChange(newText);
                     changeComment.put("token", TransitUser.user.getToken());
@@ -259,7 +262,7 @@ public class Comments extends AppCompatActivity {
                 }
             } else {
                 TransitComment.comment.setPostId(NewsLine.mapPost.second.getPostId());
-                TransitComment.comment.setContent(editTexts[0].getText().toString());
+                TransitComment.comment.setContent(views.message.getText().toString());
                 Toast.makeText(this, getString(R.string.comment_has_been_sent), Toast.LENGTH_SHORT).show();
 
                 try {
@@ -304,15 +307,15 @@ public class Comments extends AppCompatActivity {
                 }
             }
 
-            editTexts[0].getText().clear();
+            views.message.getText().clear();
 
-            if (reply.getVisibility() == View.VISIBLE) {
-                reply.setVisibility(View.GONE);
+            if (views.replyLayout.getVisibility() == View.VISIBLE) {
+                views.replyLayout.setVisibility(View.GONE);
                 Comments.toReply = null;
             }
         });
 
-        imageViews[1].setOnClickListener(v -> {
+        views.authorAva.setOnClickListener(v -> {
             try {
                 Services.sendToGetCurrentUser(new Callback<>() {
                     @Override
@@ -342,19 +345,17 @@ public class Comments extends AppCompatActivity {
         });
 
         // gone reply
-        imageViews[2].setOnClickListener(v -> {
-            reply.setVisibility(View.GONE);
+        views.closeReply.setOnClickListener(v -> {
+            views.replyLayout.setVisibility(View.GONE);
             Comments.toReply = null;
         });
         // back
-        imageViews[3].setOnClickListener(v -> finish());
+        views.arrowBack.setOnClickListener(v -> finish());
     }
 
-    // region Localisation
     private void setStringResources() {
-        textViews[0].setText(resources.getString(R.string.comments_title));
-        editTexts[0].setHint(resources.getString(R.string.add_comment));
+        views.title.setText(resources.getString(R.string.comments_title));
+        views.message.setHint(resources.getString(R.string.add_comment));
         pagingView.notifyAllLibrary();
     }
-    // endregion
 }

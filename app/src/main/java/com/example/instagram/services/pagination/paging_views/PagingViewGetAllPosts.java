@@ -15,6 +15,7 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitComment;
 import com.example.instagram.services.TransitPost;
+import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
 import com.example.instagram.services.pagination.PagingView;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
@@ -37,6 +38,8 @@ public class PagingViewGetAllPosts extends PagingView {
 
     public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
+        isEnd = false;
+        PaginationCurrentForAllPosts.resetCurrent();
 
         // initialise adapter
         paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);

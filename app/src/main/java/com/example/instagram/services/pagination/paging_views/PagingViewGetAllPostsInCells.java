@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +12,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram.R;
 import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.SharedPreferences;
@@ -32,11 +34,11 @@ import retrofit2.Response;
 
 public class PagingViewGetAllPostsInCells extends PagingView {
     private PaginationAdapterPostsCells paginationAdapter;
-    private final LinearLayoutManager manager;
     public static boolean isEnd = false;
 
     public PagingViewGetAllPostsInCells(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) throws JSONException {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
+
         isEnd = false;
         PaginationCurrentForAllPostsInCells.resetCurrent();
 
@@ -44,7 +46,7 @@ public class PagingViewGetAllPostsInCells extends PagingView {
         paginationAdapter = new PaginationAdapterPostsCells(context, activity, postsLibrary, this);
 
         // set layout manager
-        manager = new LinearLayoutManager(context);
+        LinearLayoutManager manager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
 
         // set adapter

@@ -1,15 +1,9 @@
 package com.example.instagram.authentication;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.TooltipCompat;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -24,9 +18,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.TooltipCompat;
+
 import com.example.instagram.R;
-import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
@@ -35,23 +33,46 @@ import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
-import java.util.Objects;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CreateNewPassword extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout createNewPasswordLayout;
+        private final Spinner languagesSpinner;
+        private final TextView createNewPasswordTitle;
+        private final TextView createNewPasswordDescription;
+        private final EditText fieldPassword;
+        private final EditText fieldRepeatPassword;
+        private final Button showPassword;
+        private final Button showRepeatPassword;
+        private final Button next;
+        private final ImageView warning;
+        private final TextView haveAnAccount;
+        private final TextView haveAnAccountLink;
+
+        public Views() {
+            createNewPasswordLayout = findViewById(R.id.create_new_password);
+            languagesSpinner = findViewById(R.id.languages);
+            createNewPasswordTitle = findViewById(R.id.create_new_password_title);
+            createNewPasswordDescription = findViewById(R.id.create_new_password_info);
+            fieldPassword = findViewById(R.id.info_for_password);
+            fieldRepeatPassword = findViewById(R.id.info_for_password_repeat);
+            showPassword = findViewById(R.id.auth_eye);
+            showRepeatPassword = findViewById(R.id.auth_eye_repeat);
+            next = findViewById(R.id.next);
+            haveAnAccount = findViewById(R.id.reg_question);
+            haveAnAccountLink = findViewById(R.id.link_log_in);
+            warning = findViewById(R.id.validation_error);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout createNewPassword;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private TextView[] textViews;
-    private EditText[] editTexts;
-    private Button[] buttons;
-    private ImageView[] imageViews;
+    private Views views;
     private boolean passwordEyeState = false;
     private boolean passwordEyeStateRepeat = false;
 
@@ -62,13 +83,14 @@ public class CreateNewPassword extends AppCompatActivity {
         setUiVisibility();
 
         resources = getResources();
-        findViews();
+        //findViews();
         setIntents();
 
+        views = new Views();
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        Animation.getAnimations(createNewPassword).start();
+        Animation.getAnimations(views.createNewPasswordLayout).start();
         setListeners();
     }
 
@@ -81,24 +103,12 @@ public class CreateNewPassword extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void findViews() {
-        createNewPassword = findViewById(R.id.create_new_password);
-        languages = findViewById(R.id.languages);
-        editTexts = new EditText[]{findViewById(R.id.info_for_password), findViewById(R.id.info_for_password_repeat)};
-        buttons = new Button[]{findViewById(R.id.next), findViewById(R.id.auth_eye), findViewById(R.id.auth_eye_repeat)};
-        textViews = new TextView[]{findViewById(R.id.create_new_password_title),
-                findViewById(R.id.create_new_password_info), findViewById(R.id.reg_question),
-                findViewById(R.id.link_log_in)};
-        imageViews = new ImageView[]{findViewById(R.id.validation_error)};
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setListeners() {
@@ -108,43 +118,45 @@ public class CreateNewPassword extends AppCompatActivity {
                 Configuration configuration = Localisation.setLocalize(parent, localisation, position);
                 getBaseContext().getResources().updateConfiguration(configuration, null);
                 setStringResources();
+
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        buttons[1].setOnClickListener(v -> {
+        views.showPassword.setOnClickListener(v -> {
             passwordEyeState = !passwordEyeState;
 
             if (passwordEyeState) {
-                editTexts[0].setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                buttons[1].setText(resources.getString(R.string.hide_password));
+                views.fieldPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                views.showPassword.setText(resources.getString(R.string.hide_password));
             } else {
-                editTexts[0].setTransformationMethod(PasswordTransformationMethod.getInstance());
-                buttons[1].setText(resources.getString(R.string.show_password));
+                views.fieldPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                views.showPassword.setText(resources.getString(R.string.show_password));
             }
         });
 
-        buttons[2].setOnClickListener(v -> {
+        views.showRepeatPassword.setOnClickListener(v -> {
             passwordEyeStateRepeat = !passwordEyeStateRepeat;
 
             if (passwordEyeStateRepeat) {
-                editTexts[1].setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                buttons[2].setText(resources.getString(R.string.hide_password));
+                views.fieldRepeatPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                views.showRepeatPassword.setText(resources.getString(R.string.hide_password));
             } else {
-                editTexts[1].setTransformationMethod(PasswordTransformationMethod.getInstance());
-                buttons[2].setText(resources.getString(R.string.show_password));
+                views.fieldRepeatPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                views.showRepeatPassword.setText(resources.getString(R.string.show_password));
             }
         });
 
-        editTexts[0].addTextChangedListener(new Validator(editTexts[0]) {
+        views.fieldPassword.addTextChangedListener(new Validator(views.fieldPassword) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
 
                 try {
                     Validations.validatePassword(text, resources);
@@ -155,21 +167,21 @@ public class CreateNewPassword extends AppCompatActivity {
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
                 }
 
-                if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
-                    editTexts[1].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                if (views.fieldRepeatPassword.getText().toString().equals(editText.getText().toString())) {
+                    views.fieldRepeatPassword.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
                 } else {
-                    editTexts[1].setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                    views.fieldRepeatPassword.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
                 }
             }
         });
 
-        editTexts[1].addTextChangedListener(new Validator(editTexts[1]) {
+        views.fieldRepeatPassword.addTextChangedListener(new Validator(views.fieldRepeatPassword) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editTexts[0].setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
 
-                if (editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                if (editText.getText().toString().equals(views.fieldPassword.getText().toString())) {
                     setValidationError(false, "");
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
                 } else {
@@ -179,20 +191,20 @@ public class CreateNewPassword extends AppCompatActivity {
             }
         });
 
-        buttons[0].setOnClickListener(v -> {
-            if (editTexts[0].length() != 0) {
+        views.next.setOnClickListener(v -> {
+            if (views.warning.getVisibility() == View.GONE) {
                 try {
                     // region Check to next
-                    Validations.validatePassword(editTexts[0].getText().toString(), resources);
+                    Validations.validatePassword(views.fieldPassword.getText().toString(), resources);
 
-                    if (!editTexts[1].getText().toString().equals(editTexts[0].getText().toString())) {
+                    if (!views.fieldRepeatPassword.getText().toString().equals(views.fieldPassword.getText().toString())) {
                         throw new Exception(resources.getString(R.string.password_repeat_error));
                     }
                     // endregion
 
                     setValidationError(false, "");
-                    TransitUser.user.setPassword(editTexts[0].getText().toString().trim());
-                    TransitUser.user.setPasswordRepeat(editTexts[1].getText().toString().trim());
+                    TransitUser.user.setPassword(views.fieldPassword.getText().toString().trim());
+                    TransitUser.user.setPasswordRepeat(views.fieldRepeatPassword.getText().toString().trim());
 
                     Services.sendNewPasswordAfterForgot(new Callback<>() {
                         @Override
@@ -219,7 +231,7 @@ public class CreateNewPassword extends AppCompatActivity {
             }
         });
 
-        textViews[3].setOnClickListener(v -> {
+        views.haveAnAccountLink.setOnClickListener(v -> {
             startActivity(Intents.getAuthorisation());
             finish();
         });
@@ -227,31 +239,25 @@ public class CreateNewPassword extends AppCompatActivity {
 
     private void setValidationError(boolean temp, String message) {
         if (temp) {
-            imageViews[0].setVisibility(View.VISIBLE);
-            Animation.getAnimations(imageViews[0]).start();
+            views.warning.setVisibility(View.VISIBLE);
+            Animation.getAnimations(views.warning).start();
         } else {
-            imageViews[0].setVisibility(View.GONE);
-            Animation.getAnimations(imageViews[0]).stop();
+            views.warning.setVisibility(View.GONE);
+            Animation.getAnimations(views.warning).stop();
         }
 
-        TooltipCompat.setTooltipText(imageViews[0], message);
+        TooltipCompat.setTooltipText(views.warning, message);
     }
 
-
-    // region Localisation
     private void setStringResources() {
-        buttons[0].setText(resources.getString(R.string.next_step));
-        buttons[1].setText(resources.getString(R.string.show_password));
-        buttons[2].setText(resources.getString(R.string.show_password));
-
-        textViews[0].setText(resources.getString(R.string.create_new_password_after_forgot));
-        textViews[1].setText(resources.getString(R.string.create_new_password_after_forgot_info));
-        textViews[2].setText(resources.getString(R.string.have_an_acc));
-        textViews[3].setText(resources.getString(R.string.log_in));
-
-        editTexts[0].setHint(resources.getString(R.string.password_hint));
-        editTexts[1].setHint(resources.getString(R.string.password_hint_repeat));
+        views.next.setText(resources.getString(R.string.next_step));
+        views.showPassword.setText(resources.getString(R.string.show_password));
+        views.showRepeatPassword.setText(resources.getString(R.string.show_password));
+        views.createNewPasswordTitle.setText(resources.getString(R.string.create_new_password_after_forgot));
+        views.createNewPasswordDescription.setText(resources.getString(R.string.create_new_password_after_forgot_info));
+        views.haveAnAccount.setText(resources.getString(R.string.have_an_acc));
+        views.haveAnAccountLink.setText(resources.getString(R.string.log_in));
+        views.fieldPassword.setHint(resources.getString(R.string.password_hint));
+        views.fieldRepeatPassword.setHint(resources.getString(R.string.password_hint));
     }
-
-    // endregion
 }

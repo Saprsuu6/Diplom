@@ -3,33 +3,27 @@ package com.example.instagram.authentication;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputType;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.R;
 import com.example.instagram.services.Animation;
 import com.example.instagram.services.Errors;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
@@ -39,39 +33,47 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ForgotPassword extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout forgotPasswordLayout;
+        private final TextView forgotPasswordTitle;
+        private final TextView forgotPasswordDescription;
+        private final EditText fieldForCode;
+        private final Button confirmCode;
+        private final Spinner languagesSpinner;
+
+        public Views() {
+            forgotPasswordLayout = findViewById(R.id.forgot_password);
+            languagesSpinner = findViewById(R.id.languages);
+            confirmCode = findViewById(R.id.confirm_code_button);
+            fieldForCode = findViewById(R.id.code);
+            forgotPasswordDescription = findViewById(R.id.forgot_info);
+            forgotPasswordTitle = findViewById(R.id.question);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout forgotPassword;
-    private TextView[] textViews;
-    private EditText[] editTexts;
-    private Button[] buttons;
-    private ImageView[] imageViews;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private Spinner infoTypes;
     private Handler handler;
     private Runnable runnable;
+    private Views views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
-        setUiVisibility();
 
+        views = new Views();
         resources = getResources();
-        setIntents();
-        findViews();
-
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
-
-        setListeners();
-        Animation.getAnimations(forgotPassword).start();
-
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
         handler = new Handler();
         runnable = checkUsedLink();
         handler.postDelayed(runnable, 5000L);
+
+        setUiVisibility();
+        setIntents();
+        setListeners();
+        Animation.getAnimations(views.forgotPasswordLayout).start();
     }
 
     private Runnable checkUsedLink() {
@@ -98,7 +100,6 @@ public class ForgotPassword extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        assert t != null;
                         System.out.println(t.getMessage());
                     }
                 });
@@ -117,23 +118,12 @@ public class ForgotPassword extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void setUiVisibility() {
         Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void findViews() {
-        infoTypes = findViewById(R.id.login_type);
-        forgotPassword = findViewById(R.id.forgot_password);
-        languages = findViewById(R.id.languages);
-        buttons = new Button[]{findViewById(R.id.confirm_code_button)};
-        editTexts = new EditText[]{findViewById(R.id.code)};
-        textViews = new TextView[]{findViewById(R.id.question), findViewById(R.id.forgot_info)};
-        imageViews = new ImageView[]{findViewById(R.id.validation_error)};
+        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setListeners() {
@@ -149,12 +139,12 @@ public class ForgotPassword extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        buttons[0].setOnClickListener(v -> {
-            if (editTexts[0].length() != 0) {
+        views.confirmCode.setOnClickListener(v -> {
+            if (views.fieldForCode.length() != 0) {
                 try {
-                    TransitUser.user.setEmailCode(editTexts[0].getText().toString());
+                    TransitUser.user.setEmailCode(views.fieldForCode.getText().toString());
 
                     Services.sendToCheckUserCode(new Callback<>() {
                         @Override
@@ -192,56 +182,17 @@ public class ForgotPassword extends AppCompatActivity {
                             System.out.println("Error: " + t.getMessage());
                         }
                     }, TransitUser.user.getEmailCode());
-                } catch (Exception exception) {
-                    setValidationError(true, exception.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
-            } else {
-                setValidationError(true, resources.getString(R.string.error_send_password1));
             }
         });
     }
 
-    private void setValidationError(boolean temp, String message) {
-        if (temp) {
-            imageViews[0].setVisibility(View.VISIBLE);
-            Animation.getAnimations(imageViews[0]).start();
-        } else {
-            imageViews[0].setVisibility(View.GONE);
-            Animation.getAnimations(forgotPassword).stop();
-        }
-
-        TooltipCompat.setTooltipText(imageViews[0], message);
-    }
-
-    private void setLoginTypes() {
-        ArrayAdapter<String> adapterForLoginTypes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-        adapterForLoginTypes.add(resources.getString(R.string.login_hint_phone));
-        adapterForLoginTypes.add(resources.getString(R.string.login_hint_email));
-
-        adapterForLoginTypes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        infoTypes.setAdapter(adapterForLoginTypes);
-        infoTypes.setSelection(0);
-    }
-    // endregion
-
-    // region Localisation
     private void setStringResources() {
-        //setLoginTypes();
-        //setLoginType(infoTypes.getSelectedItemPosition());
-        buttons[0].setText(resources.getString(R.string.confirm_code));
-
-        textViews[0].setText(resources.getString(R.string.can_not_login));
-        textViews[1].setText(resources.getString(R.string.confirm_code_text));
-//        textViews[2].setText(resources.getString(R.string.code));
-//        textViews[3].setText(resources.getString(R.string.gmail));
-
-        editTexts[0].setHint(resources.getString(R.string.mail_code));
-//        if (textViews[2].getVisibility() == View.VISIBLE) {
-//            editTexts[0].setHint(resources.getString(R.string.phone_reg));
-//        } else if (textViews[3].getVisibility() == View.VISIBLE) {
-//            editTexts[0].setHint(resources.getString(R.string.email_reg));
-//        }
+        views.confirmCode.setText(resources.getString(R.string.confirm_code));
+        views.forgotPasswordTitle.setText(resources.getString(R.string.can_not_login));
+        views.forgotPasswordDescription.setText(resources.getString(R.string.confirm_code_text));
+        views.fieldForCode.setHint(resources.getString(R.string.mail_code));
     }
-    // endregion
 }

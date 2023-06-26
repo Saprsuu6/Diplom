@@ -93,32 +93,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/info_for_email_code"
-                    style="@style/Authentication_EditText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:autofillHints="Login"
-                    android:inputType="textEmailAddress"
-                    tools:hint="@string/confirm_code"
-                    tools:ignore="LabelFor" />
-
-                <Button
-                    android:id="@+id/confirm_code_button"
-                    style="@style/Authentication_LogIn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="@string/confirm_code" />
-
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/reg_checkBoxes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
