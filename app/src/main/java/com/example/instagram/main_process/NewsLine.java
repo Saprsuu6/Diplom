@@ -1,13 +1,15 @@
 package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
@@ -16,9 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -34,7 +36,6 @@ import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
 import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
@@ -42,9 +43,9 @@ import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.TransitUser;
-import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
+import com.example.instagram.services.UiVisibility;
+import com.example.instagram.services.pagination.paging_views.PagingViewFindUsers;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
-import com.example.instagram.services.themes_and_backgrounds.Backgrounds;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
@@ -59,44 +60,72 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class NewsLine extends AppCompatActivity {
-    private LinearLayout newsLine;
-    private Resources resources;
-    private ImageView[] imageViewsTop;
-    private ImageView[] imageViewsBottom;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private PagingViewGetAllPosts pagingView;
+    private class Views {
+        public final SwipeRefreshLayout swipeRefreshLayout;
+        public final LinearLayout newsLineLayout;
+        public final Spinner languagesSpinner;
+        public final EditText toFindPost;
+        public final ImageView logo;
+        public final ImageView changeMainTheme;
+        public final ImageView changeTheme;
+        public final ImageView home;
+        public final ImageView searchUsers;
+        public final ImageView addNewPost;
+        public final ImageView notifications;
+        public final ImageView selfPage;
 
-    // region localisation
+        public Views() {
+            swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+            newsLineLayout = findViewById(R.id.news_list);
+            toFindPost = findViewById(R.id.toFindPost);
+            languagesSpinner = findViewById(R.id.languages);
+            logo = findViewById(R.id.logo);
+            changeMainTheme = findViewById(R.id.change_main_theme);
+            changeTheme = findViewById(R.id.change_theme);
+            home = findViewById(R.id.home);
+            searchUsers = findViewById(R.id.search);
+            addNewPost = findViewById(R.id.add_post);
+            notifications = findViewById(R.id.notifications);
+            selfPage = findViewById(R.id.self_page);
+        }
+    }
+
+    private Resources resources;
+    private PagingViewGetAllPosts pagingView;
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
     private FindUser findUser;
+    private Views views;
     static public Pair<Integer, Post> mapPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_line);
-        setUiVisibility();
-
-        setIntents();
-        findViews();
 
         // region find users
         try {
-            findUser = new FindUser(this, resources);
+            findUser = new FindUser(this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
         // endregion
-        localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
 
-        Animation.getAnimations(newsLine).start();
+        resources = getResources();
+        views = new Views();
+        localisation = new Localisation(this);
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
+
         setListeners();
         LoadAvatar();
+        setIntents();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.newsLineLayout).start();
 
-        pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+        try {
+            showAgain();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setIntents() {
@@ -114,7 +143,7 @@ public class NewsLine extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
                         String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
                     }
                 }
 
@@ -134,7 +163,7 @@ public class NewsLine extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
 
         if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
             pagingView.notifyAdapterToClearPosts();
@@ -146,9 +175,9 @@ public class NewsLine extends AppCompatActivity {
             TransitPost.postsToChangeFromOtherPage.clear();
         }
 
-        ThemesBackgrounds.setThemeContent(resources, imageViewsTop[1], getApplicationContext());
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
-        ThemesBackgrounds.loadBackground(this, newsLine);
+        ThemesBackgrounds.setThemeContent(resources, views.changeMainTheme, getApplicationContext());
+        ThemesBackgrounds.loadBackground(this, views.newsLineLayout);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -225,33 +254,68 @@ public class NewsLine extends AppCompatActivity {
         return true;
     }
 
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void findViews() {
-        resources = getResources();
-        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        newsLine = findViewById(R.id.news_list);
-        languages = findViewById(R.id.languages);
-        imageViewsTop = new ImageView[]{findViewById(R.id.logo), findViewById(R.id.change_main_theme), findViewById(R.id.change_theme), findViewById(R.id.direct)};
-        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
-    }
-
     private void chooseTheme() {
-        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(this, resources, this, newsLine);
+        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(this, resources, this, views.newsLineLayout);
         permissionsDialog.setNegativeButton("Cancel", null);
         permissionsDialog.create().show();
     }
 
-    private void showAgain() {
-        pagingView.notifyAdapterToClearAll();
-        swipeRefreshLayout.setRefreshing(false);
+    private void showAgain() throws JSONException {
+        if (pagingView != null) {
+            pagingView.notifyAdapterToClearAll();
+        } else {
+            JSONObject bodyJSON = getJSONToFind();
+            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, bodyJSON);
+        }
+        views.swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private JSONObject getJSONToFind() throws JSONException {
+        JSONObject bodyJSON;
+        JSONObject paramsJSON;
+
+        paramsJSON = new JSONObject();
+        paramsJSON.put("author", views.toFindPost.getText());
+        // TODO or
+        //paramsJSON.put("description", views.toFindPost.getText());
+
+        bodyJSON = new JSONObject();
+        bodyJSON.put("params", paramsJSON);
+
+        return bodyJSON;
     }
 
     private void setListeners() {
-        swipeRefreshLayout.setOnRefreshListener(this::showAgain);
+        Activity thisActivity = this;
+        views.toFindPost.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    JSONObject bodyJSON = getJSONToFind();
+                    pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), getApplicationContext(), thisActivity, bodyJSON);
+                } catch (JSONException e) {
+                    Log.d("JSONException: ", e.getMessage());
+                }
+            }
+        });
+
+        views.swipeRefreshLayout.setOnRefreshListener(() -> {
+            try {
+                showAgain();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -267,19 +331,16 @@ public class NewsLine extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
-        // direct
-        imageViewsTop[3].setOnClickListener(v -> startActivity(Intents.getChatList()));
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         // initialize menu bottom
-        BottomMenu.setListeners(this, new ImageView[]{imageViewsBottom[1], imageViewsBottom[2], imageViewsBottom[3]}, findUser);
+        BottomMenu.setListeners(this, new ImageView[]{views.searchUsers, views.addNewPost, views.notifications}, findUser);
 
         // region Bottom menu
         // home
-        imageViewsBottom[0].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
+        views.home.setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
         // self page
-        imageViewsBottom[4].setOnClickListener(v -> {
+        views.selfPage.setOnClickListener(v -> {
             try {
                 Services.sendToGetCurrentUser(new Callback<>() {
                     @Override
@@ -310,24 +371,23 @@ public class NewsLine extends AppCompatActivity {
         // endregion
 
         // set system theme on label
-        imageViewsTop[0].setOnClickListener(v -> {
+        views.logo.setOnClickListener(v -> {
             ThemesBackgrounds.theme = Themes.SYSTEM;
             recreate();
         });
 
         // set night/day theme
-        imageViewsTop[1].setOnClickListener(v -> {
+        views.changeMainTheme.setOnClickListener(v -> {
             ThemesBackgrounds.theme = ThemesBackgrounds.isNight(resources) ? Themes.DAY : Themes.NIGHT;
             recreate();
         });
 
         // choose background
-        imageViewsTop[2].setOnClickListener(v -> chooseTheme());
+        views.changeTheme.setOnClickListener(v -> chooseTheme());
     }
 
-    // region Localisation
     private void setStringResources() {
+        views.toFindPost.setHint(getString(R.string.find_post));
         pagingView.notifyAllLibrary();
     }
-    // endregion
 }

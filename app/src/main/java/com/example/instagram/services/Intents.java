@@ -7,15 +7,13 @@ public class Intents {
     private static Intent authorisation;
     private static Intent registration;
     private static Intent forgotPassword;
-    private static Intent setName;    //region getters
+    private static Intent setName;
     private static Intent setPassword;
     private static Intent setBirthday;
     private static Intent setAvatar;
-    private static Intent setFindContacts;
     private static Intent newsList;
     private static Intent comments;
     private static Intent selfPage;
-    private static Intent chatList;
     private static Intent createNewPost;
     private static Intent editProfile;
 
@@ -31,20 +29,12 @@ public class Intents {
         return createNewPassword;
     }
 
-    public static Intent getChatList() {
-        return chatList;
-    }
-
     public static Intent getSelfPage() {
         return selfPage;
     }
 
     public static Intent getComments() {
         return comments;
-    }
-
-    public static Intent getSetFindContacts() {
-        return setFindContacts;
     }
 
     public static Intent getSetAvatar() {
@@ -91,9 +81,6 @@ public class Intents {
     public static void setCreateNewPassword(Intent createNewPassword) {
         Intents.createNewPassword = createNewPassword;
     }
-    public static void setChatList(Intent chatList) {
-        Intents.chatList = chatList;
-    }
 
     public static void setSelfPage(Intent selfPage) {
         Intents.selfPage = selfPage;
@@ -105,10 +92,6 @@ public class Intents {
 
     public static void setNewsList(Intent newsList) {
         Intents.newsList = newsList;
-    }
-
-    public static void setSetFindContacts(Intent setFindContacts) {
-        Intents.setFindContacts = setFindContacts;
     }
 
     public static void setSetAvatar(Intent setAvatar) {

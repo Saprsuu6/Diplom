@@ -32,6 +32,7 @@ import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
 
@@ -82,9 +83,9 @@ public class SetBirthday extends AppCompatActivity {
         views.languagesSpinner.setAdapter(localisation.getAdapter());
         views.setBirthdayField.setInputType(InputType.TYPE_NULL);
 
-        setUiVisibility();
         setIntents();
         setListeners();
+        UiVisibility.setUiVisibility(this);
         Animation.getAnimations(views.setBirthdayLayout).start();}
 
     private void setIntents() {
@@ -98,11 +99,6 @@ public class SetBirthday extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     @SuppressLint("ClickableViewAccessibility")

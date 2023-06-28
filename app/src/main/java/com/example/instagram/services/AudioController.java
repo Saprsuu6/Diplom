@@ -14,8 +14,8 @@ import android.widget.TextView;
 import com.example.instagram.R;
 
 public class AudioController {
-    private MediaPlayer mediaPlayer;
-    private SeekBar seekBar;
+    private final MediaPlayer mediaPlayer;
+    private final SeekBar seekBar;
     private Handler handler;
     private final ImageView playStop;
     private final ImageView playPrev;
@@ -136,11 +136,10 @@ public class AudioController {
     }
 
     public class UpdateSeekBar implements Runnable {
-        private final int delay = 100;
-
         @SuppressLint("SetTextI18n")
         @Override
         public void run() {
+            int delay = 100;
             seekBar.setProgress(mediaPlayer.getCurrentPosition());
             timeLine.setText(GFG.convert(mediaPlayer.getCurrentPosition()) + " / " + GFG.convert(mediaPlayer.getDuration()));
             handler.postDelayed(this, delay);

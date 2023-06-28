@@ -32,6 +32,8 @@
     <string name="reply">Reply</string>
     <string name="author">Author</string>
     <string name="comment_has_been_sent">Comment has been sent</string>
+    <string name="find_post">Start type to find post</string>
+    <string name="successfull_uesr_update">Successfully update</string>
 
     <string name="search" translatable="false">search</string>
     <string name="add_post" translatable="false">add_post</string>

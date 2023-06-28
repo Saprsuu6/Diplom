@@ -10,7 +10,6 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,6 +31,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -44,46 +44,85 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SelfPage extends AppCompatActivity {
-    private FlexboxLayout flexboxLayout;
+    private class Views {
+        public final FlexboxLayout flexboxForCellsLayout;
+        public final LinearLayout selfPageLayout;
+        public final Spinner languagesSpinner;
+        public final TextView login;
+        public final TextView nick;
+        public final TextView surname;
+        public final TextView email;
+        public final TextView description;
+        public final TextView birthday;
+        public final TextView amountPosts;
+        public final TextView followings;
+        public final TextView followers;
+        public final ImageView back;
+        public final ImageView pageContext;
+        public final ImageView avatar;
+        public final ImageView home;
+        public final ImageView search;
+        public final ImageView addPost;
+        public final ImageView notifications;
+        public final ImageView selfPage;
+
+        public Views() {
+            flexboxForCellsLayout = findViewById(R.id.layout);
+            selfPageLayout = findViewById(R.id.self_page_activity);
+            languagesSpinner = findViewById(R.id.languages);
+            back = findViewById(R.id.back);
+            pageContext = findViewById(R.id.user_context);
+            avatar = findViewById(R.id.avatar);
+            home = findViewById(R.id.home);
+            search = findViewById(R.id.search);
+            addPost = findViewById(R.id.add_post);
+            notifications = findViewById(R.id.notifications);
+            selfPage = findViewById(R.id.self_page);
+            login = findViewById(R.id.user_login);
+            nick = findViewById(R.id.user_name);
+            surname = findViewById(R.id.user_surname);
+            email = findViewById(R.id.user_email);
+            description = findViewById(R.id.user_description);
+            birthday = findViewById(R.id.user_birthday);
+            amountPosts = findViewById(R.id.amount_posts);
+            followings = findViewById(R.id.amount_followings);
+            followers = findViewById(R.id.amount_followers);
+        }
+    }
+
     public static User userPage;
     private Resources resources;
-    private LinearLayout selfPage;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private ImageView[] imageViews;
-    private TextView[] textViews;
-    private ImageView[] imageViewsBottom;
-    private PagingViewGetAllPostsInCells pagingView;
     private FindUser findUser;
+    private Views views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_self_page);
-        setUiVisibility();
-        findViews();
 
         // region find users
         try {
-            findUser = new FindUser(this, resources);
+            findUser = new FindUser(this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
         // endregion
+
+        resources = getResources();
+        views = new Views();
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
         setIntents();
-
-        Animation.getAnimations(selfPage).start();
         setListeners();
-        registerForContextMenu(imageViews[2]);
+        registerForContextMenu(views.pageContext);
         LoadAvatar();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.selfPageLayout).start();
 
         try {
-            pagingView = new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+            new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -93,10 +132,10 @@ public class SelfPage extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (textViews != null) {
+        if (views != null) {
             setInfo();
+            Localisation.setFirstLocale(views.languagesSpinner);
         }
-        Localisation.setFirstLocale(languages);
     }
 
     @Override
@@ -118,8 +157,8 @@ public class SelfPage extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
                         String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[3]);
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViewsBottom[4]);
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
                     }
                 }
 
@@ -132,11 +171,6 @@ public class SelfPage extends AppCompatActivity {
             Log.d("sendToGetAva: (JSONException)", e.getMessage());
         }
         // endregion
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -189,33 +223,23 @@ public class SelfPage extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void setInfo() {
-        textViews[0].setText(SelfPage.userPage.getLogin());
+        views.login.setText(SelfPage.userPage.getLogin());
 
-        if (SelfPage.userPage.getNickName().equals("")) textViews[1].setVisibility(View.GONE);
-        else textViews[1].setText(SelfPage.userPage.getNickName());
+        if (SelfPage.userPage.getNickName().equals("")) views.nick.setVisibility(View.GONE);
+        else views.nick.setText(SelfPage.userPage.getNickName());
 
-        if (SelfPage.userPage.getSurname().equals("")) textViews[2].setVisibility(View.GONE);
-        else textViews[2].setText(SelfPage.userPage.getSurname());
+        if (SelfPage.userPage.getSurname().equals("")) views.surname.setVisibility(View.GONE);
+        else views.surname.setText(SelfPage.userPage.getSurname());
 
-        if (SelfPage.userPage.getDescription().equals("")) textViews[3].setVisibility(View.GONE);
-        else textViews[3].setText(SelfPage.userPage.getDescription());
+        if (SelfPage.userPage.getDescription().equals(""))
+            views.description.setVisibility(View.GONE);
+        else views.description.setText(SelfPage.userPage.getDescription());
 
-        textViews[5].setText(Integer.toString(SelfPage.userPage.getAmountPosts()));
-        textViews[7].setText("101");
-        textViews[9].setText("102");
-        textViews[10].setText(SelfPage.userPage.getEmail());
-
-        textViews[11].setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
-    }
-
-    private void findViews() {
-        flexboxLayout = findViewById(R.id.layout);
-        resources = getResources();
-        selfPage = findViewById(R.id.self_page_activity);
-        languages = findViewById(R.id.languages);
-        imageViews = new ImageView[]{findViewById(R.id.back), findViewById(R.id.change_main_theme), findViewById(R.id.user_context), findViewById(R.id.avatar)};
-        textViews = new TextView[]{findViewById(R.id.nick_name), findViewById(R.id.user_name), findViewById(R.id.user_surname), findViewById(R.id.user_description), findViewById(R.id.amount_posts_title), findViewById(R.id.amount_posts), findViewById(R.id.amount_followings_title), findViewById(R.id.amount_followings), findViewById(R.id.amount_followers_title), findViewById(R.id.amount_followers), findViewById(R.id.user_email), findViewById(R.id.user_birthday)};
-        imageViewsBottom = new ImageView[]{findViewById(R.id.home), findViewById(R.id.search), findViewById(R.id.add_post), findViewById(R.id.notifications), findViewById(R.id.self_page)};
+        views.amountPosts.setText(Integer.toString(SelfPage.userPage.getAmountPosts()));
+        views.followings.setText("101");
+        views.followers.setText("102");
+        views.email.setText(SelfPage.userPage.getEmail());
+        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
 
     private void setListeners() {
@@ -233,38 +257,32 @@ public class SelfPage extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
-        imageViews[0].setOnClickListener(v -> {
-            finish();
-            SelfPage.userPage = null;
-        });
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         // initialize menu bottom
-        BottomMenu.setListeners(this, new ImageView[]{imageViewsBottom[1], imageViewsBottom[2], imageViewsBottom[3]}, findUser);
+        BottomMenu.setListeners(this, new ImageView[]{views.search, views.addPost, views.notifications}, findUser);
 
         // home
-        imageViewsBottom[0].setOnClickListener(v -> {
+        views.home.setOnClickListener(v -> {
             finish();
             SelfPage.userPage = null;
         });
         // back
-        imageViews[0].setOnClickListener(v -> {
+        views.back.setOnClickListener(v -> {
             finish();
             SelfPage.userPage = null;
         });
         // self page
-        imageViewsBottom[4].setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
+        views.selfPage.setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
     }
 
     // region Localisation
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        textViews[4].setText(resources.getString(R.string.posts));
-        textViews[6].setText(resources.getString(R.string.followings));
-        textViews[8].setText(resources.getString(R.string.followers));
-
-        textViews[11].setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
+        views.amountPosts.setText(resources.getString(R.string.posts));
+        views.followings.setText(resources.getString(R.string.followings));
+        views.followers.setText(resources.getString(R.string.followers));
+        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
     // endregion
 }

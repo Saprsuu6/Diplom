@@ -28,6 +28,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
@@ -77,10 +78,9 @@ public class Registration extends AppCompatActivity {
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
         setRememberMe();
-        setUiVisibility();
         setIntents();
         setListeners();
-
+        UiVisibility.setUiVisibility(this);
         Animation.getAnimations(views.registrationLayout).start();
     }
 
@@ -94,11 +94,6 @@ public class Registration extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setRememberMe() {

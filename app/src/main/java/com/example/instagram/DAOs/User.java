@@ -74,6 +74,9 @@ public class User {
     public String getEmailCode() {
         return emailCode;
     }
+    public boolean isEmailConfirmed() {
+        return isEmailConfirmed;
+    }
 
     // endregion
     // region setters
@@ -136,12 +139,16 @@ public class User {
         this.otherInfo = otherInfo;
     }
 
+    public void setEmailConfirmed(boolean emailConfirmed) {
+        isEmailConfirmed = emailConfirmed;
+    }
+
     public void setEmailCode(String emailCode) {
         this.emailCode = emailCode;
     }
 
     // endregion
-    private String login = "Andry";
+    private String login;
     private String nickName;
 
     private String surname;
@@ -157,6 +164,8 @@ public class User {
     private int amountPosts;
     private int amountSubscribers;
     private int amountSubscribing;
+
+    private boolean isEmailConfirmed;
 
     private UserOtherInfo otherInfo = new UserOtherInfo();
 
@@ -175,7 +184,10 @@ public class User {
         this.email = email;
     }
 
-    // TODO: json constructor
+    public User(JSONObject object) throws JSONException {
+        setLogin(object.getString("login"));
+        setNickName(object.getString("name"));
+    }
 
     // could be changed
     public JSONObject getJSON() throws JSONException {

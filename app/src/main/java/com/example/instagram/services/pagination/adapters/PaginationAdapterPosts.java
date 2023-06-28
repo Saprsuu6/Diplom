@@ -110,9 +110,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
-
-                        // set ava
-                        Glide.with(context).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
+                        String imagePath = Services.BASE_URL + context.getString(R.string.root_folder) + avaLink;
+                        Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
                     }
                 }
 
@@ -485,7 +484,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     Log.d("JSONException: ", e.getMessage());
                 }
             });
-
             login.setOnClickListener(v -> {
                 try {
                     Services.sendToGetCurrentUser(new Callback<>() {
@@ -514,9 +512,6 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     Log.d("JSONException: ", e.getMessage());
                 }
             });
-
-            // TODO add name
-
             authorNickname.setOnClickListener(v -> {
                 try {
                     Services.sendToGetCurrentUser(new Callback<>() {

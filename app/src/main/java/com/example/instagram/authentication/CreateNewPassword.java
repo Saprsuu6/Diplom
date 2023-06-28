@@ -30,6 +30,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
@@ -80,18 +81,16 @@ public class CreateNewPassword extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_password);
-        setUiVisibility();
 
         resources = getResources();
-        //findViews();
-        setIntents();
-
         views = new Views();
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        Animation.getAnimations(views.createNewPasswordLayout).start();
+        setIntents();
         setListeners();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.createNewPasswordLayout).start();
     }
 
     private void setIntents() {
@@ -104,11 +103,6 @@ public class CreateNewPassword extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setListeners() {

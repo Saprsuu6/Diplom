@@ -25,6 +25,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
 
@@ -70,9 +71,9 @@ public class ForgotPassword extends AppCompatActivity {
         runnable = checkUsedLink();
         handler.postDelayed(runnable, 5000L);
 
-        setUiVisibility();
         setIntents();
         setListeners();
+        UiVisibility.setUiVisibility(this);
         Animation.getAnimations(views.forgotPasswordLayout).start();
     }
 
@@ -119,11 +120,6 @@ public class ForgotPassword extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setListeners() {

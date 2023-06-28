@@ -1,11 +1,5 @@
 package com.example.instagram.main_process;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.TooltipCompat;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -20,7 +14,6 @@ import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,11 +23,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.TooltipCompat;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetBirthday;
+import com.example.instagram.services.Animation;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
@@ -44,8 +44,8 @@ import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.Animation;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
@@ -65,52 +65,80 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EditProfile extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout editProfileLayout;
+        private final Spinner languagesSpinner;
+        private final ImageView close;
+        private final ImageView done;
+        private final ImageView avatar;
+        private final TextView title;
+        private final EditText userName;
+        private final EditText surName;
+        private final EditText birthday;
+        private final EditText bio;
+        private final EditText email;
+        private final EditText confirmCode;
+        private final Button sendCode;
+        private final Button confirmCodeButton;
+        private final ImageView warningEmail;
+        private final ImageView warningBirthday;
+
+        public Views() {
+            editProfileLayout = findViewById(R.id.edit_profile);
+            languagesSpinner = findViewById(R.id.languages);
+            close = findViewById(R.id.close);
+            done = findViewById(R.id.done);
+            title = findViewById(R.id.title);
+            avatar = findViewById(R.id.ava);
+            userName = findViewById(R.id.info_for_name);
+            surName = findViewById(R.id.info_for_surname);
+            birthday = findViewById(R.id.birth_date);
+            bio = findViewById(R.id.info_for_bio);
+            email = findViewById(R.id.info_for_email);
+            confirmCode = findViewById(R.id.info_for_email_code);
+            sendCode = findViewById(R.id.send_new_email);
+            confirmCodeButton = findViewById(R.id.confirm_code_button);
+            warningEmail = findViewById(R.id.validation_error_email);
+            warningBirthday = findViewById(R.id.validation_error_birthday);
+        }
+    }
+
     private Resources resources;
-    private LinearLayout editProfile;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-    private TextView[] textViews;
-    private EditText[] editTexts;
-    private Button[] buttons;
-    private ImageView[] imageViews;
     private Calendar selectedDate;
     private DatePickerDialog.OnDateSetListener dateSetListener;
-    private byte[] imageBytes;
     private String extension;
     private Handler handler;
     private Runnable runnable;
+    private Views views;
+    private byte[] imageBytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
-        setUiVisibility();
 
         resources = getResources();
-        findViews();
-        LoadAvatar();
-
-        localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
-
-        editTexts[4].setInputType(InputType.TYPE_NULL);
-
-        setListeners();
-        Animation.getAnimations(editProfile);
-
-        setUserInfo();
-
         handler = new Handler();
         runnable = checkUsedLink();
         handler.postDelayed(runnable, 5000L);
+        views = new Views();
+        localisation = new Localisation(this);
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
+        views.birthday.setInputType(InputType.TYPE_NULL);
+
+        LoadAvatar();
+        setListeners();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.editProfileLayout);
+
+        setUserInfo();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void LoadAvatar() {
@@ -121,9 +149,8 @@ public class EditProfile extends AppCompatActivity {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
-
-                        // set ava
-                        Glide.with(getApplicationContext()).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[0]);
+                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
+                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
                     }
                 }
 
@@ -138,27 +165,12 @@ public class EditProfile extends AppCompatActivity {
         // endregion
     }
 
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void findViews() {
-        editProfile = findViewById(R.id.edit_profile);
-        languages = findViewById(R.id.languages);
-        editTexts = new EditText[]{findViewById(R.id.info_for_name), findViewById(R.id.info_for_surname), findViewById(R.id.info_for_email), findViewById(R.id.info_for_bio), findViewById(R.id.birth_date), findViewById(R.id.info_for_email_code)};
-        imageViews = new ImageView[]{findViewById(R.id.ava), findViewById(R.id.close), findViewById(R.id.done), findViewById(R.id.ava), findViewById(R.id.validation_error_email), findViewById(R.id.validation_error_birthday)};
-        textViews = new TextView[]{findViewById(R.id.title), findViewById(R.id.email_name)};
-        buttons = new Button[]{findViewById(R.id.send_new_email), findViewById(R.id.confirm_code_button)};
-    }
-
     private void setUserInfo() {
-        editTexts[0].setText(SelfPage.userPage.getNickName());
-        editTexts[1].setText(SelfPage.userPage.getSurname());
-
-        editTexts[2].setText(SelfPage.userPage.getEmail());
-        editTexts[3].setText(SelfPage.userPage.getDescription());
-        editTexts[4].setText(DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
+        views.userName.setText(SelfPage.userPage.getNickName());
+        views.surName.setText(SelfPage.userPage.getSurname());
+        views.email.setText(SelfPage.userPage.getEmail());
+        views.bio.setText(SelfPage.userPage.getDescription());
+        views.birthday.setText(DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
     }
 
     @SuppressLint("IntentReset")
@@ -177,22 +189,20 @@ public class EditProfile extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        imageViews[0].setOnClickListener(v -> finish());
-
-        editTexts[2].addTextChangedListener(new Validator(editTexts[2]) {
+        views.email.addTextChangedListener(new Validator(views.email) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editTexts[2].setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
 
                 try {
                     Validations.validateEmail(text, "", resources);
-                    setValidationError(imageViews[4], false, "");
+                    setValidationError(views.warningEmail, false, "");
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
                 } catch (Exception exception) {
-                    setValidationError(imageViews[4], true, getResources().getString(R.string.error_send_password1));
+                    setValidationError(views.warningEmail, true, getResources().getString(R.string.error_send_password1));
                     editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
                 }
             }
@@ -204,7 +214,7 @@ public class EditProfile extends AppCompatActivity {
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        editTexts[4].setOnClickListener(v -> {
+        views.birthday.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(this, android.R.style.Theme_DeviceDefault_Dialog, dateSetListener, year, month, day);
 
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
@@ -218,17 +228,17 @@ public class EditProfile extends AppCompatActivity {
             DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
             if (year - SetBirthday.yearOffset <= year1) {
-                setValidationError(imageViews[5], true, getResources().getString(R.string.birthday_error_age));
+                setValidationError(views.warningBirthday, true, getResources().getString(R.string.birthday_error_age));
             } else {
-                editTexts[4].setText(DateFormatting.formatDate(selectedDate));
-                setValidationError(imageViews[5], false, "");
+                views.birthday.setText(DateFormatting.formatDate(selectedDate));
+                setValidationError(views.warningBirthday, false, "");
             }
         };
         // endregion
 
-        imageViews[0].setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
+        views.avatar.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
-        imageViews[1].setOnClickListener(v -> {
+        views.close.setOnClickListener(v -> {
             try {
                 Services.sendToGetCurrentUser(new Callback<>() {
                     @Override
@@ -257,17 +267,17 @@ public class EditProfile extends AppCompatActivity {
             }
         });
 
-        imageViews[2].setOnClickListener(v -> {
-            if (imageViews[4].getVisibility() == View.GONE && imageViews[5].getVisibility() == View.GONE) {
-                SelfPage.userPage.setLogin(editTexts[0].getText().toString().trim());
-                SelfPage.userPage.setSurname(editTexts[1].getText().toString().trim());
-                SelfPage.userPage.setDescription(editTexts[3].getText().toString().trim());
-
+        views.done.setOnClickListener(v -> {
+            if (views.warningBirthday.getVisibility() == View.GONE && views.warningEmail.getVisibility() == View.GONE) {
                 if (selectedDate == null) {
                     selectedDate = DateFormatting.getCalendar(SelfPage.userPage.getBirthday());
                 }
 
                 SelfPage.userPage.setBirthday(selectedDate.getTime());
+                SelfPage.userPage.setDescription(views.bio.getText().toString().trim());
+                SelfPage.userPage.setNickName(views.userName.getText().toString().trim());
+                SelfPage.userPage.setSurname(views.surName.getText().toString().trim());
+                SelfPage.userPage.setDescription(views.bio.getText().toString().trim());
 
                 sendAvaToBackEnd();
 
@@ -279,9 +289,7 @@ public class EditProfile extends AppCompatActivity {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             if (response.isSuccessful() && response.body() != null) {
-                                if (response.body().contains("3")) {
-                                    Toast.makeText(getApplicationContext(), getString(R.string.email_are_not_valid), Toast.LENGTH_SHORT).show();
-                                }
+                                Errors.editProfile(getApplicationContext(), response.body()).show();
                             }
                         }
 
@@ -297,12 +305,12 @@ public class EditProfile extends AppCompatActivity {
         });
 
         // send code to mail
-        buttons[0].setOnClickListener(v -> {
-            if (SelfPage.userPage.getEmail().equals(editTexts[2].getText().toString())) {
+        views.sendCode.setOnClickListener(v -> {
+            if (!SelfPage.userPage.getEmail().equals(views.email.getText().toString())) {
                 JSONObject body = new JSONObject();
                 try {
                     body.put("login", SelfPage.userPage.getLogin());
-                    body.put("newEmail", editTexts[2].getText().toString());
+                    body.put("newEmail", views.email.getText().toString());
                     body.put("token", TransitUser.user.getToken());
 
                     Services.sendToSendCodeForEmail(new Callback<>() {
@@ -325,14 +333,14 @@ public class EditProfile extends AppCompatActivity {
         });
 
         // check code
-        buttons[1].setOnClickListener(v -> {
-            if (editTexts[5].getText().length() > 0) {
-                if (!SelfPage.userPage.getEmail().equals(editTexts[2].getText().toString())) {
+        views.confirmCodeButton.setOnClickListener(v -> {
+            if (views.confirmCode.getText().length() > 0) {
+                if (!SelfPage.userPage.getEmail().equals(views.confirmCodeButton.getText().toString())) {
                     JSONObject body = new JSONObject();
                     try {
                         body.put("token", TransitUser.user.getToken());
-                        body.put("code", editTexts[5].getText());
-                        body.put("newEmail", editTexts[2].getText().toString());
+                        body.put("code", views.confirmCode.getText());
+                        body.put("newEmail", views.email.getText().toString());
 
                         Services.sendToChangeEmailFinally(new Callback<>() {
                             @Override
@@ -367,7 +375,7 @@ public class EditProfile extends AppCompatActivity {
                                 String responseStr = response.body();
                                 int index = responseStr.indexOf(":");
                                 responseStr = responseStr.substring(index + 1);
-                                editTexts[5].setText(responseStr.trim());
+                                views.confirmCode.setText(responseStr.trim());
                             } else {
                                 handler.postDelayed(runnable, 5000L);
                             }
@@ -414,9 +422,7 @@ public class EditProfile extends AppCompatActivity {
                         Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
                     }
 
-                    //Bitmap ava = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    imageViews[0].setImageURI(selectedImageUri);
-                    //Glide.with(getApplicationContext()).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageViews[0]);
+                    views.avatar.setImageURI(selectedImageUri);
                 } catch (IOException e) {
                     Log.d("IOException: ", e.getMessage());
                 }
@@ -460,21 +466,15 @@ public class EditProfile extends AppCompatActivity {
         finish();
     }
 
-    // region Localisation
     private void setStringResources() {
-        textViews[0].setText(resources.getString(R.string.change_your_info_to_be_individual));
-        editTexts[0].setHint(resources.getString(R.string.login_hint_username));
-        editTexts[1].setHint(resources.getString(R.string.login_hint_surname));
-        editTexts[2].setHint(resources.getString(R.string.login_hint_email));
-        editTexts[3].setHint(resources.getString(R.string.login_hint_bio));
-        editTexts[4].setHint(resources.getString(R.string.birthday_hint));
-        editTexts[2].setHint(resources.getString(R.string.login_hint_email));
-        editTexts[5].setHint(resources.getString(R.string.mail_code));
-
-        buttons[0].setText(resources.getString(R.string.send_code));
-        buttons[1].setText(resources.getString(R.string.confirm_code));
+        views.title.setText(resources.getString(R.string.change_your_info_to_be_individual));
+        views.userName.setHint(resources.getString(R.string.login_hint_username));
+        views.surName.setHint(resources.getString(R.string.login_hint_surname));
+        views.email.setHint(resources.getString(R.string.login_hint_email));
+        views.birthday.setHint(resources.getString(R.string.login_hint_bio));
+        views.birthday.setHint(resources.getString(R.string.birthday_hint));
+        views.confirmCode.setHint(R.string.confirm_code);
+        views.sendCode.setText(resources.getString(R.string.send_code));
+        views.confirmCodeButton.setText(resources.getString(R.string.confirm_code));
     }
-
-    // endregion
-
 }

@@ -102,7 +102,6 @@ public class Authorisation extends AppCompatActivity {
 
         setIntents();
         setListeners();
-
         UiVisibility.setUiVisibility(this);
         Animation.getAnimations(views.authorisationLayout).start();
         if (!TransitUser.user.getOtherInfo().isPhoneBookPermission() || !TransitUser.user.getOtherInfo().isMediaPermission())
@@ -243,6 +242,9 @@ public class Authorisation extends AppCompatActivity {
                     Validations.validatePassword(views.fieldForPassword.getText().toString(), resources);
                     setValidationError(false, "");
 
+                    TransitUser.user.setLogin(views.fieldForLogin.getText().toString());
+                    TransitUser.user.setPassword(views.fieldForPassword.getText().toString());
+
                     if (views.rememberMe.isChecked()) {
                         com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", views.rememberMe.isChecked());
                         com.example.instagram.services.SharedPreferences.saveSP(this, "login", TransitUser.user.getLogin());
@@ -263,9 +265,6 @@ public class Authorisation extends AppCompatActivity {
                                     // endregion
 
                                     TransitUser.user.setToken(token);
-                                    TransitUser.user.setLogin(views.fieldForLogin.getText().toString());
-                                    TransitUser.user.setPassword(views.fieldForPassword.getText().toString());
-
 
                                     startActivity(Intents.getNewsList());
                                     finish();

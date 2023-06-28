@@ -8,16 +8,13 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -67,51 +64,80 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CreatePost extends AppCompatActivity {
+    private class Views {
+        private final LinearLayout audioControllerLinearLayout;
+        private final LinearLayout createNewPostLayout;
+        private final Button btnVideo;
+        private final Button btnImage;
+        private final Button btnAudio;
+        private final ImageView close;
+        private final ImageView done;
+        private final ImageView playPrev;
+        private final ImageView playNext;
+        private final ImageView playStop;
+        private final TextView timeLine;
+        private final TextView title;
+        private final TextView tagPeople;
+        private final TextView postponePublication;
+        private final EditText description;
+        private final Spinner languagesSpinner;
+        private final SeekBar seekBar;
+        private final VideoView videoView;
+        private final ImageView photoView;
+
+        public Views() {
+            audioControllerLinearLayout = findViewById(R.id.audio_controller);
+            createNewPostLayout = findViewById(R.id.create_post);
+            timeLine = findViewById(R.id.time_line);
+            playPrev = findViewById(R.id.play_prev);
+            playNext = findViewById(R.id.play_next);
+            playStop = findViewById(R.id.play_stop);
+            btnVideo = findViewById(R.id.btn_video);
+            btnAudio = findViewById(R.id.btn_audio);
+            btnImage = findViewById(R.id.btn_image);
+            close = findViewById(R.id.close);
+            done = findViewById(R.id.done);
+            title = findViewById(R.id.new_post_title);
+            tagPeople = findViewById(R.id.tag_people);
+            postponePublication = findViewById(R.id.postpone_publication);
+            description = findViewById(R.id.new_post_description);
+            languagesSpinner = findViewById(R.id.languages);
+            seekBar = findViewById(R.id.seek_bar);
+            videoView = findViewById(R.id.video_content);
+            photoView = findViewById(R.id.preview_photo);
+        }
+    }
+
     private AudioController audioController;
     private Resources resources;
-    // region localisation
     private Localisation localisation;
-    private Spinner languages;
-    // endregion
-
-    private EditText[] editTexts;
-    private TextView[] textViews;
-    private ImageView[] imageViews;
-    private Button[] buttons;
-    private VideoView videoView;
-    private LinearLayout audioControllerLinearLayout;
-    private LinearLayout createNewPost;
-    private byte[] mediaBytes;
     private String extension;
     private TagPeople tagPeople;
-    private DatePickerDialog.OnDateSetListener setListener;
-    private SeekBar seekBar;
     private Calendar selectedDate;
+    private Views views;
+    private byte[] mediaBytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
-        findViews();
-        setIntents();
-
-        UiVisibility.setUiVisibility(this);
-
         resources = getResources();
-
+        views = new Views();
         tagPeople = new TagPeople(this, resources, this);
         localisation = new Localisation(this);
-        languages.setAdapter(localisation.getAdapter());
+        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
+        setIntents();
         setListeners();
-        Animation.getAnimations(createNewPost).start();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.createNewPostLayout).start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(languages);
+        Localisation.setFirstLocale(views.languagesSpinner);
     }
 
     private void setIntents() {
@@ -125,18 +151,6 @@ public class CreatePost extends AppCompatActivity {
         permissionsDialog.create().show();
     }
 
-    private void findViews() {
-        createNewPost = findViewById(R.id.create_post);
-        languages = findViewById(R.id.languages);
-        audioControllerLinearLayout = findViewById(R.id.audio_controller);
-        editTexts = new EditText[]{findViewById(R.id.new_post_description)};
-        textViews = new TextView[]{findViewById(R.id.new_post_title), findViewById(R.id.tag_people), findViewById(R.id.add_place), findViewById(R.id.postpone_publication), findViewById(R.id.time_line)};
-        imageViews = new ImageView[]{findViewById(R.id.cancel), findViewById(R.id.done), findViewById(R.id.preview_photo), findViewById(R.id.cancel), findViewById(R.id.done), findViewById(R.id.play_stop), findViewById(R.id.play_prev), findViewById(R.id.play_next)};
-        videoView = findViewById(R.id.video_content);
-        buttons = new Button[]{findViewById(R.id.btn_video), findViewById(R.id.btn_image), findViewById(R.id.btn_audio)};
-        seekBar = findViewById(R.id.seek_bar);
-    }
-
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == Activity.RESULT_OK) {
             Intent data = result.getData();
@@ -147,8 +161,6 @@ public class CreatePost extends AppCompatActivity {
                 extension = FindExtension.getExtension(selectedUri, getApplicationContext());
                 String mime = Post.getMimeTypeFromExtension(extension);
                 Bitmap selectedImage;
-
-                getFileName(selectedUri);
 
                 try {
                     mediaBytes = ReadBytesForMedia.readBytes(this, selectedUri);
@@ -165,26 +177,25 @@ public class CreatePost extends AppCompatActivity {
                         selectedImage = BitmapFactory.decodeByteArray(mediaBytes, 0, mediaBytes.length);
 
                         if (selectedImage != null) {
-                            imageViews[2].setVisibility(View.VISIBLE);
-                            //imageViews[2].setImageBitmap(selectedImage);
-                            imageViews[2].setImageURI(selectedUri);
+                            views.photoView.setVisibility(View.VISIBLE);
+                            views.photoView.setImageURI(selectedUri);
 
                             object.put("Size", selectedImage.getHeight() + "x" + selectedImage.getWidth());
                             TransitPost.post.setMetadata(object.toString());
                         }
                     } else if (mime.contains(getString(R.string.mime_video))) {
                         // set video
-                        videoView.setVisibility(View.VISIBLE);
-                        videoView.setVideoURI(selectedUri);
-                        videoView.start();
-                        videoView.requestFocus();
+                        views.videoView.setVisibility(View.VISIBLE);
+                        views.videoView.setVideoURI(selectedUri);
+                        views.videoView.start();
+                        views.videoView.requestFocus();
 
-                        object.put("Size", videoView.getHeight() + "x" + videoView.getWidth());
+                        object.put("Size", views.videoView.getHeight() + "x" + views.videoView.getWidth());
                         TransitPost.post.setMetadata(object.toString());
                     } else if (mime.contains(getString(R.string.mime_audio))) {
                         // set audio
-                        audioControllerLinearLayout.setVisibility(View.VISIBLE);
-                        audioController = new AudioController(textViews[4], seekBar, imageViews[5], imageViews[6], imageViews[7], getApplicationContext(), selectedUri);
+                        views.audioControllerLinearLayout.setVisibility(View.VISIBLE);
+                        audioController = new AudioController(views.timeLine, views.seekBar, views.playStop, views.playPrev, views.playNext, getApplicationContext(), selectedUri);
                         audioController.initHandler(new Handler());
                         object.put("Duration", audioController.getDuration());
                         TransitPost.post.setMetadata(object.toString());
@@ -199,49 +210,25 @@ public class CreatePost extends AppCompatActivity {
         }
     });
 
-    @SuppressLint("Range")
-    public String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                assert cursor != null;
-                cursor.close();
-            }
-        }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
-    }
-
     private void goneButtons() {
-        buttons[0].setVisibility(View.GONE);
-        buttons[1].setVisibility(View.GONE);
-        buttons[2].setVisibility(View.GONE);
+        views.btnVideo.setVisibility(View.GONE);
+        views.btnImage.setVisibility(View.GONE);
+        views.btnAudio.setVisibility(View.GONE);
     }
 
     @SuppressLint("SetTextI18n")
     private void setListeners() {
-        buttons[0].setOnClickListener(v -> {
+        views.btnVideo.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.VIDEO, someActivityResultLauncher);
             goneButtons();
         });
 
-        buttons[1].setOnClickListener(v -> {
+        views.btnImage.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher);
             goneButtons();
         });
 
-        buttons[2].setOnClickListener(v -> {
+        views.btnAudio.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.AUDIO, someActivityResultLauncher);
             goneButtons();
         });
@@ -256,7 +243,7 @@ public class CreatePost extends AppCompatActivity {
                 DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
 
                 if (selectedDate != null) {
-                    textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+                    views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
                 }
             }
 
@@ -264,7 +251,7 @@ public class CreatePost extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        languages.setOnItemSelectedListener(itemLocaliseSelectedListener);
+        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -284,16 +271,14 @@ public class CreatePost extends AppCompatActivity {
             selectedDate = Calendar.getInstance();
             selectedDate.set(year1, month1, dayOfMonth);
 
-            //DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-
             if (year >= year1 && month >= month1 && dayOfMonth >= day) {
-                textViews[3].setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+                views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
             } else {
                 Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
             }
         };
 
-        textViews[3].setOnClickListener(v -> {
+        views.postponePublication.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, dateSetListener, year, month, day);
             TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Localisation.chosenLocale.getCountry().equals("EN"));
 
@@ -303,11 +288,11 @@ public class CreatePost extends AppCompatActivity {
             datePickerDialog.show();
         });
 
-        imageViews[0].setOnClickListener(v -> finish());
+        views.close.setOnClickListener(v -> finish());
 
-        imageViews[1].setOnClickListener(v -> {
+        views.done.setOnClickListener(v -> {
             if (mediaBytes == null || mediaBytes.length == 0) {
-                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show(); // TODO st localize
+                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
                 audioController.clearHandler();
                 finish();
                 return;
@@ -324,7 +309,7 @@ public class CreatePost extends AppCompatActivity {
                 media = RequestBody.create(MediaType.parse(getString(R.string.mime_audio) + "/" + extension), mediaBytes);
             }
 
-            TransitPost.post.setDescription(editTexts[0].getText().toString());
+            TransitPost.post.setDescription(views.description.getText().toString());
 
             try {
                 String otherInfo = TransitPost.post.crateOtherInfo().toString();
@@ -351,29 +336,27 @@ public class CreatePost extends AppCompatActivity {
             finish();
         });
 
-        imageViews[2].setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
-        videoView.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.VIDEO, someActivityResultLauncher));
+        views.photoView.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
+        views.videoView.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.VIDEO, someActivityResultLauncher));
+        views.audioControllerLinearLayout.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.AUDIO, someActivityResultLauncher));
 
-        textViews[1].setOnClickListener(v -> setToTagPeople());
+        views.tagPeople.setOnClickListener(v -> setToTagPeople());
     }
 
-    // region Localisation
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        editTexts[0].setHint(resources.getString(R.string.add_description));
-
-        textViews[0].setText(resources.getString(R.string.new_post));
+        views.description.setHint(resources.getString(R.string.add_description));
+        views.title.setText(resources.getString(R.string.new_post));
+        views.postponePublication.setText(resources.getString(R.string.postpone_publication));
 
         if (TransitPost.post.getNickNames() != null) {
-            textViews[1].setText(resources.getString(R.string.tag_people) + ": " + TransitPost.post.getNickNames());
+            views.tagPeople.setText(resources.getString(R.string.tag_people) + ": " + TransitPost.post.getNickNames());
         }
-
-        textViews[2].setText(resources.getString(R.string.add_a_place));
-        textViews[3].setText(resources.getString(R.string.postpone_publication));
 
         if (selectedDate != null) {
-            textViews[3].setText(textViews[3].getText() + ": " + DateFormatting.formatDate(selectedDate));
+            views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+        } else {
+            views.postponePublication.setText(resources.getString(R.string.postpone_publication));
         }
     }
-    // endregion
 }

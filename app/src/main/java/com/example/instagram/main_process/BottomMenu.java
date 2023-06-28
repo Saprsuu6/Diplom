@@ -9,11 +9,17 @@ import com.example.instagram.R;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 
+import org.json.JSONException;
+
 public class BottomMenu {
     public static void setListeners(Activity activity, ImageView[] imageViews, FindUser findUser) {
         // find users
         imageViews[0].setOnClickListener(v -> {
-            findUser.getToFindUser().show();
+            try {
+                findUser.getToFindUser().show();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         // new post

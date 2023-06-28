@@ -35,6 +35,7 @@ import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
 
@@ -88,15 +89,10 @@ public class SetAvatar extends AppCompatActivity {
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        setUiVisibility();
         setIntents();
         setListeners();
+        UiVisibility.setUiVisibility(this);
         Animation.getAnimations(views.setAvaLayout).start();
-    }
-
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     private void setIntents() {

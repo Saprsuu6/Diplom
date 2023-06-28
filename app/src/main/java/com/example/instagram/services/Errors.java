@@ -99,4 +99,13 @@ public class Errors {
         else
             return Toast.makeText(context, R.string.internal_error, Toast.LENGTH_SHORT);
     }
+
+    public static Toast editProfile(Context context, String responseStr) {
+        if (responseStr.contains("0"))
+            return Toast.makeText(context, R.string.successfull_uesr_update, Toast.LENGTH_SHORT);
+        else if (responseStr.contains("3"))
+            return Toast.makeText(context, R.string.email_are_not_valid, Toast.LENGTH_SHORT);
+        else
+            return Toast.makeText(context, R.string.internal_error, Toast.LENGTH_SHORT);
+    }
 }

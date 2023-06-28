@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.CommentsLibrary;
 import com.example.instagram.DAOs.PostsLibrary;
+import com.example.instagram.DAOs.UsersLibrary;
 import com.example.instagram.R;
 
 import org.json.JSONException;
@@ -29,6 +30,7 @@ abstract public class PagingView {
     protected final Activity activity;
     protected final PostsLibrary postsLibrary = new PostsLibrary();
     protected final CommentsLibrary commentsLibrary = new CommentsLibrary();
+    protected final UsersLibrary usersLibrary = new UsersLibrary();
 
     public PagingView(NestedScrollView scrollView, RecyclerView recyclerView,
                       ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {

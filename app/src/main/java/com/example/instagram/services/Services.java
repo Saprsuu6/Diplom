@@ -14,6 +14,8 @@ import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
 import com.example.instagram.services.interfaces.SendToCheckUserCode;
 import com.example.instagram.services.interfaces.SendToDeleteComment;
 import com.example.instagram.services.interfaces.SendToDeletePost;
+import com.example.instagram.services.interfaces.SendToFindPost;
+import com.example.instagram.services.interfaces.SendToFindUser;
 import com.example.instagram.services.interfaces.SendToGetAllComments;
 import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
@@ -38,7 +40,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://b700-2a09-bac5-597c-52d-00-84-89.ngrok-free.app";
+    public final static String BASE_URL = "https://6bce-2a09-bac5-597b-52d-00-84-8f.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback) throws IOException, JSONException {
@@ -220,6 +222,20 @@ public class Services {
 
     public static void sendToChangeEmailFinally(Callback<String> callback, String body) throws JSONException {
         SendToChangeEmailFinally mainInterface = retrofit.create(SendToChangeEmailFinally.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToFindUser(Callback<String> callback, String body) {
+        SendToFindUser mainInterface = retrofit.create(SendToFindUser.class);
+
+        Call<String> call = mainInterface.STRING_CALL(body);
+        call.enqueue(callback);
+    }
+
+    public static void sendToFindPost(Callback<String> callback, String body) {
+        SendToFindPost mainInterface = retrofit.create(SendToFindPost.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);

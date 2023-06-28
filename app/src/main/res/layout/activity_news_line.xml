@@ -71,6 +71,16 @@
 
         </LinearLayout>
 
+        <EditText
+            android:id="@+id/toFindPost"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Nickname"
+            android:inputType="text"
+            tools:hint="@string/find_post"
+            tools:ignore="LabelFor" />
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"

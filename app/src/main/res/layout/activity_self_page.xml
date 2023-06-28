@@ -83,12 +83,12 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/nick_name"
+                    android:id="@+id/user_login"
                     style="@style/Bold_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    tools:text="UserNickName" />
+                    tools:text="UserLogin" />
 
                 <TextView
                     android:id="@+id/user_name"

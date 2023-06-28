@@ -28,6 +28,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
@@ -74,14 +75,14 @@ public class SetPassword extends AppCompatActivity {
 
         resources = getResources();
         setIntents();
-        //findViews();
 
         views = new Views();
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        Animation.getAnimations(views.addPasswordLayout).start();
         setListeners();
+        UiVisibility.setUiVisibility(this);
+        Animation.getAnimations(views.addPasswordLayout).start();
     }
 
     private void setIntents() {
