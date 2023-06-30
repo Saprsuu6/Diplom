@@ -4,50 +4,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="5"
         android:orientation="horizontal"
         tools:ignore="UselessParent">
 
         <ImageView
             android:id="@+id/home"
-            android:layout_columnWeight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:contentDescription="@string/home"
             android:src="@drawable/home" />
 
         <ImageView
             android:id="@+id/search"
-            android:layout_columnWeight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:contentDescription="@string/search"
             android:src="@drawable/search" />
 
         <ImageView
             android:id="@+id/add_post"
-            android:layout_columnWeight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:contentDescription="@string/notifications"
             android:src="@drawable/add_post" />
 
         <ImageView
             android:id="@+id/notifications"
-            android:layout_columnWeight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:contentDescription="@string/add_post"
             android:src="@drawable/like_empty" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/self_page"
-            android:layout_width="35dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="35dp"
-            android:layout_columnWeight="1"
             android:layout_gravity="center"
             android:contentDescription="@string/avatar"
             android:scaleType="centerCrop"
             android:src="@color/for_skeleton" />
-    </GridLayout>
+    </LinearLayout>
 
 </LinearLayout>

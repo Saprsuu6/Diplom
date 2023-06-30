@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -65,6 +66,8 @@ public class SelfPage extends AppCompatActivity {
         public final ImageView addPost;
         public final ImageView notifications;
         public final ImageView selfPage;
+        public final Button subscribe;
+        public final Button editProfile;
 
         public Views() {
             flexboxForCellsLayout = findViewById(R.id.layout);
@@ -87,6 +90,8 @@ public class SelfPage extends AppCompatActivity {
             amountPosts = findViewById(R.id.amount_posts);
             followings = findViewById(R.id.amount_followings);
             followers = findViewById(R.id.amount_followers);
+            subscribe = findViewById(R.id.subscribe);
+            editProfile = findViewById(R.id.edit_profile);
         }
     }
 
@@ -113,6 +118,7 @@ public class SelfPage extends AppCompatActivity {
         views = new Views();
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
+        views.editProfile.setVisibility(TransitUser.user.getLogin().equals(userPage.getLogin()) ? View.VISIBLE : View.GONE);
 
         setIntents();
         setListeners();
@@ -189,9 +195,6 @@ public class SelfPage extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.settings:
-                startActivity(Intents.getEditProfile());
-                break;
             case R.id.statistic:
                 System.out.println("statistic"); // TODO: statistic
                 return true;
@@ -258,6 +261,12 @@ public class SelfPage extends AppCompatActivity {
             }
         };
         views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
+
+        views.subscribe.setOnClickListener(v -> {
+            // TODO realize subscribe
+        });
+
+        views.editProfile.setOnClickListener(v -> startActivity(Intents.getEditProfile()));
 
         // initialize menu bottom
         BottomMenu.setListeners(this, new ImageView[]{views.search, views.addPost, views.notifications}, findUser);

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/settings"
-        android:title="@string/setting_context" />
-    <item
         android:id="@+id/statistic"
         android:title="@string/statistic_context" />
     <item

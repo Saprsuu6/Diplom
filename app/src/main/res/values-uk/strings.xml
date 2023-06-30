@@ -104,7 +104,7 @@
     <string name="copy_profile_url">Копіювати URL профіля</string>
     <string name="share_profile">Поділитися профілем</string>
     <string name="qr_code">QR код</string>
-    <string name="setting_context">Налаштування</string>
+    <string name="edit_profile_context">Налаштувати профіль</string>
     <string name="statistic_context">Статистика</string>
     <string name="saved_context">Збережене</string>
     <string name="favorites_context">Предпочетаемое</string>
@@ -189,6 +189,4 @@
     <string name="incorrect_token_2">Невірний токен</string>
     <string name="empty_3">Email не може бути порожнім</string>
     <string name="match_4">Email не може збігатися з попередньою</string>
-    <string name="int_er">Внутрішня помилка</string>
-
 </resources>

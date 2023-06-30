@@ -155,7 +155,7 @@
     <string name="copy_profile_url">Copy profile URL</string>
     <string name="share_profile">Share profile</string>
     <string name="qr_code">QR code</string>
-    <string name="setting_context">Settings</string>
+    <string name="edit_profile_context">Edit profile</string>
     <string name="statistic_context">Statistic</string>
     <string name="saved_context">Saved</string>
     <string name="favorites_context">Favorites</string>
