@@ -90,7 +90,6 @@ public class CreateNewPassword extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.createNewPasswordLayout).start();
     }
 
     private void setIntents() {

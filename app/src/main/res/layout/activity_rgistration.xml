@@ -4,7 +4,7 @@
     android:id="@+id/registration"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_list_main"
+    android:background="@drawable/main_theme"
     android:gravity="top|center"
     android:orientation="vertical"
     android:theme="@style/Theme.Instagram.System"
@@ -73,14 +73,14 @@
                     tools:text="@string/code" />
 
                 <EditText
-                    android:id="@+id/phone_or_email"
+                    android:id="@+id/field_email"
                     style="@style/Authentication_EditText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:autofillHints="Login"
                     android:inputType="textEmailAddress"
-                    tools:hint="@string/login_hint_phone"
+                    tools:hint="@string/login_hint_email"
                     tools:ignore="LabelFor" />
 
                 <TextView

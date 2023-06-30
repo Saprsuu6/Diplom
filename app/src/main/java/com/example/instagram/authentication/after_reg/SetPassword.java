@@ -82,7 +82,6 @@ public class SetPassword extends AppCompatActivity {
 
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.addPasswordLayout).start();
     }
 
     private void setIntents() {

@@ -131,7 +131,6 @@ public class CreatePost extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.createNewPostLayout).start();
     }
 
     @Override

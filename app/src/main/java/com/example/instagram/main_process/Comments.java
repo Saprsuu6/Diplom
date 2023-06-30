@@ -97,7 +97,6 @@ public class Comments extends AppCompatActivity {
         setUiVisibility();
         setListeners();
         LoadAvatar();
-        Animation.getAnimations(views.commentsLayout).start();
 
         pagingView = new PagingViewGetAllComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
     }

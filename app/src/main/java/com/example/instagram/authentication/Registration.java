@@ -50,7 +50,7 @@ public class Registration extends AppCompatActivity {
 
         public Views() {
             registrationLayout = findViewById(R.id.registration);
-            fieldToEmail = findViewById(R.id.phone_or_email);
+            fieldToEmail = findViewById(R.id.field_email);
             singIn = findViewById(R.id.reg_log_in);
             receiveEmail = findViewById(R.id.receive_news_letters);
             hideEmail = findViewById(R.id.hide_email);
@@ -81,7 +81,6 @@ public class Registration extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.registrationLayout).start();
     }
 
     private void setIntents() {

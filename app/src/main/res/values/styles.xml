@@ -19,7 +19,7 @@
     </style>
 
     <style name="Authentication_Button" parent="Authentication_EditText">
-        <item name="android:background">@drawable/gradient_background_1</item>
+        <item name="android:background">@drawable/gradient_background_ui</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -32,7 +32,7 @@
     </style>
 
     <style name="Authentication_LogIn" parent="Authentication_Button">
-        <item name="android:background">@drawable/gradient_background_2</item>
+        <item name="android:background">@drawable/gradient_background_ui</item>
     </style>
 
     <style name="Authentication_Link" parent="TextAppearance.AppCompat">

@@ -66,7 +66,6 @@ public class SetName extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.setLoginLayout).start();
     }
 
     private void setIntents() {

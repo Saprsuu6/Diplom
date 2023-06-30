@@ -130,7 +130,6 @@ public class EditProfile extends AppCompatActivity {
         LoadAvatar();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.editProfileLayout);
 
         setUserInfo();
     }

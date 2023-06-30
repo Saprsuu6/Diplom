@@ -103,7 +103,6 @@ public class Authorisation extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.authorisationLayout).start();
         if (!TransitUser.user.getOtherInfo().isPhoneBookPermission() || !TransitUser.user.getOtherInfo().isMediaPermission())
             setPermissions();
     }

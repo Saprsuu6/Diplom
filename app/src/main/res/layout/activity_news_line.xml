@@ -5,11 +5,11 @@
     android:id="@+id/news_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_list_main"
+    android:background="@drawable/main_theme"
     android:gravity="top|center"
     android:orientation="vertical"
     android:theme="@style/Theme.Instagram.System"
-    tools:context=".authentication.Registration">
+    tools:context=".main_process.NewsLine">
 
     <include layout="@layout/languages_spinner" />
 

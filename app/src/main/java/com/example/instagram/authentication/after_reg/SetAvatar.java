@@ -92,7 +92,6 @@ public class SetAvatar extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.setAvaLayout).start();
     }
 
     private void setIntents() {

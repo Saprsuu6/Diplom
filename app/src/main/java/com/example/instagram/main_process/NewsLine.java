@@ -119,7 +119,6 @@ public class NewsLine extends AppCompatActivity {
         LoadAvatar();
         setIntents();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.newsLineLayout).start();
 
         try {
             showAgain();

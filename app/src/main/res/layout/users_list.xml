@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
             tools:ignore="RtlSymmetry"
-            tools:listitem="@layout/list_item_contacts" />
+            tools:listitem="@layout/list_item_user" />
 
         <io.supercharge.shimmerlayout.ShimmerLayout
             android:id="@+id/skeleton"

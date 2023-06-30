@@ -5,11 +5,11 @@
     android:id="@+id/set_name"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_list_main"
+    android:background="@drawable/main_theme"
     android:gravity="top|center"
     android:orientation="vertical"
     android:theme="@style/Theme.Instagram.System"
-    tools:context=".authentication.Registration">
+    tools:context=".authentication.after_reg.SetName">
 
     <include layout="@layout/languages_spinner"/>
 

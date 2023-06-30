@@ -5,11 +5,11 @@
     android:id="@+id/self_page_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_list_main"
+    android:background="@drawable/main_theme"
     android:gravity="top|center"
     android:orientation="vertical"
     android:theme="@style/Theme.Instagram.System"
-    tools:context=".authentication.Registration">
+    tools:context=".main_process.SelfPage">
 
     <include layout="@layout/languages_spinner" />
 
@@ -278,53 +278,12 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            tools:ignore="UselessParent">
+                        <include layout="@layout/skeleton_post_self_page_cell_layout" />
 
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            tools:ignore="UselessParent">
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            tools:ignore="UselessParent">
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                            <include layout="@layout/skeleton_post_self_page_cell" />
-
-                        </LinearLayout>
+                        <include layout="@layout/skeleton_post_self_page_cell_layout" />
 
                     </LinearLayout>
 

@@ -125,7 +125,6 @@ public class SelfPage extends AppCompatActivity {
         registerForContextMenu(views.pageContext);
         LoadAvatar();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.selfPageLayout).start();
 
         try {
             new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);

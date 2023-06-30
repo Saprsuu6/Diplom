@@ -1,6 +1,5 @@
 package com.example.instagram.services.pagination.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -16,8 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.instagram.DAOs.Post;
-import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.DAOs.UsersLibrary;
 import com.example.instagram.R;
@@ -50,7 +47,7 @@ public class PaginationAdapterUsers extends RecyclerView.Adapter<PaginationAdapt
     @NonNull
     @Override
     public PaginationAdapterUsers.ViewHolderUser onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_contacts, parent, false); // don't forget to change
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_user, parent, false); // don't forget to change
         return new ViewHolderUser(view);
     }
 

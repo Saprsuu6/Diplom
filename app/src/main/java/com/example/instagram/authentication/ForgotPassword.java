@@ -74,7 +74,6 @@ public class ForgotPassword extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        Animation.getAnimations(views.forgotPasswordLayout).start();
     }
 
     private Runnable checkUsedLink() {

@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,7 +14,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.example.instagram.R;
-import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.TransitUser;
 
 public class ThemesBackgrounds {
@@ -62,8 +59,6 @@ public class ThemesBackgrounds {
             radioButtons[4].setChecked(true);
         } else if (background == Backgrounds.Background5.getValue()) {
             radioButtons[5].setChecked(true);
-        } else if (background == Backgrounds.Background6.getValue()) {
-            radioButtons[5].setChecked(true);
         } else {
             radioButtons[0].setChecked(true);
         }
@@ -86,46 +81,33 @@ public class ThemesBackgrounds {
         // region create check box
         RadioButton radioButton0 = new RadioButton(context);
         radioButton0.setLayoutParams(layoutParams);
-        radioButton0.setBackground(resources.getDrawable(R.drawable.gradient_list_main_template, context.getTheme()));
-
-        AnimationDrawable animationDrawable = (AnimationDrawable) radioButton0.getBackground();
-        animationDrawable.setExitFadeDuration(1000);
-        animationDrawable.start();
+        radioButton0.setBackground(resources.getDrawable(R.drawable.main_theme_template, context.getTheme()));
 
         RadioButton radioButton1 = new RadioButton(context);
         radioButton1.setLayoutParams(layoutParams);
-        radioButton1.setBackground(resources.getDrawable(R.drawable.gradient_1_template, context.getTheme()));
+        radioButton1.setBackground(resources.getDrawable(R.drawable.theme_1_template, context.getTheme()));
 
         RadioButton radioButton2 = new RadioButton(context);
         radioButton2.setLayoutParams(layoutParams);
-        radioButton2.setBackground(resources.getDrawable(R.drawable.gradient_2_template, context.getTheme()));
+        radioButton2.setBackground(resources.getDrawable(R.drawable.theme_2_template, context.getTheme()));
 
         RadioButton radioButton3 = new RadioButton(context);
         radioButton3.setLayoutParams(layoutParams);
-        radioButton3.setBackground(resources.getDrawable(R.drawable.gradient_3_template, context.getTheme()));
+        radioButton3.setBackground(resources.getDrawable(R.drawable.theme_3_template, context.getTheme()));
 
         RadioButton radioButton4 = new RadioButton(context);
         radioButton4.setLayoutParams(layoutParams);
-        radioButton4.setBackground(resources.getDrawable(R.drawable.gradient_4_template, context.getTheme()));
+        radioButton4.setBackground(resources.getDrawable(R.drawable.theme_4_template, context.getTheme()));
 
         RadioButton radioButton5 = new RadioButton(context);
         radioButton5.setLayoutParams(layoutParams);
-        radioButton5.setBackground(resources.getDrawable(R.drawable.gradient_5_template, context.getTheme()));
-
-        RadioButton radioButton6 = new RadioButton(context);
-        radioButton6.setLayoutParams(layoutParams);
-        radioButton6.setBackground(resources.getDrawable(R.drawable.gradient_6_template, context.getTheme()));
+        radioButton5.setBackground(resources.getDrawable(R.drawable.theme_5_template, context.getTheme()));
         // endregion
 
         // region set listeners
         radioButton0.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background0.getValue(), setBackground);
-
-                AnimationDrawable animationDrawableActivity
-                        = (AnimationDrawable) setBackground.getBackground();
-                animationDrawableActivity.setExitFadeDuration(4000);
-                animationDrawableActivity.start();
             }
         });
 
@@ -158,15 +140,9 @@ public class ThemesBackgrounds {
                 saveBackgroundState(activity, Backgrounds.Background5.getValue(), setBackground);
             }
         });
-
-        radioButton6.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                saveBackgroundState(activity, Backgrounds.Background6.getValue(), setBackground);
-            }
-        });
         // endregion
 
-        return new RadioButton[]{radioButton0, radioButton1, radioButton2, radioButton3, radioButton4, radioButton5, radioButton6};
+        return new RadioButton[]{radioButton0, radioButton1, radioButton2, radioButton3, radioButton4, radioButton5};
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -187,17 +163,11 @@ public class ThemesBackgrounds {
         return com.example.instagram.services.SharedPreferences.loadIntSP(activity, key);
     }
 
-    public static void deleteSp(Activity activity, String key) {
-        com.example.instagram.services.SharedPreferences.deleteSP(activity, key);
-    }
-
     @SuppressLint("UseCompatLoadingForDrawables")
     public static void loadBackground(Activity activity, LinearLayout linearLayout) { // load bg after resume activity
         int idBackground = loadSP(activity, "background");
 
-        linearLayout.setBackground(idBackground != 0
-                ? activity.getResources().getDrawable(idBackground, activity.getTheme())
-                : activity.getResources().getDrawable(R.drawable.gradient_list_main, activity.getTheme()));
+        linearLayout.setBackground(idBackground != 0 ? activity.getResources().getDrawable(idBackground, activity.getTheme()) : activity.getResources().getDrawable(R.drawable.main_theme_template, activity.getTheme()));
 
         saveBackgroundState(activity, idBackground == 0 ? Backgrounds.Background0.getValue() : idBackground, linearLayout);
     }
