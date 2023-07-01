@@ -59,7 +59,7 @@ public class Services {
         call.enqueue(callback);
     }
 
-    public static void sendToForgotPassword(Callback<String> callback) throws Exception {
+    public static void sendToForgotPassword(Callback<String> callback) throws JSONException {
         SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
 
         Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONLogin().toString());
