@@ -6,13 +6,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -22,12 +20,13 @@ import androidx.appcompat.widget.TooltipCompat;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetName;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.GetEthernetInfo;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -36,7 +35,6 @@ import java.util.Locale;
 
 public class Registration extends AppCompatActivity {
     private class Views {
-        private final LinearLayout registrationLayout;
         private final EditText fieldToEmail;
         private final Button singIn;
         private final ImageView warning;
@@ -49,7 +47,6 @@ public class Registration extends AppCompatActivity {
         private final Spinner languagesSpinner;
 
         public Views() {
-            registrationLayout = findViewById(R.id.registration);
             fieldToEmail = findViewById(R.id.field_email);
             singIn = findViewById(R.id.reg_log_in);
             receiveEmail = findViewById(R.id.receive_news_letters);
@@ -96,7 +93,7 @@ public class Registration extends AppCompatActivity {
     }
 
     private void setRememberMe() {
-        boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
+        boolean rememberMeFlag = Cache.loadBoolSP(this, "rememberMe");
         views.rememberMe.setChecked(rememberMeFlag);
     }
 
@@ -117,7 +114,7 @@ public class Registration extends AppCompatActivity {
         };
         views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
-        views.rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", isChecked));
+        views.rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> Cache.saveSP(this, "rememberMe", isChecked));
 
         views.fieldToEmail.addTextChangedListener(new Validator(views.fieldToEmail) {
             @SuppressLint("UseCompatLoadingForDrawables")
@@ -141,9 +138,14 @@ public class Registration extends AppCompatActivity {
                 try {
                     setValidationError(false, "");
 
-                    TransitUser.user.getOtherInfo().setReceiveNewsletters(views.receiveEmail.isChecked());
-                    TransitUser.user.getOtherInfo().setHideEmail(views.hideEmail.isChecked());
-                    TransitUser.user.getOtherInfo().setIpAddress(GetEthernetInfo.getNetworkInfo());
+                    // save email
+                    Cache.saveSP(this, CacheScopes.USER_EMAIL.toString(), views.fieldToEmail.toString().trim());
+
+                    Cache.saveSP(this, CacheScopes.USER_IS_RECEIVE_LETTERS.toString(), views.receiveEmail.isChecked());
+                    Cache.saveSP(this, CacheScopes.USER_IS_HIDE_EMAIL.toString(), views.hideEmail.isChecked());
+
+                    String ip = GetEthernetInfo.getNetworkInfo();
+                    if (ip != null) Cache.saveSP(this, CacheScopes.USER_IP.toString(), ip);
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }

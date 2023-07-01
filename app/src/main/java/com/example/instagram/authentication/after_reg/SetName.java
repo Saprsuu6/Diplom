@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,16 +17,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
-import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
 public class SetName extends AppCompatActivity {
     private class Views {
-        private final LinearLayout setLoginLayout;
         private final TextView setLoginTitle;
         private final TextView setLoginDescription;
         private final EditText setLoginField;
@@ -37,7 +35,6 @@ public class SetName extends AppCompatActivity {
         private final Spinner languagesSpinner;
 
         public Views() {
-            setLoginLayout = findViewById(R.id.set_name);
             setLoginField = findViewById(R.id.info_for_name);
             next = findViewById(R.id.let_name_next);
             setLoginDescription = findViewById(R.id.let_name_info);
@@ -99,7 +96,8 @@ public class SetName extends AppCompatActivity {
 
         views.next.setOnClickListener(v -> {
             if (views.setLoginField.length() != 0) {
-                TransitUser.user.setLogin(views.setLoginField.getText().toString().trim());
+                String login = views.setLoginField.getText().toString().trim();
+                Cache.saveSP(this, CacheScopes.USER_LOGIN.toString(), login);
                 RegistrationActivities.activityList.add(this);
                 startActivity(Intents.getSetPassword());
             } else {

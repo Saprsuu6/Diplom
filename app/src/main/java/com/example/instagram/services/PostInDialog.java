@@ -3,7 +3,6 @@ package com.example.instagram.services;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -28,7 +27,6 @@ import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
-import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,6 +146,8 @@ public class PostInDialog {
 
         // region set like, save
         if (post.isLiked() == null) {
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToGetIsLiked(new Callback<>() {
                     @Override
@@ -175,7 +175,7 @@ public class PostInDialog {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, post.getPostId(), TransitUser.user.getLogin());
+                }, post.getPostId(), login);
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -186,6 +186,8 @@ public class PostInDialog {
         }
 
         if (post.isSaved() == null) {
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToGetIsSaved(new Callback<>() {
                     @Override
@@ -208,7 +210,7 @@ public class PostInDialog {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, post.getPostId(), TransitUser.user.getLogin());
+                }, post.getPostId(), login);
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -316,11 +318,13 @@ public class PostInDialog {
             post.setLiked(like_flag);
             amountLikes.setText(Integer.toString(post.getLikes()));
 
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             // region send unlike
             try {
                 JSONObject object = new JSONObject();
                 object.put("postId", post.getPostId());
-                object.put("login", TransitUser.user.getLogin());
+                object.put("login", login);
                 object.put("isLiked", like_flag);
 
                 Services.sendToLikeUnlikePost(new Callback<>() {
@@ -353,11 +357,13 @@ public class PostInDialog {
             bookmark_flag = !bookmark_flag;
             post.setSaved(bookmark_flag);
 
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             // region send save
             try {
                 JSONObject object = new JSONObject();
                 object.put("postId", post.getPostId());
-                object.put("login", TransitUser.user.getLogin());
+                object.put("login", login);
                 object.put("isSaved", bookmark_flag);
 
                 Services.sendToSaveUnsavedPost(new Callback<>() {

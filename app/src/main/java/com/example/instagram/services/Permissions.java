@@ -15,20 +15,14 @@ public class Permissions {
         linearLayout.setPadding(40, 0, 40, 0);
 
         // TODO add phone book
-        //CheckBox phoneBookCheckBox = getPhoneBookPermission(context, resources);
         CheckBox mediaCheckBox = mediaPermission(context, resources);
-
-        //linearLayout.addView(phoneBookCheckBox);
         linearLayout.addView(mediaCheckBox);
 
         return new AlertDialog.Builder(context)
                 .setMessage(resources.getString(R.string.permission)) // set Locale Resources
                 .setCancelable(false)
                 .setView(linearLayout)
-                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> {
-                    //TransitUser.user.getOtherInfo().setPhoneBookPermission(phoneBookCheckBox.isChecked());
-                    TransitUser.user.getOtherInfo().setMediaPermission(mediaCheckBox.isChecked());
-                });
+                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> Cache.saveSP(context, CacheScopes.MEDIA_PERMISSION.toString(), mediaCheckBox.isChecked()));
     }
 
     public static AlertDialog.Builder getPermissionMediaDialog(Context context, Resources resources) {
@@ -44,19 +38,7 @@ public class Permissions {
                 .setMessage(resources.getString(R.string.media_permission)) // set Locale Resources
                 .setCancelable(false)
                 .setView(linearLayout)
-                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> {
-                    TransitUser.user.getOtherInfo().setMediaPermission(mediaCheckBox.isChecked());
-                });
-    }
-
-    private static CheckBox getPhoneBookPermission(Context context, Resources resources) {
-        CheckBox phoneBookPermission = new CheckBox(context);
-        phoneBookPermission.setText(resources.getString(R.string.phone_book_permission));
-        phoneBookPermission.setChecked(true);
-        phoneBookPermission.setFocusable(false);
-        phoneBookPermission.setClickable(false);
-
-        return phoneBookPermission;
+                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> Cache.saveSP(context, CacheScopes.MEDIA_PERMISSION.toString(), mediaCheckBox.isChecked()));
     }
 
     private static CheckBox mediaPermission(Context context, Resources resources) {

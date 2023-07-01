@@ -17,7 +17,6 @@ import com.example.instagram.services.interfaces.SendToDeletePost;
 import com.example.instagram.services.interfaces.SendToFindPost;
 import com.example.instagram.services.interfaces.SendToFindUser;
 import com.example.instagram.services.interfaces.SendToGetAllComments;
-import com.example.instagram.services.interfaces.SendToGetAllPosts;
 import com.example.instagram.services.interfaces.SendToGetAva;
 import com.example.instagram.services.interfaces.SendToGetCurrentUser;
 import com.example.instagram.services.interfaces.SendToGetIsLiked;
@@ -43,47 +42,47 @@ public class Services {
     public final static String BASE_URL = "https://6bce-2a09-bac5-597b-52d-00-84-8f.ngrok-free.app";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
-    public static void addUser(Callback<String> callback) throws IOException, JSONException {
+    public static void addUser(Callback<String> callback, String body) throws IOException, JSONException {
         // create main interface
         SendToAddUser mainInterface = retrofit.create(SendToAddUser.class);
 
         // initialize call
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSON().toString());
+        Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
-    public static void authorizeUser(Callback<String> callback) throws JSONException {
+    public static void authorizeUser(Callback<String> callback, String body) {
         SendToCheckExistUser mainInterface = retrofit.create(SendToCheckExistUser.class);
 
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONToCheck().toString());
+        Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
-    public static void sendToForgotPassword(Callback<String> callback) throws JSONException {
+    public static void sendToForgotPassword(Callback<String> callback, String body) {
         SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
 
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONLogin().toString());
+        Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
-    public static void sendToCheckUsedLickInMail(Callback<String> callback) throws JSONException {
+    public static void sendToCheckUsedLickInMail(Callback<String> callback, String login) throws JSONException {
         SendToCheckUsedLinkInMail mainInterface = retrofit.create(SendToCheckUsedLinkInMail.class);
 
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getLogin());
+        Call<String> call = mainInterface.STRING_CALL(login);
         call.enqueue(callback);
     }
 
-    public static void sendToCheckUserCode(Callback<String> callback, String code) {
+    public static void sendToCheckUserCode(Callback<String> callback, String login, String code) {
         SendToCheckUserCode mainInterface = retrofit.create(SendToCheckUserCode.class);
 
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getLogin(), code);
+        Call<String> call = mainInterface.STRING_CALL(login, code);
         call.enqueue(callback);
     }
 
-    public static void sendNewPasswordAfterForgot(Callback<String> callback) throws JSONException {
+    public static void sendNewPasswordAfterForgot(Callback<String> callback, String body) {
         SendNewPasswordAfterForgot mainInterface = retrofit.create(SendNewPasswordAfterForgot.class);
 
-        Call<String> call = mainInterface.STRING_CALL(TransitUser.user.getJSONAfterForgotPassword().toString());
+        Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
@@ -98,13 +97,6 @@ public class Services {
         SendAva mainInterface = retrofit.create(SendAva.class);
 
         Call<ResponseBody> call = mainInterface.STRING_CALL(image, login);
-        call.enqueue(callback);
-    }
-
-    public static void sendToGetAllPosts(Callback<String> callback, int from, int amount) {
-        SendToGetAllPosts mainInterface = retrofit.create(SendToGetAllPosts.class);
-
-        Call<String> call = mainInterface.STRING_CALL(from, amount);
         call.enqueue(callback);
     }
 

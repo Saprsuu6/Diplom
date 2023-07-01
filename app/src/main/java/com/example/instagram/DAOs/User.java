@@ -1,7 +1,6 @@
 package com.example.instagram.DAOs;
 
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -190,23 +189,42 @@ public class User {
     }
 
     // could be changed
-    public JSONObject getJSON() throws JSONException {
+    public static JSONObject getJSONToRegistarate(String login, String password, String email, Date birthday) throws JSONException {
 
         JSONObject userBody = new JSONObject();
         userBody.put("login", login);
         userBody.put("password", password);
         userBody.put("name", login);
         userBody.put("surname", "");
-        userBody.put("phone", phoneNumber);
         userBody.put("email", email);
-        userBody.put("avatar", "avatar");
+        userBody.put("avatar", "");
         userBody.put("birthday", DateFormatting.formatToDateWithoutTime(birthday));
-        userBody.put("bio", description);
+        userBody.put("bio", "");
 
         return userBody;
     }
 
-    public JSONObject getJSONToCheck() throws JSONException {
+    public static JSONObject getJSONToSendCodeForEmail(String login, String newEmail, String token) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("login", login);
+        jsonObject.put("newEmail", newEmail);
+        jsonObject.put("token", token);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToChangeEmailFinally(String code, String newEmail, String token) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("code", code);
+        jsonObject.put("newEmail", newEmail);
+        jsonObject.put("token", token);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToCheck(String login, String password) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("login", login);
         jsonObject.put("password", password);
@@ -214,17 +232,17 @@ public class User {
         return jsonObject;
     }
 
-    public JSONObject getJSONLogin() throws JSONException {
+    public static JSONObject getJSONLogin(String login) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("login", login);
 
         return jsonObject;
     }
 
-    public JSONObject getJSONAfterForgotPassword() throws JSONException {
+    public static JSONObject getJSONAfterForgotPassword(String login, String code, String password, String passwordRepeat) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("login", login);
-        jsonObject.put("code", emailCode);
+        jsonObject.put("code", code);
         jsonObject.put("newPassword", password);
         jsonObject.put("repeatPassword", passwordRepeat);
 
@@ -247,7 +265,7 @@ public class User {
         return selfPageUser;
     }
 
-    public JSONObject getToChange() throws JSONException {
+    public JSONObject getToChange(String token) throws JSONException {
         JSONObject user = new JSONObject();
 
         JSONObject jsonObject = new JSONObject();
@@ -256,7 +274,7 @@ public class User {
         jsonObject.put("bio", description);
         jsonObject.put("birthday", DateFormatting.formatToDateWithTime(birthday));
 
-        user.put("token", TransitUser.user.token);
+        user.put("token", token);
         user.put("user", jsonObject);
 
         return user;

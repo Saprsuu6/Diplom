@@ -23,21 +23,24 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Permissions;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -47,7 +50,6 @@ import retrofit2.Response;
 
 public class Authorisation extends AppCompatActivity {
     private class Views {
-        public final LinearLayout authorisationLayout;
         public final EditText fieldForLogin;
         public final EditText fieldForPassword;
         public final TextView gmailName;
@@ -61,7 +63,6 @@ public class Authorisation extends AppCompatActivity {
         public final Spinner languagesSpinner;
 
         public Views() {
-            authorisationLayout = findViewById(R.id.authorisation);
             fieldForLogin = findViewById(R.id.auth_login);
             fieldForPassword = findViewById(R.id.auth_pass);
             gmailName = findViewById(R.id.email_name);
@@ -90,6 +91,7 @@ public class Authorisation extends AppCompatActivity {
         resources = getResources();
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
+
         // TODO delete someday
         views.fieldForLogin.setText("Andry");
         views.fieldForPassword.setText("MyNewPass2929!");
@@ -103,19 +105,20 @@ public class Authorisation extends AppCompatActivity {
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
-        if (!TransitUser.user.getOtherInfo().isPhoneBookPermission() || !TransitUser.user.getOtherInfo().isMediaPermission())
-            setPermissions();
+
+        // check on permissions
+        boolean mediaPermission = Cache.loadBoolSP(this, CacheScopes.MEDIA_PERMISSION.toString());
+        if (!mediaPermission) setPermissions();
     }
 
     private boolean setRememberMe() throws JSONException {
-        boolean rememberMeFlag = com.example.instagram.services.SharedPreferences.loadBoolSP(this, "rememberMe");
+        boolean rememberMeFlag = Cache.loadBoolSP(this, CacheScopes.REMEMBER_ME.toString());
+
+        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+        String password = Cache.loadStringSP(this, CacheScopes.USER_PASSWORD.toString());
+        JSONObject jsonObject = User.getJSONToCheck(login, password);
 
         if (rememberMeFlag) {
-            TransitUser.user.setLogin(com.example.instagram.services.SharedPreferences.loadStringSP(this, "login"));
-            TransitUser.user.setPhoneNumber(com.example.instagram.services.SharedPreferences.loadStringSP(this, "phone"));
-            TransitUser.user.setEmail(com.example.instagram.services.SharedPreferences.loadStringSP(this, "email"));
-            TransitUser.user.setPassword(com.example.instagram.services.SharedPreferences.loadStringSP(this, "password"));
-
             Services.authorizeUser(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -127,7 +130,9 @@ public class Authorisation extends AppCompatActivity {
                         String token = responseStr.substring(indexFrom + 1).trim();
                         // endregion
 
-                        TransitUser.user.setToken(token);
+                        // save auth sated user info in cache
+                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token);
+
                         if (response.body().contains("0")) {
                             startActivity(Intents.getNewsList());
                             finish();
@@ -141,7 +146,7 @@ public class Authorisation extends AppCompatActivity {
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     System.out.println(t.getMessage());
                 }
-            });
+            }, jsonObject.toString());
 
             startActivity(Intents.getNewsList());
             finish();
@@ -241,16 +246,12 @@ public class Authorisation extends AppCompatActivity {
                     Validations.validatePassword(views.fieldForPassword.getText().toString(), resources);
                     setValidationError(false, "");
 
-                    TransitUser.user.setLogin(views.fieldForLogin.getText().toString());
-                    TransitUser.user.setPassword(views.fieldForPassword.getText().toString());
-
                     if (views.rememberMe.isChecked()) {
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "rememberMe", views.rememberMe.isChecked());
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "login", TransitUser.user.getLogin());
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "phone", TransitUser.user.getPhoneNumber());
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "email", TransitUser.user.getEmail());
-                        com.example.instagram.services.SharedPreferences.saveSP(this, "password", TransitUser.user.getPassword());
+                        Cache.saveSP(this, CacheScopes.REMEMBER_ME.toString(), views.rememberMe.isChecked());
                     }
+
+                    JSONObject jsonObject = User.getJSONToCheck(views.fieldForLogin.getText().toString(), views.fieldForPassword.getText().toString());
+
                     Services.authorizeUser(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -263,7 +264,10 @@ public class Authorisation extends AppCompatActivity {
                                     String token = responseStr.substring(indexFrom + 1).trim();
                                     // endregion
 
-                                    TransitUser.user.setToken(token);
+                                    // save auth sated user info in cache
+                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
+                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
+                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token);
 
                                     startActivity(Intents.getNewsList());
                                     finish();
@@ -277,7 +281,7 @@ public class Authorisation extends AppCompatActivity {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             System.out.println(t.getMessage());
                         }
-                    });
+                    }, jsonObject.toString());
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
@@ -288,8 +292,10 @@ public class Authorisation extends AppCompatActivity {
 
         // forgot password
         views.linkForgotPassword.setOnClickListener(v -> {
-            if (TransitUser.user.getLogin() != null) {
+            if (!Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()).equals("")) {
                 try {
+                    JSONObject jsonObject = User.getJSONLogin(views.fieldForLogin.getText().toString().trim());
+
                     Services.sendToForgotPassword(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -302,7 +308,7 @@ public class Authorisation extends AppCompatActivity {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             System.out.println(t.getMessage());
                         }
-                    });
+                    }, jsonObject.toString());
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }

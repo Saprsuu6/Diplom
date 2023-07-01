@@ -32,14 +32,14 @@ import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.AudioController;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -126,6 +126,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         // endregion
         // region set like, save
         if (postsLibrary.getDataArrayList().get(position).isLiked() == null) {
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToGetIsLiked(new Callback<>() {
                     @Override
@@ -153,7 +155,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, data.getPostId(), TransitUser.user.getLogin());
+                }, data.getPostId(), login);
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -164,6 +166,8 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
         }
 
         if (postsLibrary.getDataArrayList().get(position).isSaved() == null) {
+            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToGetIsSaved(new Callback<>() {
                     @Override
@@ -186,7 +190,7 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
                     }
-                }, data.getPostId(), TransitUser.user.getLogin());
+                }, data.getPostId(), login);
             } catch (JSONException e) {
                 Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
             }
@@ -382,12 +386,12 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 postsLibrary.getDataArrayList().get(position).setLiked(like_flag);
                 notifyDataSetChanged();
 
+                String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
                 // region send unlike
                 try {
-                    JSONObject object = new JSONObject();
-                    object.put("postId", postsLibrary.getDataArrayList().get(position).getPostId());
-                    object.put("login", TransitUser.user.getLogin());
-                    object.put("isLiked", like_flag);
+                    String postId = postsLibrary.getDataArrayList().get(position).getPostId();
+                    JSONObject object = Post.getJSONToLikeUnlikePost(postId, login, like_flag);
 
                     Services.sendToLikeUnlikePost(new Callback<>() {
                         @Override
@@ -418,12 +422,12 @@ public class PaginationAdapterPosts extends RecyclerView.Adapter<PaginationAdapt
                 postsLibrary.getDataArrayList().get(position).setSaved(bookmark_flag);
                 notifyDataSetChanged();
 
+                String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
                 // region send save
                 try {
-                    JSONObject object = new JSONObject();
-                    object.put("postId", postsLibrary.getDataArrayList().get(position).getPostId());
-                    object.put("login", TransitUser.user.getLogin());
-                    object.put("isSaved", bookmark_flag);
+                    String postId = postsLibrary.getDataArrayList().get(position).getPostId();
+                    JSONObject object = Post.getJSONToSaveUnsavedPost(postId, login, bookmark_flag);
 
                     Services.sendToSaveUnsavedPost(new Callback<>() {
                         @Override

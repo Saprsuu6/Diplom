@@ -23,6 +23,7 @@ import androidx.appcompat.widget.TooltipCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.R;
+import com.example.instagram.main_process.CreatePost;
 
 import org.json.JSONException;
 
@@ -108,7 +109,7 @@ public class TagPeople {
                     String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
                     taggedPeople.setText(resources.getString(R.string.tag_people) + ": " + namesWithoutDuplicates);
 
-                    TransitPost.post.setNickNames(namesWithoutDuplicates);
+                    CreatePost.PostToAdd.taggedPeople = namesWithoutDuplicates;
                 });
     }
 

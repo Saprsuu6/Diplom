@@ -1,5 +1,7 @@
 package com.example.instagram.services;
 
+import androidx.annotation.NonNull;
+
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
@@ -10,9 +12,7 @@ public class GetEthernetInfo {
             List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface networkInterface : all) {
                 if (networkInterface.getName().equalsIgnoreCase("wlan0")) {
-
-                    return getIp(networkInterface)
-                            .substring(0, getIp(networkInterface).indexOf("%"));
+                    return getIp(networkInterface).substring(0, getIp(networkInterface).indexOf("%"));
                 }
             }
 

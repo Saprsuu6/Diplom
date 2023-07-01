@@ -21,21 +21,25 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -44,7 +48,6 @@ import retrofit2.Response;
 
 public class SetBirthday extends AppCompatActivity {
     private class Views {
-        private final LinearLayout setBirthdayLayout;
         private final TextView setBirthdayTitle;
         private final EditText setBirthdayField;
         private final Button next;
@@ -53,7 +56,6 @@ public class SetBirthday extends AppCompatActivity {
         private final Spinner languagesSpinner;
 
         public Views() {
-            setBirthdayLayout = findViewById(R.id.set_birthday);
             setBirthdayTitle = findViewById(R.id.let_info);
             next = findViewById(R.id.next);
             setBirthdayField = findViewById(R.id.birth_date);
@@ -150,9 +152,14 @@ public class SetBirthday extends AppCompatActivity {
                 if (year <= selectedDate.get(1) - yearOffset) {
                     Toast.makeText(this, R.string.birthday_error_age, Toast.LENGTH_SHORT).show();
                 } else {
-                    TransitUser.user.setBirthday(selectedDate.getTime());
-
                     try {
+                        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+                        String password = Cache.loadStringSP(this, CacheScopes.USER_PASSWORD.toString());
+                        String email = Cache.loadStringSP(this, CacheScopes.USER_EMAIL.toString());
+                        Date birthday = selectedDate.getTime();
+
+                        JSONObject jsonObject = User.getJSONToRegistarate(login, password, email, birthday);
+
                         Services.addUser(new Callback<>() {
                             @Override
                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -164,7 +171,12 @@ public class SetBirthday extends AppCompatActivity {
                                     String token = responseStr.substring(indexFrom + 1).trim();
                                     // endregion
 
-                                    TransitUser.user.setToken(token);
+                                    // delete unnecessary
+                                    Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString());
+                                    Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD_REPEAT.toString());
+
+                                    // save token
+                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token.trim());
                                     Errors.registrationUser(getApplicationContext(), response.body()).show();
                                 }
                             }
@@ -173,7 +185,7 @@ public class SetBirthday extends AppCompatActivity {
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                                 System.out.println(t.getMessage());
                             }
-                        });
+                        }, jsonObject.toString());
                     } catch (IOException | JSONException e) {
                         System.out.println(e.getMessage());
                     }

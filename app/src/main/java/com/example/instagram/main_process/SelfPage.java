@@ -24,14 +24,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
-import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 import com.google.android.flexbox.FlexboxLayout;
@@ -118,7 +118,8 @@ public class SelfPage extends AppCompatActivity {
         views = new Views();
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
-        views.editProfile.setVisibility(TransitUser.user.getLogin().equals(userPage.getLogin()) ? View.VISIBLE : View.GONE);
+        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+        views.editProfile.setVisibility(login.equals(userPage.getLogin()) ? View.VISIBLE : View.GONE);
 
         setIntents();
         setListeners();
@@ -186,7 +187,8 @@ public class SelfPage extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
 
         if (v.getId() == R.id.user_context) {
-            inflater.inflate(TransitUser.user.getLogin().equals(userPage.getLogin()) ? R.menu.user_context : R.menu.other_user_context, menu);
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+            inflater.inflate(login.equals(userPage.getLogin()) ? R.menu.user_context : R.menu.other_user_context, menu);
         }
     }
 

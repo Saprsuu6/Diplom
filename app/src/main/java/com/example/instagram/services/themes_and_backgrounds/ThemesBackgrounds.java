@@ -14,7 +14,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.example.instagram.R;
-import com.example.instagram.services.TransitUser;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 
 public class ThemesBackgrounds {
 
@@ -45,7 +46,7 @@ public class ThemesBackgrounds {
         // endregion
 
         // region select
-        int background = TransitUser.user.getOtherInfo().getPreferBackground();
+        int background = Cache.loadIntSP(context, CacheScopes.USER_PREFER_THEME.toString());
 
         if (background == Backgrounds.Background0.getValue()) {
             radioButtons[0].setChecked(true);
@@ -148,19 +149,18 @@ public class ThemesBackgrounds {
     @SuppressLint("UseCompatLoadingForDrawables")
     private static void saveBackgroundState(Activity activity, int value, LinearLayout setBackground) {
         saveSP(activity, "background", value);
-        TransitUser.user.getOtherInfo().setPreferBackground(value);
-
+        Cache.saveSP(activity, CacheScopes.USER_PREFER_THEME.toString(), value);
         background = value;
 
         setBackground.setBackground(activity.getResources().getDrawable(value, activity.getTheme()));
     }
 
     public static void saveSP(Activity activity, String key, int value) {
-        com.example.instagram.services.SharedPreferences.saveSP(activity, key, value);
+        Cache.saveSP(activity, key, value);
     }
 
     public static int loadSP(Activity activity, String key) {
-        return com.example.instagram.services.SharedPreferences.loadIntSP(activity, key);
+        return Cache.loadIntSP(activity, key);
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

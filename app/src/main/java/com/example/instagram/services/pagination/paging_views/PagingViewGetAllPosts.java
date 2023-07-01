@@ -13,21 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitComment;
 import com.example.instagram.services.TransitPost;
-import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
-import com.example.instagram.services.pagination.PaginationCurrentForAllUsers;
 import com.example.instagram.services.pagination.PagingView;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Comment;
-
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import io.supercharge.shimmerlayout.ShimmerLayout;
 import retrofit2.Call;
@@ -74,7 +67,7 @@ public class PagingViewGetAllPosts extends PagingView {
                 Post postToReplace = paginationAdapter.getPostsLibrary().getDataArrayList().get(i);
 
                 if (postToReplace.getPostId().equals(post.getPostId())) {
-                    paginationAdapter.getPostsLibrary().getDataArrayList().remove(i);
+                    paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> postDuplicate.getPostId().equals(post.getPostId()));
                     paginationAdapter.getPostsLibrary().getDataArrayList().add(i, post.clone(post));
                 }
             }
@@ -84,7 +77,6 @@ public class PagingViewGetAllPosts extends PagingView {
 
     @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearPosts() {
-        // TODO debug logic
         paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> TransitPost.postsToDeleteFromOtherPage.stream().anyMatch(item -> item.getPostId().equals(postDuplicate.getPostId())));
         paginationAdapter.notifyDataSetChanged();
     }
@@ -92,7 +84,7 @@ public class PagingViewGetAllPosts extends PagingView {
     @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearByPosition(int position) {
         Post post = paginationAdapter.getPostsLibrary().getDataArrayList().get(position);
-        paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> Objects.equals(postDuplicate.getPostId(), post.getPostId()));
+        paginationAdapter.getPostsLibrary().getDataArrayList().removeIf(postDuplicate -> postDuplicate.getPostId().equals(post.getPostId()));
         paginationAdapter.notifyDataSetChanged();
     }
 
@@ -171,78 +163,6 @@ public class PagingViewGetAllPosts extends PagingView {
                     Log.d("sendToGetAllPosts: ", t.getMessage());
                 }
             }, body.toString());
-
-//            if (!findPost) {
-//                Services.sendToGetAllPosts(new Callback<>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-//                        if (response.isSuccessful() && response.body() != null) {
-//                            String body = response.body();
-//
-//                            if (!body.equals("[]")) {
-//                                try {
-//                                    JSONArray jsonArray = new JSONArray(body);
-//
-//                                    if (jsonArray.length() < PaginationCurrentForAllPosts.amountOfPagination) {
-//                                        PagingViewGetAllPosts.isEnd = true;
-//                                    }
-//
-//                                    isBusy = false;
-//                                    PaginationCurrentForAllPosts.nextCurrent();
-//                                    postsLibrary.setDataArrayList(jsonArray);
-//                                    setPaginationAdapter();
-//                                } catch (JSONException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                            stopSkeletonAnim();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-//                        Log.d("sendToGetAllPosts: ", t.getMessage());
-//                    }
-//                }, PaginationCurrentForAllPosts.current, PaginationCurrentForAllPosts.amountOfPagination);
-//            } else {
-//                if (!isStart) {
-//                    body.put("from", Integer.toString(PaginationCurrentForAllPosts.current));
-//                    body.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
-//                    isStart = false;
-//                }
-//
-//                Services.sendToFindPost(new Callback<>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-//                        if (response.isSuccessful() && response.body() != null) {
-//                            String body = response.body();
-//
-//                            if (!body.equals("[]")) {
-//                                try {
-//                                    JSONArray jsonArray = new JSONArray(body);
-//
-//                                    if (jsonArray.length() < PaginationCurrentForAllPosts.amountOfPagination) {
-//                                        PagingViewGetAllPosts.isEnd = true;
-//                                    }
-//
-//                                    isBusy = false;
-//                                    PaginationCurrentForAllPosts.nextCurrent();
-//                                    postsLibrary.setDataArrayList(jsonArray);
-//                                    setPaginationAdapter();
-//                                } catch (JSONException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                            stopSkeletonAnim();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-//                        Log.d("sendToGetAllPosts: ", t.getMessage());
-//                    }
-//                }, body.toString());
-//            }
         }
     }
 }

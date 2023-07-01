@@ -11,7 +11,7 @@ import androidx.activity.result.ActivityResultLauncher;
 public class OpenMedia {
     @SuppressLint("IntentReset")
     public static void openGallery(Context context, MediaTypes type, ActivityResultLauncher<Intent> someActivityResultLauncher) {
-        if (TransitUser.user.getOtherInfo().isMediaPermission()) {
+        if (Cache.loadBoolSP(context, CacheScopes.MEDIA_PERMISSION.toString())) {
             Intent intent = null;
 
             if (type == MediaTypes.IMAGE) {

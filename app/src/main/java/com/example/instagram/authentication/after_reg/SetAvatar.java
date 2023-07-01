@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -25,7 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.main_process.NewsLine;
-import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
@@ -34,7 +34,6 @@ import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
@@ -50,7 +49,6 @@ import retrofit2.Response;
 
 public class SetAvatar extends AppCompatActivity {
     private class Views {
-        private final LinearLayout setAvaLayout;
         private final TextView setAvaTitle;
         private final TextView setAvaDescription;
         private final Button openGallery;
@@ -61,7 +59,6 @@ public class SetAvatar extends AppCompatActivity {
         private final Spinner languagesSpinner;
 
         public Views() {
-            setAvaLayout = findViewById(R.id.set_photo);
             setAvaTitle = findViewById(R.id.add_photo_header);
             setAvaDescription = findViewById(R.id.add_photo_info);
             openGallery = findViewById(R.id.photo_button);
@@ -166,8 +163,9 @@ public class SetAvatar extends AppCompatActivity {
             return;
         }
 
+        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
         RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
-        RequestBody nickName = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), TransitUser.user.getLogin());
+        RequestBody nickName = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), login);
 
         try {
             Services.sendAva(new Callback<>() {

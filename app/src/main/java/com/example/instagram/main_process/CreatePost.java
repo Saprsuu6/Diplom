@@ -34,8 +34,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
-import com.example.instagram.services.Animation;
 import com.example.instagram.services.AudioController;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
@@ -45,7 +46,6 @@ import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TagPeople;
-import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.UiVisibility;
 
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +54,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import okhttp3.MediaType;
@@ -66,7 +67,6 @@ import retrofit2.Response;
 public class CreatePost extends AppCompatActivity {
     private class Views {
         private final LinearLayout audioControllerLinearLayout;
-        private final LinearLayout createNewPostLayout;
         private final Button btnVideo;
         private final Button btnImage;
         private final Button btnAudio;
@@ -87,7 +87,6 @@ public class CreatePost extends AppCompatActivity {
 
         public Views() {
             audioControllerLinearLayout = findViewById(R.id.audio_controller);
-            createNewPostLayout = findViewById(R.id.create_post);
             timeLine = findViewById(R.id.time_line);
             playPrev = findViewById(R.id.play_prev);
             playNext = findViewById(R.id.play_next);
@@ -106,6 +105,13 @@ public class CreatePost extends AppCompatActivity {
             videoView = findViewById(R.id.video_content);
             photoView = findViewById(R.id.preview_photo);
         }
+    }
+
+    public static class PostToAdd {
+        public static String metadata;
+        public static Date postponePublication;
+        public static String description;
+        public static String taggedPeople;
     }
 
     private AudioController audioController;
@@ -168,8 +174,8 @@ public class CreatePost extends AppCompatActivity {
                         Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
                     }
 
-                    JSONObject object = new JSONObject();
-                    object.put("Extension", extension);
+                    JSONObject metadata = new JSONObject();
+                    metadata.put("Extension", extension);
 
                     if (mime.contains(getString(R.string.mime_image))) {
                         //set image
@@ -179,8 +185,7 @@ public class CreatePost extends AppCompatActivity {
                             views.photoView.setVisibility(View.VISIBLE);
                             views.photoView.setImageURI(selectedUri);
 
-                            object.put("Size", selectedImage.getHeight() + "x" + selectedImage.getWidth());
-                            TransitPost.post.setMetadata(object.toString());
+                            metadata.put("Size", selectedImage.getHeight() + "x" + selectedImage.getWidth());
                         }
                     } else if (mime.contains(getString(R.string.mime_video))) {
                         // set video
@@ -189,16 +194,17 @@ public class CreatePost extends AppCompatActivity {
                         views.videoView.start();
                         views.videoView.requestFocus();
 
-                        object.put("Size", views.videoView.getHeight() + "x" + views.videoView.getWidth());
-                        TransitPost.post.setMetadata(object.toString());
+                        metadata.put("Size", views.videoView.getHeight() + "x" + views.videoView.getWidth());
                     } else if (mime.contains(getString(R.string.mime_audio))) {
                         // set audio
                         views.audioControllerLinearLayout.setVisibility(View.VISIBLE);
                         audioController = new AudioController(views.timeLine, views.seekBar, views.playStop, views.playPrev, views.playNext, getApplicationContext(), selectedUri);
                         audioController.initHandler(new Handler());
-                        object.put("Duration", audioController.getDuration());
-                        TransitPost.post.setMetadata(object.toString());
+
+                        metadata.put("Duration", audioController.getDuration());
                     }
+
+                    PostToAdd.metadata = metadata.toString();
                     // endregion
                 } catch (IOException e) {
                     Log.d("ActivityResultLauncher & IOException: ", e.getMessage());
@@ -263,7 +269,7 @@ public class CreatePost extends AppCompatActivity {
             selectedDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
             selectedDate.set(Calendar.MINUTE, minute);
 
-            TransitPost.post.setPostponePublication(selectedDate.getTime());
+            PostToAdd.postponePublication = selectedDate.getTime();
         };
 
         DatePickerDialog.OnDateSetListener dateSetListener = (view, year1, month1, dayOfMonth) -> {
@@ -308,10 +314,10 @@ public class CreatePost extends AppCompatActivity {
                 media = RequestBody.create(MediaType.parse(getString(R.string.mime_audio) + "/" + extension), mediaBytes);
             }
 
-            TransitPost.post.setDescription(views.description.getText().toString());
-
+            PostToAdd.description = views.description.getText().toString();
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
             try {
-                String otherInfo = TransitPost.post.crateOtherInfo().toString();
+                JSONObject body = Post.getJSONToSetNewPost(login, PostToAdd.description, PostToAdd.metadata, PostToAdd.postponePublication, PostToAdd.taggedPeople);
 
                 Services.sendMultipartPost(new Callback<>() {
                     @Override
@@ -325,7 +331,7 @@ public class CreatePost extends AppCompatActivity {
                     public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
                         Log.d("sendMultipartPost: ", t.getMessage());
                     }
-                }, media, otherInfo);
+                }, media, body.toString());
             } catch (JSONException e) {
                 Log.d("JSONException: ", e.getMessage());
             }
@@ -348,8 +354,8 @@ public class CreatePost extends AppCompatActivity {
         views.title.setText(resources.getString(R.string.new_post));
         views.postponePublication.setText(resources.getString(R.string.postpone_publication));
 
-        if (TransitPost.post.getNickNames() != null) {
-            views.tagPeople.setText(resources.getString(R.string.tag_people) + ": " + TransitPost.post.getNickNames());
+        if (PostToAdd.taggedPeople != null) {
+            views.tagPeople.setText(resources.getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople);
         }
 
         if (selectedDate != null) {

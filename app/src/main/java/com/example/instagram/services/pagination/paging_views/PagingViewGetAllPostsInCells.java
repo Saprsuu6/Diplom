@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,16 +11,10 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.instagram.R;
 import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.SharedPreferences;
-import com.example.instagram.services.TransitComment;
-import com.example.instagram.services.TransitUser;
-import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCells;
 import com.example.instagram.services.pagination.PagingView;
-import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
 import com.example.instagram.services.pagination.adapters.PaginationAdapterPostsCells;
 
 import org.json.JSONArray;

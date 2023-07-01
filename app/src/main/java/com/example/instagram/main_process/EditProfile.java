@@ -18,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +34,8 @@ import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetBirthday;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindExtension;
@@ -44,7 +45,6 @@ import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -66,7 +66,6 @@ import retrofit2.Response;
 
 public class EditProfile extends AppCompatActivity {
     private class Views {
-        private final LinearLayout editProfileLayout;
         private final Spinner languagesSpinner;
         private final ImageView close;
         private final ImageView done;
@@ -84,7 +83,6 @@ public class EditProfile extends AppCompatActivity {
         private final ImageView warningBirthday;
 
         public Views() {
-            editProfileLayout = findViewById(R.id.edit_profile);
             languagesSpinner = findViewById(R.id.languages);
             close = findViewById(R.id.close);
             done = findViewById(R.id.done);
@@ -238,6 +236,8 @@ public class EditProfile extends AppCompatActivity {
         views.avatar.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
         views.close.setOnClickListener(v -> {
+            String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToGetCurrentUser(new Callback<>() {
                     @Override
@@ -247,8 +247,7 @@ public class EditProfile extends AppCompatActivity {
 
                             try {
                                 user = new JSONObject(response.body());
-
-                                SelfPage.userPage = User.getPublicUser(user, TransitUser.user.getLogin());
+                                SelfPage.userPage = User.getPublicUser(user, login);
                                 finish();
                             } catch (JSONException | ParseException e) {
                                 Log.d("JSONException", e.getMessage());
@@ -260,7 +259,7 @@ public class EditProfile extends AppCompatActivity {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
                     }
-                }, TransitUser.user.getLogin());
+                }, login);
             } catch (JSONException e) {
                 Log.d("JSONException: ", e.getMessage());
             }
@@ -282,7 +281,8 @@ public class EditProfile extends AppCompatActivity {
 
                 JSONObject toChange;
                 try {
-                    toChange = SelfPage.userPage.getToChange();
+                    String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+                    toChange = SelfPage.userPage.getToChange(token);
 
                     Services.sendToChangeUser(new Callback<>() {
                         @Override
@@ -306,11 +306,11 @@ public class EditProfile extends AppCompatActivity {
         // send code to mail
         views.sendCode.setOnClickListener(v -> {
             if (!SelfPage.userPage.getEmail().equals(views.email.getText().toString())) {
-                JSONObject body = new JSONObject();
                 try {
-                    body.put("login", SelfPage.userPage.getLogin());
-                    body.put("newEmail", views.email.getText().toString());
-                    body.put("token", TransitUser.user.getToken());
+                    String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+                    String newEmail = views.email.getText().toString().trim();
+                    String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+                    JSONObject body = User.getJSONToSendCodeForEmail(login, newEmail, token);
 
                     Services.sendToSendCodeForEmail(new Callback<>() {
                         @Override
@@ -335,11 +335,11 @@ public class EditProfile extends AppCompatActivity {
         views.confirmCodeButton.setOnClickListener(v -> {
             if (views.confirmCode.getText().length() > 0) {
                 if (!SelfPage.userPage.getEmail().equals(views.confirmCodeButton.getText().toString())) {
-                    JSONObject body = new JSONObject();
                     try {
-                        body.put("token", TransitUser.user.getToken());
-                        body.put("code", views.confirmCode.getText());
-                        body.put("newEmail", views.email.getText().toString());
+                        String code = views.confirmCode.toString().trim();
+                        String newEmail = views.email.getText().toString().trim();
+                        String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+                        JSONObject body = User.getJSONToSendCodeForEmail(code, newEmail, token);
 
                         Services.sendToChangeEmailFinally(new Callback<>() {
                             @Override
@@ -365,6 +365,8 @@ public class EditProfile extends AppCompatActivity {
     // check link
     private Runnable checkUsedLink() {
         return () -> {
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToCheckUsedLickInMail(new Callback<>() {
                     @Override
@@ -385,7 +387,7 @@ public class EditProfile extends AppCompatActivity {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         System.out.println(t.getMessage());
                     }
-                });
+                }, login);
 
             } catch (JSONException e) {
                 System.out.println(e.getMessage());
@@ -439,8 +441,9 @@ public class EditProfile extends AppCompatActivity {
             return;
         }
 
+        String loginFromContext = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
         RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
-        RequestBody login = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), TransitUser.user.getLogin());
+        RequestBody login = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), loginFromContext);
 
         try {
             Services.sendAva(new Callback<>() {

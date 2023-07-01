@@ -16,7 +16,6 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,7 +33,8 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
-import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.FindUser;
@@ -42,9 +42,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitPost;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
-import com.example.instagram.services.pagination.paging_views.PagingViewFindUsers;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
@@ -135,6 +133,8 @@ public class NewsLine extends AppCompatActivity {
 
     private void LoadAvatar() {
         // region send request to get avatar
+        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+
         try {
             Services.sendToGetAva(new Callback<>() {
                 @Override
@@ -150,7 +150,7 @@ public class NewsLine extends AppCompatActivity {
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     Log.d("sendToGetAva: (onFailure)", t.getMessage());
                 }
-            }, TransitUser.user.getLogin());
+            }, login);
         } catch (JSONException e) {
             Log.d("sendToGetAva: (JSONException)", e.getMessage());
         }
@@ -186,7 +186,8 @@ public class NewsLine extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
 
         if (v.getId() == R.id.post_context) {
-            inflater.inflate(TransitUser.user.getLogin().equals(NewsLine.mapPost.second.getAuthor()) ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+            inflater.inflate(login.equals(NewsLine.mapPost.second.getAuthor()) ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
         }
     }
 
@@ -195,11 +196,10 @@ public class NewsLine extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.remove_post:
-                JSONObject body = new JSONObject();
+                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
 
                 try {
-                    body.put("postId", NewsLine.mapPost.second.getPostId());
-                    body.put("token", TransitUser.user.getToken());
+                    JSONObject body = Post.getJSONToDeletePost(NewsLine.mapPost.second.getPostId(), token);
 
                     Services.sendToDeletePost(new Callback<>() {
                         @Override
@@ -341,6 +341,8 @@ public class NewsLine extends AppCompatActivity {
         // self page
         views.selfPage.setOnClickListener(v -> {
             try {
+                String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+
                 Services.sendToGetCurrentUser(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -350,7 +352,7 @@ public class NewsLine extends AppCompatActivity {
                             try {
                                 user = new JSONObject(response.body());
 
-                                SelfPage.userPage = User.getPublicUser(user, TransitUser.user.getLogin());
+                                SelfPage.userPage = User.getPublicUser(user, login);
                                 startActivity(Intents.getSelfPage());
                             } catch (JSONException | ParseException e) {
                                 Log.d("JSONException", e.getMessage());
@@ -362,7 +364,7 @@ public class NewsLine extends AppCompatActivity {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
                     }
-                }, TransitUser.user.getLogin());
+                }, login);
             } catch (JSONException e) {
                 Log.d("JSONException: ", e.getMessage());
             }

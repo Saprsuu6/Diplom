@@ -24,17 +24,17 @@ import androidx.appcompat.widget.TooltipCompat;
 import com.example.instagram.R;
 import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
 
 public class SetPassword extends AppCompatActivity {
     private class Views {
-        private final LinearLayout addPasswordLayout;
         private final Spinner languagesSpinner;
         private final TextView addPasswordTitle;
         private final EditText fieldPassword;
@@ -47,7 +47,6 @@ public class SetPassword extends AppCompatActivity {
         private final TextView haveAnAccountLink;
 
         public Views() {
-            addPasswordLayout = findViewById(R.id.set_password);
             languagesSpinner = findViewById(R.id.languages);
             addPasswordTitle = findViewById(R.id.let_info);
             fieldPassword = findViewById(R.id.info_for_password);
@@ -194,8 +193,12 @@ public class SetPassword extends AppCompatActivity {
                     // endregion
 
                     setValidationError(false, "");
-                    TransitUser.user.setPassword(views.fieldPassword.getText().toString().trim());
-                    TransitUser.user.setPasswordRepeat(views.fieldRepeatPassword.getText().toString().trim());
+
+                    // set passwords
+                    String password = views.fieldPassword.getText().toString().trim();
+                    String rpPassword = views.fieldRepeatPassword.getText().toString().trim();
+                    Cache.saveSP(this, CacheScopes.USER_PASSWORD.toString(), password);
+                    Cache.saveSP(this, CacheScopes.USER_PASSWORD_REPEAT.toString(), rpPassword);
 
                     RegistrationActivities.activityList.add(this);
                     startActivity(Intents.getSetBirthday());

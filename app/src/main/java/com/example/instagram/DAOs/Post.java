@@ -5,7 +5,6 @@ import android.webkit.MimeTypeMap;
 import androidx.annotation.Nullable;
 
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -182,14 +181,40 @@ public class Post {
         setLikes(object.getInt("likes"));
     }
 
-    public JSONObject crateOtherInfo() throws JSONException {
+    public static JSONObject getJSONToSetNewPost(String login, String description, String metadata, Date postponePublication, String taggedPeople) throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("author", TransitUser.user.getLogin());
+        jsonObject.put("author", login);
         jsonObject.put("description", description);
         jsonObject.put("metadata", metadata);
 
         jsonObject.put("postponePublication", postponePublication != null ? DateFormatting.formatToDateWithTime(postponePublication) : DateFormatting.formatToDateWithTime(new Date()));
         jsonObject.put("taggedPeople", taggedPeople);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToDeletePost(String postId, String token) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("postId", postId);
+        jsonObject.put("token", token);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToLikeUnlikePost(String postId, String login, boolean isLiked) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("postId", postId);
+        jsonObject.put("login", login);
+        jsonObject.put("isLiked",isLiked);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToSaveUnsavedPost(String postId, String login, boolean isSaved) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("postId", postId);
+        jsonObject.put("login", login);
+        jsonObject.put("isSaved",isSaved);
 
         return jsonObject;
     }

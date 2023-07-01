@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,12 +18,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
-import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
@@ -35,7 +34,6 @@ import retrofit2.Response;
 
 public class ForgotPassword extends AppCompatActivity {
     private class Views {
-        private final LinearLayout forgotPasswordLayout;
         private final TextView forgotPasswordTitle;
         private final TextView forgotPasswordDescription;
         private final EditText fieldForCode;
@@ -43,7 +41,6 @@ public class ForgotPassword extends AppCompatActivity {
         private final Spinner languagesSpinner;
 
         public Views() {
-            forgotPasswordLayout = findViewById(R.id.forgot_password);
             languagesSpinner = findViewById(R.id.languages);
             confirmCode = findViewById(R.id.confirm_code_button);
             fieldForCode = findViewById(R.id.code);
@@ -78,17 +75,20 @@ public class ForgotPassword extends AppCompatActivity {
 
     private Runnable checkUsedLink() {
         return () -> {
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+
             try {
                 Services.sendToCheckUsedLickInMail(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().contains("0")) {
-                                String responseStr = response.body();
-                                int index = responseStr.indexOf(":");
-                                responseStr = responseStr.substring(index + 1);
+                                int index = response.body().indexOf(":");
+                                String code = response.body().substring(index + 1);
 
-                                TransitUser.user.setEmailCode(responseStr.trim());
+                                // save user repair password email
+                                Cache.saveSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
+
                                 startActivity(Intents.getCreateNewPassword());
                                 handler.removeCallbacks(runnable);
                                 finish();
@@ -102,7 +102,7 @@ public class ForgotPassword extends AppCompatActivity {
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                         System.out.println(t.getMessage());
                     }
-                });
+                }, login);
 
             } catch (JSONException e) {
                 System.out.println(e.getMessage());
@@ -138,9 +138,10 @@ public class ForgotPassword extends AppCompatActivity {
 
         views.confirmCode.setOnClickListener(v -> {
             if (views.fieldForCode.length() != 0) {
-                try {
-                    TransitUser.user.setEmailCode(views.fieldForCode.getText().toString());
+                String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+                String code = views.fieldForCode.getText().toString().trim();
 
+                try {
                     Services.sendToCheckUserCode(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull retrofit2.Response<String> response) {
@@ -162,11 +163,11 @@ public class ForgotPassword extends AppCompatActivity {
                                 }
                             }
 
-                            String responseStr = response.body();
-                            int index = responseStr.indexOf(":");
-                            responseStr = responseStr.substring(index + 1);
+                            int index = response.body().indexOf(":");
+                            String code = response.body().substring(index + 1);
 
-                            TransitUser.user.setEmailCode(responseStr.trim());
+                            // save user repair password email
+                            Cache.saveSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
 
                             startActivity(Intents.getCreateNewPassword());
                             finish();
@@ -176,7 +177,7 @@ public class ForgotPassword extends AppCompatActivity {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             System.out.println("Error: " + t.getMessage());
                         }
-                    }, TransitUser.user.getEmailCode());
+                    }, login, code);
                 } catch (Exception e) {
                     System.out.println("Error: " + e.getMessage());
                 }

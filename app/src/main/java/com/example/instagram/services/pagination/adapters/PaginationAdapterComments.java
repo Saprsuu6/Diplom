@@ -28,13 +28,11 @@ import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.Optional;
 
 import retrofit2.Call;
 import retrofit2.Callback;

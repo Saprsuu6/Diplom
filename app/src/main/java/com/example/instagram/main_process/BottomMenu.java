@@ -3,9 +3,6 @@ package com.example.instagram.main_process;
 import android.app.Activity;
 import android.widget.ImageView;
 
-import androidx.core.widget.NestedScrollView;
-
-import com.example.instagram.R;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 
@@ -23,9 +20,7 @@ public class BottomMenu {
         });
 
         // new post
-        imageViews[1].setOnClickListener(v -> {
-            activity.startActivity(Intents.getCreateNewPost());
-        });
+        imageViews[1].setOnClickListener(v -> activity.startActivity(Intents.getCreateNewPost()));
 
         // TODO: notifications [2]
     }

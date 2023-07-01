@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -15,7 +14,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
@@ -28,12 +26,12 @@ import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.main_process.SelfPage;
-import com.example.instagram.services.AudioController;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.PostInDialog;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitPost;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
 import com.google.android.flexbox.FlexboxLayout;
@@ -46,12 +44,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PaginationAdapterPostsCells extends RecyclerView.Adapter<PaginationAdapterPostsCells.ViewHolderPostsCells> {
-    @Nullable
-    private final Activity activity;
     private final Context context;
     private final PostsLibrary postsLibrary;
     private final Point size;
-    private PagingViewGetAllPostsInCells pagingView;
+    private final PagingViewGetAllPostsInCells pagingView;
     private final PostInDialog postInDialog = new PostInDialog();
 
     public PostsLibrary getPostsLibrary() {
@@ -59,7 +55,6 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
     }
 
     public PaginationAdapterPostsCells(Context context, @Nullable Activity activity, PostsLibrary postsLibrary, PagingViewGetAllPostsInCells pagingView) {
-        this.activity = activity;
         this.context = context;
         this.postsLibrary = postsLibrary;
         this.pagingView = pagingView;
@@ -150,16 +145,16 @@ public class PaginationAdapterPostsCells extends RecyclerView.Adapter<Pagination
 
     private View.OnClickListener postInDialog(Post post) {
         AlertDialog.Builder builder = postInDialog.getPostDialog(context, post, pagingView);
+        String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+        String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
 
-        if (TransitUser.user.getLogin().equals(SelfPage.userPage.getLogin())) {
+        if (login.equals(SelfPage.userPage.getLogin())) {
             builder.setNegativeButton(context.getApplicationContext().getString(R.string.remove_post), (dialog, which) -> {
                 AlertDialog.Builder negativeButton = new AlertDialog.Builder(context).setMessage(context.getApplicationContext().getString(R.string.remove_post_question)).setPositiveButton(context.getApplicationContext().getString(R.string.yes), (dialog1, which1) -> {
                     TransitPost.postsToDeleteFromOtherPage.add(post);
-                    JSONObject body = new JSONObject();
 
                     try {
-                        body.put("postId", post.getPostId());
-                        body.put("token", TransitUser.user.getToken());
+                        JSONObject body = Post.getJSONToDeletePost(post.getPostId(), token);
 
                         Services.sendToDeletePost(new Callback<>() {
                             @Override

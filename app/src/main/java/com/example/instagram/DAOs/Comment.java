@@ -1,15 +1,12 @@
 package com.example.instagram.DAOs;
 
-import com.example.instagram.main_process.Comments;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.TransitUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
 
 public class Comment {
     private boolean toChange;
@@ -20,64 +17,6 @@ public class Comment {
     private String author;
     private String content;
 
-    public Comment(JSONObject jsonObject) throws JSONException, ParseException {
-        if (!jsonObject.isNull("commentId")) {
-            replayedCommentId = jsonObject.getString("commentId");
-
-            JSONObject answer = jsonObject.getJSONObject("answerComment");
-            parseComment(answer);
-        } else {
-            parseComment(jsonObject);
-        }
-    }
-
-    private void parseComment(JSONObject jsonObject) throws JSONException, ParseException {
-        commentId = jsonObject.getString("id");
-        author = jsonObject.getString("author");
-        dateOfAdd = DateFormatting.formatDateFromStandard(jsonObject.getString("date"));
-        content = jsonObject.getString("content");
-
-        if (!jsonObject.isNull("postId")) {
-            postId = jsonObject.getString("postId");
-        }
-    }
-
-    public Comment() {
-
-    }
-
-    public JSONObject getJSONComment() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("postId", postId);
-        jsonObject.put("date", DateFormatting.formatToDateWithTime(new Date()));
-        jsonObject.put("author", TransitUser.user.getLogin());
-        jsonObject.put("content", content);
-
-        return jsonObject;
-    }
-
-    public JSONObject getJSONCommentToChange(String text) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("id", commentId);
-        jsonObject.put("postId", postId);
-        jsonObject.put("date", DateFormatting.formatToDateWithTime(new Date()));
-        jsonObject.put("author", TransitUser.user.getLogin());
-        jsonObject.put("content", text);
-
-        return jsonObject;
-    }
-
-    public JSONObject getJSONReply() throws JSONException {
-        JSONObject jsonObjectComment = getJSONComment();
-
-        JSONObject jsonObjectReplay = new JSONObject();
-        jsonObjectReplay.put("commentId", replayedCommentId);
-        jsonObjectReplay.put("answer", jsonObjectComment);
-
-        return jsonObjectReplay;
-    }
 
     //region setters
     public void setToChange(boolean toChange) {
@@ -138,4 +77,77 @@ public class Comment {
         return content;
     }
     //endregion
+
+    public Comment(JSONObject jsonObject) throws JSONException, ParseException {
+        if (!jsonObject.isNull("commentId")) {
+            replayedCommentId = jsonObject.getString("commentId");
+
+            JSONObject answer = jsonObject.getJSONObject("answerComment");
+            parseComment(answer);
+        } else {
+            parseComment(jsonObject);
+        }
+    }
+
+    private void parseComment(JSONObject jsonObject) throws JSONException, ParseException {
+        commentId = jsonObject.getString("id");
+        author = jsonObject.getString("author");
+        dateOfAdd = DateFormatting.formatDateFromStandard(jsonObject.getString("date"));
+        content = jsonObject.getString("content");
+
+        if (!jsonObject.isNull("postId")) {
+            postId = jsonObject.getString("postId");
+        }
+    }
+
+    public static JSONObject getJSONComment(String postId, String login, String content) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("postId", postId);
+        jsonObject.put("date", DateFormatting.formatToDateWithTime(new Date()));
+        jsonObject.put("author", login);
+        jsonObject.put("content", content);
+
+        return jsonObject;
+    }
+
+    public JSONObject getJSONCommentToChange(String text, String login) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("id", commentId);
+        jsonObject.put("postId", postId);
+        jsonObject.put("date", DateFormatting.formatToDateWithTime(new Date()));
+        jsonObject.put("author", login);
+        jsonObject.put("content", text);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONReply(String login, String replayedCommentId, String postId, String content) throws JSONException {
+        JSONObject jsonObjectComment = getJSONComment(postId, login, content);
+
+        JSONObject jsonObjectReplay = new JSONObject();
+        jsonObjectReplay.put("commentId", replayedCommentId);
+        jsonObjectReplay.put("answer", jsonObjectComment);
+
+        return jsonObjectReplay;
+    }
+
+    public static JSONObject getJSONToDeleteComment(String commentId, String token) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("commentId", commentId);
+        jsonObject.put("token", token);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToSendCangeCommnet(String comment, String token) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("commentId", comment);
+        jsonObject.put("token", token);
+
+        return jsonObject;
+    }
 }

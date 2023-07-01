@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,17 +21,21 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
+import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.Animation;
+import com.example.instagram.services.Cache;
+import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.Errors;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitUser;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
+
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -42,7 +45,6 @@ import retrofit2.Response;
 
 public class CreateNewPassword extends AppCompatActivity {
     private class Views {
-        private final LinearLayout createNewPasswordLayout;
         private final Spinner languagesSpinner;
         private final TextView createNewPasswordTitle;
         private final TextView createNewPasswordDescription;
@@ -56,7 +58,6 @@ public class CreateNewPassword extends AppCompatActivity {
         private final TextView haveAnAccountLink;
 
         public Views() {
-            createNewPasswordLayout = findViewById(R.id.create_new_password);
             languagesSpinner = findViewById(R.id.languages);
             createNewPasswordTitle = findViewById(R.id.create_new_password_title);
             createNewPasswordDescription = findViewById(R.id.create_new_password_info);
@@ -196,8 +197,12 @@ public class CreateNewPassword extends AppCompatActivity {
                     // endregion
 
                     setValidationError(false, "");
-                    TransitUser.user.setPassword(views.fieldPassword.getText().toString().trim());
-                    TransitUser.user.setPasswordRepeat(views.fieldRepeatPassword.getText().toString().trim());
+
+                    String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+                    String code = Cache.loadStringSP(this, CacheScopes.USER_EMAIL_CODE.toString());
+                    String password = views.fieldPassword.getText().toString().trim();
+                    String rpPassword = views.fieldRepeatPassword.getText().toString().trim();
+                    JSONObject jsonObject = User.getJSONAfterForgotPassword(login, code, password, rpPassword);
 
                     Services.sendNewPasswordAfterForgot(new Callback<>() {
                         @Override
@@ -206,6 +211,9 @@ public class CreateNewPassword extends AppCompatActivity {
                             Errors.afterRestorePassword(getApplicationContext(), response.body()).show();
 
                             if (response.body().contains("0")) {
+                                // delete unnecessary
+                                Cache.deleteSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString());
+
                                 startActivity(Intents.getAuthorisation());
                                 finish();
                             }
@@ -215,7 +223,7 @@ public class CreateNewPassword extends AppCompatActivity {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             System.out.println(t.getMessage());
                         }
-                    });
+                    }, jsonObject.toString());
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
