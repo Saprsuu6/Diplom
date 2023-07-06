@@ -22,35 +22,33 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".main_process.Notifications"
+            android:exported="true"
+            android:screenOrientation="locked" />
+        <activity
             android:name=".main_process.EditProfile"
             android:exported="true"
-            android:screenOrientation="locked">
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.CreateNewPassword"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".main_process.CreatePost"
             android:exported="true"
             android:screenOrientation="locked" />
         <activity
-            android:name=".main_process.SelfPage"
+            android:name=".main_process.UserPage"
             android:exported="true"
-            android:screenOrientation="locked"></activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".main_process.Comments"
             android:exported="true"
-            android:screenOrientation="locked">
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".main_process.NewsLine"
             android:exported="true"
-            android:screenOrientation="locked"></activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.after_reg.SetAvatar"
             android:exported="true"
@@ -58,33 +56,23 @@
         <activity
             android:name=".authentication.after_reg.SetBirthday"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.after_reg.SetPassword"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.after_reg.SetName"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.ForgotPassword"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.Registration"
             android:exported="true"
-            android:screenOrientation="locked" >
-
-        </activity>
+            android:screenOrientation="locked" />
         <activity
             android:name=".authentication.Authorisation"
             android:exported="true"
@@ -98,6 +86,8 @@
 
         <receiver
             android:name=".services.DownloadCompletedReceiver"
+            android:largeHeap="true"
+            android:hardwareAccelerated="false"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />

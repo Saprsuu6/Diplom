@@ -40,8 +40,8 @@ public class SetPassword extends AppCompatActivity {
         private final EditText fieldPassword;
         private final EditText fieldRepeatPassword;
         private final Button showPassword;
-        private final ImageView warning;
         private final Button showRepeatPassword;
+        private final ImageView warning;
         private final Button next;
         private final TextView haveAnAccount;
         private final TextView haveAnAccountLink;
@@ -133,10 +133,10 @@ public class SetPassword extends AppCompatActivity {
             passwordEyeStateRepeat = !passwordEyeStateRepeat;
 
             if (passwordEyeStateRepeat) {
-                views.showRepeatPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                views.fieldRepeatPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 views.showRepeatPassword.setText(resources.getString(R.string.hide_password));
             } else {
-                views.showRepeatPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                views.fieldRepeatPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 views.showRepeatPassword.setText(resources.getString(R.string.show_password));
             }
         });

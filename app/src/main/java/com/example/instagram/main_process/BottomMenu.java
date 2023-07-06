@@ -13,7 +13,7 @@ public class BottomMenu {
         // find users
         imageViews[0].setOnClickListener(v -> {
             try {
-                findUser.getToFindUser().show();
+                findUser.getToFindUser(null).show();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -22,6 +22,7 @@ public class BottomMenu {
         // new post
         imageViews[1].setOnClickListener(v -> activity.startActivity(Intents.getCreateNewPost()));
 
-        // TODO: notifications [2]
+        // notifications
+        imageViews[2].setOnClickListener(v -> activity.startActivity(Intents.getNotifications()));
     }
 }

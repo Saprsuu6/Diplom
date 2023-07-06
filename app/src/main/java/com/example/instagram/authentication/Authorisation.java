@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
@@ -14,12 +15,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
@@ -30,11 +29,10 @@ import com.example.instagram.services.Animation;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Permissions;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -43,10 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class Authorisation extends AppCompatActivity {
     private class Views {
@@ -94,15 +88,16 @@ public class Authorisation extends AppCompatActivity {
 
         // TODO delete someday
         views.fieldForLogin.setText("Andry");
-        views.fieldForPassword.setText("MyNewPass2929!");
+        views.fieldForPassword.setText("MyNewPass123!");
+
+        setIntents();
 
         try {
             if (setRememberMe()) return;
         } catch (JSONException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
         }
 
-        setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
 
@@ -119,37 +114,13 @@ public class Authorisation extends AppCompatActivity {
         JSONObject jsonObject = User.getJSONToCheck(login, password);
 
         if (rememberMeFlag) {
-            Services.authorizeUser(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String responseStr = response.body();
+            new DoCallBack().setValues(() -> {
+                Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), login);
+                Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), password);
 
-                        // region get token from response
-                        int indexFrom = responseStr.indexOf(":");
-                        String token = responseStr.substring(indexFrom + 1).trim();
-                        // endregion
-
-                        // save auth sated user info in cache
-                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token);
-
-                        if (response.body().contains("0")) {
-                            startActivity(Intents.getNewsList());
-                            finish();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    System.out.println(t.getMessage());
-                }
-            }, jsonObject.toString());
-
-            startActivity(Intents.getNewsList());
-            finish();
+                startActivity(Intents.getNewsList());
+                finish();
+            }, this, new Object[]{jsonObject}).logIn();
             return true;
         }
 
@@ -252,36 +223,13 @@ public class Authorisation extends AppCompatActivity {
 
                     JSONObject jsonObject = User.getJSONToCheck(views.fieldForLogin.getText().toString(), views.fieldForPassword.getText().toString());
 
-                    Services.authorizeUser(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                String responseStr = response.body();
+                    new DoCallBack().setValues(() -> {
+                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
+                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
 
-                                if (responseStr.contains("0")) {
-                                    // region get token from response
-                                    int indexFrom = responseStr.indexOf(":");
-                                    String token = responseStr.substring(indexFrom + 1).trim();
-                                    // endregion
-
-                                    // save auth sated user info in cache
-                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
-                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
-                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token);
-
-                                    startActivity(Intents.getNewsList());
-                                    finish();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "User are not authorized", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            System.out.println(t.getMessage());
-                        }
-                    }, jsonObject.toString());
+                        startActivity(Intents.getNewsList());
+                        finish();
+                    }, this, new Object[]{jsonObject}).logIn();
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
@@ -295,22 +243,10 @@ public class Authorisation extends AppCompatActivity {
             if (!Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()).equals("")) {
                 try {
                     JSONObject jsonObject = User.getJSONLogin(views.fieldForLogin.getText().toString().trim());
-
-                    Services.sendToForgotPassword(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            System.out.println(t.getMessage());
-                        }
-                    }, jsonObject.toString());
+                    // send code to restore password
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToCodeToRestorePassword();
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    throw new RuntimeException(e);
                 }
 
                 startActivity(Intents.getForgotPassword());

@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,23 +16,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.TooltipCompat;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.R;
 import com.example.instagram.main_process.CreatePost;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class TagPeople {
     private final Context context;
@@ -52,6 +43,7 @@ public class TagPeople {
 
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context)
                 .inflate(R.layout.tag_people, null, true);
+        ThemesBackgrounds.loadBackground(activity, ((LinearLayout) view));
 
         LinearLayout general = view.findViewById(R.id.tag_people);
         ImageView add = view.findViewById(R.id.add_to_tag);
@@ -161,36 +153,7 @@ public class TagPeople {
             @Override
             public void afterTextChanged(Editable s) {
                 try {
-                    Services.sendToGetAva(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.body() != null) {
-                                String avaLink = response.body();
-
-                                if (avaLink.equals("")) {
-                                    error.setVisibility(View.VISIBLE);
-                                    ava.setVisibility(View.GONE);
-                                    animationDrawable.start();
-
-                                    TooltipCompat.setTooltipText(error, resources.getString(R.string.user_are_not_exists));
-                                } else {
-                                    // set ava
-                                    Glide.with(context).load(Services.BASE_URL + avaLink)
-                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                            .into(ava);
-
-                                    error.setVisibility(View.GONE);
-                                    ava.setVisibility(View.VISIBLE);
-                                    animationDrawable.stop();
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToGetAva: ", t.getMessage());
-                        }
-                    }, s.toString());
+                    new DoCallBack().setValues(animationDrawable::start, context.getApplicationContext(), new Object[]{s, error, ava}).sendToGetAvaInTagPeople();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

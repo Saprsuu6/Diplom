@@ -133,32 +133,22 @@ public class Registration extends AppCompatActivity {
             }
         });
 
-        views.singIn.setOnClickListener(v -> {
-            if (views.fieldToEmail.length() != 0) {
-                try {
-                    setValidationError(false, "");
-
-                    // save email
-                    Cache.saveSP(this, CacheScopes.USER_EMAIL.toString(), views.fieldToEmail.toString().trim());
-
-                    Cache.saveSP(this, CacheScopes.USER_IS_RECEIVE_LETTERS.toString(), views.receiveEmail.isChecked());
-                    Cache.saveSP(this, CacheScopes.USER_IS_HIDE_EMAIL.toString(), views.hideEmail.isChecked());
-
-                    String ip = GetEthernetInfo.getNetworkInfo();
-                    if (ip != null) Cache.saveSP(this, CacheScopes.USER_IP.toString(), ip);
-                } catch (Exception exception) {
-                    setValidationError(true, exception.getMessage());
-                }
-            } else {
-                setValidationError(true, resources.getString(R.string.error_send_password1));
-            }
-        });
-
         views.haveAnAccountLink.setOnClickListener(v -> finish());
 
         // send code to email
         views.singIn.setOnClickListener(v -> {
             if (views.warning.getVisibility() == View.GONE) {
+                setValidationError(false, "");
+
+                // save email
+                Cache.saveSP(this, CacheScopes.USER_EMAIL.toString(), views.fieldToEmail.getText().toString().trim() + views.emailName.getText());
+
+                Cache.saveSP(this, CacheScopes.USER_IS_RECEIVE_LETTERS.toString(), views.receiveEmail.isChecked());
+                Cache.saveSP(this, CacheScopes.USER_IS_HIDE_EMAIL.toString(), views.hideEmail.isChecked());
+
+                String ip = GetEthernetInfo.getNetworkInfo();
+                if (ip != null) Cache.saveSP(this, CacheScopes.USER_IP.toString(), ip);
+
                 if (!RegistrationActivities.activityList.contains(this)) {
                     RegistrationActivities.activityList.add(this);
                 }

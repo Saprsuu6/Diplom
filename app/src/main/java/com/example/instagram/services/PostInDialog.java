@@ -17,26 +17,18 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import androidx.annotation.NonNull;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
-import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
-import com.example.instagram.main_process.SelfPage;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+import com.example.instagram.services.pagination.paging_views.PagingAdapterNotifications;
+import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.Calendar;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PostInDialog {
     private Context context;
@@ -61,10 +53,10 @@ public class PostInDialog {
     private ImageView playStop;
     private ImageView playPrev;
     private ImageView playNext;
-    private boolean like_flag = false;
-    private boolean bookmark_flag = false;
+    private Boolean like_flag = false;
+    private Boolean bookmark_flag = false;
 
-    public AlertDialog.Builder getPostDialog(Context context, Post post, PagingViewGetAllPostsInCells pagingView) {
+    public AlertDialog.Builder getPostDialog(Context context, Post post, Object pagingView) throws JSONException {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.post, null, false);
 
         this.context = context;
@@ -75,7 +67,10 @@ public class PostInDialog {
 
         return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> {
             if (audioController != null) audioController.clearHandler();
-            pagingView.notifyAdapterToClearAll();
+            if (pagingView.getClass() == PagingAdapterPostsCells.class)
+                ((PagingAdapterPostsCells) pagingView).notifyAdapterToClearAll();
+            else if (pagingView.getClass() == PagingAdapterNotifications.class)
+                ((PagingAdapterNotifications) pagingView).notifyAdapterToClearAll();
         });
     }
 
@@ -104,7 +99,7 @@ public class PostInDialog {
     }
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
-    private void setContent(Post post) {
+    private void setContent(Post post) throws JSONException {
         String mime = post.getMimeType();
         String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + post.getResourceMedia();
 
@@ -147,38 +142,7 @@ public class PostInDialog {
         // region set like, save
         if (post.isLiked() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-
-            try {
-                Services.sendToGetIsLiked(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            try {
-                                JSONObject object = new JSONObject(response.body());
-
-                                // set liked
-                                like_flag = object.getBoolean("isLiked");
-                                postLike.setImageDrawable(context.getResources().getDrawable(like_flag ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
-                                post.setLiked(like_flag);
-
-                                // set amount likes
-                                int likes = object.getInt("amountLikes");
-                                amountLikes.setText(Integer.toString(likes));
-                                post.setLikes(likes);
-                            } catch (JSONException e) {
-                                Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
-                    }
-                }, post.getPostId(), login);
-            } catch (JSONException e) {
-                Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
-            }
+            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, like_flag, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
         } else {
             like_flag = post.isLiked();
             postLike.setImageDrawable(context.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
@@ -187,33 +151,7 @@ public class PostInDialog {
 
         if (post.isSaved() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-
-            try {
-                Services.sendToGetIsSaved(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            try {
-                                JSONObject object = new JSONObject(response.body());
-
-                                // set saved
-                                bookmark_flag = object.getBoolean("isSaved");
-                                save.setImageDrawable(context.getResources().getDrawable(bookmark_flag ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
-                                post.setSaved(bookmark_flag);
-                            } catch (JSONException e) {
-                                Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToGetIsLiked: (onFailure)", t.getMessage());
-                    }
-                }, post.getPostId(), login);
-            } catch (JSONException e) {
-                Log.d("sendToGetIsLiked: (JSONException)", e.getMessage());
-            }
+            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, bookmark_flag, save, post}).sendToGetIsSaved();
         } else {
             bookmark_flag = post.isSaved();
             save.setImageDrawable(context.getResources().getDrawable(post.isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
@@ -238,65 +176,9 @@ public class PostInDialog {
                 String id = post.getPostId();
                 // region get tagged people
                 try {
-                    Services.sendToGetTaggedPeople(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.code() == 200) {
-                                try {
-                                    assert response.body() != null;
-                                    JSONObject logins = new JSONObject(response.body());
-
-                                    for (int i = 0; i < logins.length(); i++) {
-                                        String login = logins.getString(Integer.toString(i));
-                                        TextView taggedPerson = new TextView(context);
-                                        taggedPerson.setTextSize(18);
-                                        taggedPerson.setText(login);
-
-                                        taggedPerson.setOnClickListener(v1 -> {
-                                            try {
-                                                Services.sendToGetCurrentUser(new Callback<>() {
-                                                    @Override
-                                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                                        if (response.isSuccessful() && response.body() != null) {
-                                                            JSONObject user;
-
-                                                            try {
-                                                                user = new JSONObject(response.body());
-
-                                                                SelfPage.userPage = User.getPublicUser(user, login);
-                                                                context.startActivity(Intents.getSelfPage());
-                                                            } catch (JSONException |
-                                                                     ParseException e) {
-                                                                Log.d("JSONException", e.getMessage());
-                                                            }
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                                                    }
-                                                }, login);
-                                            } catch (JSONException e) {
-                                                Log.d("JSONException: ", e.getMessage());
-                                            }
-                                        });
-
-                                        taggedPeopleLayout.addView(taggedPerson);
-                                    }
-                                } catch (JSONException e) {
-                                    Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("JSONException: (sendToGetTaggedPeople)", t.getMessage());
-                        }
-                    }, id);
+                    new DoCallBack().setValues(null, context, new Object[]{id, taggedPeopleLayout}).sendToGetTaggedPeople();
                 } catch (JSONException e) {
-                    Log.d("JSONException: (sendToGetTaggedPeople)", e.getMessage());
+                    throw new RuntimeException(e);
                 }
                 // endregion
             }
@@ -322,22 +204,10 @@ public class PostInDialog {
 
             // region send unlike
             try {
-                JSONObject object = new JSONObject();
-                object.put("postId", post.getPostId());
-                object.put("login", login);
-                object.put("isLiked", like_flag);
-
-                Services.sendToLikeUnlikePost(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        Log.d("sendToLikeUnlikePost: (onResponse)", response.body());
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToLikeUnlikePost: (onFailure)", t.getMessage());
-                    }
-                }, object.toString());
+                JSONObject jsonObject = Post.getLikedUnliked(post.getPostId(), login, like_flag);
+                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+                // like unlike post
+                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
             } catch (JSONException e) {
                 Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
             }
@@ -361,24 +231,11 @@ public class PostInDialog {
 
             // region send save
             try {
-                JSONObject object = new JSONObject();
-                object.put("postId", post.getPostId());
-                object.put("login", login);
-                object.put("isSaved", bookmark_flag);
-
-                Services.sendToSaveUnsavedPost(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        Log.d("sendToSaveUnsavedPost: (onResponse)", response.body());
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToSaveUnsavedPost: (onFailure)", t.getMessage());
-                    }
-                }, object.toString());
+                JSONObject jsonObject = Post.getSavedUnsaved(post.getPostId(), login, bookmark_flag);
+                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSaveUnsavedPost();
             } catch (JSONException e) {
-                Log.d("sendToSaveUnsavedPost: (JSONException)", e.getMessage());
+                throw new RuntimeException(e);
             }
             // endregion
         });

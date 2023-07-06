@@ -1,11 +1,12 @@
 package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -30,32 +31,26 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
-import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.UiVisibility;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPosts;
+import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
 import com.example.instagram.services.themes_and_backgrounds.Themes;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class NewsLine extends AppCompatActivity {
     private class Views {
@@ -89,7 +84,7 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private Resources resources;
-    private PagingViewGetAllPosts pagingView;
+    private PagingAdapterPosts pagingView;
     private Localisation localisation;
     private FindUser findUser;
     private Views views;
@@ -102,7 +97,7 @@ public class NewsLine extends AppCompatActivity {
 
         // region find users
         try {
-            findUser = new FindUser(this, this);
+            findUser = new FindUser(NewsLine.this, NewsLine.this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -110,57 +105,52 @@ public class NewsLine extends AppCompatActivity {
 
         resources = getResources();
         views = new Views();
-        localisation = new Localisation(this);
+        localisation = new Localisation(NewsLine.this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
         setListeners();
-        LoadAvatar();
         setIntents();
-        UiVisibility.setUiVisibility(this);
-
-        try {
-            showAgain();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        UiVisibility.setUiVisibility(NewsLine.this);
     }
 
     private void setIntents() {
-        Intents.setComments(new Intent(this, Comments.class));
-        Intents.setSelfPage(new Intent(this, SelfPage.class));
-        Intents.setCreateNewPost(new Intent(this, CreatePost.class));
+        Intents.setComments(new Intent(NewsLine.this, Comments.class));
+        Intents.setSelfPage(new Intent(NewsLine.this, UserPage.class));
+        Intents.setCreateNewPost(new Intent(NewsLine.this, CreatePost.class));
+        Intents.setNotifications(new Intent(NewsLine.this, Notifications.class));
     }
 
-    private void LoadAvatar() {
-        // region send request to get avatar
-        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
-
-        try {
-            Services.sendToGetAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String avaLink = response.body();
-                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
-                }
-            }, login);
-        } catch (JSONException e) {
-            Log.d("sendToGetAva: (JSONException)", e.getMessage());
-        }
-        // endregion
+    private void LoadAvatar() throws JSONException {
+        String login = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_LOGIN.toString());
+        new DoCallBack().setValues(null, NewsLine.this, new Object[]{login, views.selfPage}).sendToGetAvaImage();
     }
 
     @SuppressLint("WrongConstant")
     @Override
     protected void onResume() {
         super.onResume();
+
+        try {
+            showAgain();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
+
+        if (ava.equals("")) {
+            try {
+                LoadAvatar();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Glide.with(NewsLine.this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
+            } catch (Exception e) {
+                Log.d("DoCallBack: ", e.getMessage());
+            }
+        }
 
         Localisation.setFirstLocale(views.languagesSpinner);
 
@@ -175,8 +165,8 @@ public class NewsLine extends AppCompatActivity {
         }
 
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
-        ThemesBackgrounds.setThemeContent(resources, views.changeMainTheme, getApplicationContext());
-        ThemesBackgrounds.loadBackground(this, views.newsLineLayout);
+        ThemesBackgrounds.setThemeContent(resources, views.changeMainTheme, NewsLine.this);
+        ThemesBackgrounds.loadBackground(NewsLine.this, views.newsLineLayout);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -186,7 +176,7 @@ public class NewsLine extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
 
         if (v.getId() == R.id.post_context) {
-            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_LOGIN.toString());
             inflater.inflate(login.equals(NewsLine.mapPost.second.getAuthor()) ? R.menu.post_context_menu : R.menu.post_context_menu_hasnt_post, menu);
         }
     }
@@ -196,33 +186,18 @@ public class NewsLine extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.remove_post:
-                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+                String token = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_TOKEN.toString());
 
                 try {
-                    JSONObject body = Post.getJSONToDeletePost(NewsLine.mapPost.second.getPostId(), token);
-
-                    Services.sendToDeletePost(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                String responseStr = response.body();
-                                Errors.delete(getApplicationContext(), responseStr).show();
-
-                                pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("onFailure: (sendToDeletePost)", t.getMessage());
-                        }
-                    }, body.toString());
+                    JSONObject jsonObject = Post.getJSONToDeletePost(NewsLine.mapPost.second.getPostId(), token);
+                    // delete post
+                    new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearAll(), NewsLine.this, new Object[]{jsonObject}).deletePost();
                 } catch (JSONException e) {
                     Log.d("JSONException: (sendToDeletePost)", e.getMessage());
                 }
                 break;
             case R.id.download:
-                AndroidDownloader androidDownloader = new AndroidDownloader(this);
+                AndroidDownloader androidDownloader = new AndroidDownloader(NewsLine.this);
                 Uri uri = Uri.parse(Services.BASE_URL + NewsLine.mapPost.second.getResourceMedia());
 
                 if (NewsLine.mapPost.second.getMetadata() != null) {
@@ -254,7 +229,7 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void chooseTheme() {
-        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(this, resources, this, views.newsLineLayout);
+        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, resources, NewsLine.this, views.newsLineLayout);
         permissionsDialog.setNegativeButton("Cancel", null);
         permissionsDialog.create().show();
     }
@@ -264,7 +239,7 @@ public class NewsLine extends AppCompatActivity {
             pagingView.notifyAdapterToClearAll();
         } else {
             JSONObject bodyJSON = getJSONToFind();
-            pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, bodyJSON);
+            pagingView = new PagingAdapterPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), NewsLine.this, NewsLine.this, bodyJSON);
         }
         views.swipeRefreshLayout.setRefreshing(false);
     }
@@ -275,8 +250,6 @@ public class NewsLine extends AppCompatActivity {
 
         paramsJSON = new JSONObject();
         paramsJSON.put("author", views.toFindPost.getText());
-        // TODO or
-        //paramsJSON.put("description", views.toFindPost.getText());
 
         bodyJSON = new JSONObject();
         bodyJSON.put("params", paramsJSON);
@@ -284,8 +257,8 @@ public class NewsLine extends AppCompatActivity {
         return bodyJSON;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setListeners() {
-        Activity thisActivity = this;
         views.toFindPost.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -301,7 +274,7 @@ public class NewsLine extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 try {
                     JSONObject bodyJSON = getJSONToFind();
-                    pagingView = new PagingViewGetAllPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), getApplicationContext(), thisActivity, bodyJSON);
+                    pagingView = new PagingAdapterPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), NewsLine.this, NewsLine.this, bodyJSON);
                 } catch (JSONException e) {
                     Log.d("JSONException: ", e.getMessage());
                 }
@@ -333,40 +306,19 @@ public class NewsLine extends AppCompatActivity {
         views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         // initialize menu bottom
-        BottomMenu.setListeners(this, new ImageView[]{views.searchUsers, views.addNewPost, views.notifications}, findUser);
+        BottomMenu.setListeners(NewsLine.this, new ImageView[]{views.searchUsers, views.addNewPost, views.notifications}, findUser);
 
         // region Bottom menu
         // home
         views.home.setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
         // self page
         views.selfPage.setOnClickListener(v -> {
+            String login = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_LOGIN.toString());
+
             try {
-                String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
-
-                Services.sendToGetCurrentUser(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            JSONObject user;
-
-                            try {
-                                user = new JSONObject(response.body());
-
-                                SelfPage.userPage = User.getPublicUser(user, login);
-                                startActivity(Intents.getSelfPage());
-                            } catch (JSONException | ParseException e) {
-                                Log.d("JSONException", e.getMessage());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                    }
-                }, login);
+                new DoCallBack().setValues(() -> startActivity(Intents.getSelfPage()), NewsLine.this, new Object[]{login}).sendToGetCurrentUser();
             } catch (JSONException e) {
-                Log.d("JSONException: ", e.getMessage());
+                throw new RuntimeException(e);
             }
         });
         // endregion

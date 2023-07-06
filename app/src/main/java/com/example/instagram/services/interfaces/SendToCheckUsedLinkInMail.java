@@ -6,7 +6,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface SendToCheckUsedLinkInMail {
-    @GET("/confirm")
+    @GET("/Clickshot/confirm")
     Call<String> STRING_CALL(
             @Query("login") String login
     );

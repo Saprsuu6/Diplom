@@ -10,7 +10,6 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,31 +25,26 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
-import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Services;
+import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllComments;
+import com.example.instagram.services.pagination.paging_views.PagingAdapterComments;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class Comments extends AppCompatActivity {
     private class Views {
+        private final LinearLayout commentsLayout;
         private final LinearLayout replyLayout;
         private final ImageView arrowBack;
         private final ImageView authorAva;
@@ -62,6 +56,7 @@ public class Comments extends AppCompatActivity {
         private final SwipeRefreshLayout swipeRefreshLayout;
 
         public Views() {
+            commentsLayout = findViewById(R.id.comments);
             replyLayout = findViewById(R.id.reply_layout);
             closeReply = findViewById(R.id.close_reply);
             arrowBack = findViewById(R.id.back);
@@ -80,7 +75,7 @@ public class Comments extends AppCompatActivity {
         public static String content;
     }
 
-    private PagingViewGetAllComments pagingView;
+    private PagingAdapterComments pagingView;
     private Resources resources;
     private Localisation localisation;
     static public Pair<Integer, Comment> mapComment;
@@ -97,17 +92,33 @@ public class Comments extends AppCompatActivity {
         localisation = new Localisation(this);
         views.languagesSpinner.setAdapter(localisation.getAdapter());
 
-        setUiVisibility();
         setListeners();
-        LoadAvatar();
 
-        pagingView = new PagingViewGetAllComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
+        UiVisibility.setUiVisibility(this);
+
+        if (ava.equals("")) {
+            try {
+                LoadAvatar();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.authorAva);
+            } catch (Exception e) {
+                Log.d("DoCallBack: ", e.getMessage());
+            }
+        }
+
+        pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
+        ThemesBackgrounds.loadBackground(this, views.commentsLayout);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -130,43 +141,16 @@ public class Comments extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.remove_post:
+                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+                String commentId = Comments.mapComment.second.getCommentId();
+
                 try {
-                    String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
-                    String commentId = Comments.mapComment.second.getCommentId();
-                    JSONObject body = Comment.getJSONToDeleteComment(commentId, token);
-
-                    Services.sendToDeleteComment(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                List<String> deleteId = null;
-
-                                try {
-                                    deleteId = new ArrayList<>();
-                                    JSONObject jsonObject = new JSONObject(response.body());
-
-                                    for (int i = 0; i < jsonObject.length(); i++) {
-                                        deleteId.add(jsonObject.getString(Integer.toString(i)));
-                                    }
-
-                                } catch (JSONException e) {
-                                    Log.d("isSuccessful: (JSONException)", e.getMessage());
-                                }
-
-                                Toast.makeText(getApplicationContext(), R.string.successful_delete, Toast.LENGTH_SHORT).show();
-                                pagingView.notifyAdapterToClearByPosition(deleteId);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("onFailure: (sendToDeletePost)", t.getMessage());
-                        }
-                    }, body.toString());
+                    JSONObject jsonObject = Comment.getJSONToDeleteComment(commentId, token);
+                    pagingView.notifyAdapterToClearByPosition(commentId);
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject, pagingView}).sendToDeleteComment();
                 } catch (JSONException e) {
-                    Log.d("JSONException: (sendToDeletePost)", e.getMessage());
+                    throw new RuntimeException(e);
                 }
-                break;
             case R.id.change_comment:
                 views.message.setText(Comments.mapComment.second.getContent());
                 Comments.mapComment.second.setToChange(true);
@@ -175,39 +159,15 @@ public class Comments extends AppCompatActivity {
         return true;
     }
 
-    private void setUiVisibility() {
-        Window w = getWindow();
-        w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    private void LoadAvatar() {
+    private void LoadAvatar() throws JSONException {
         // region send request to get avatar
         String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
-
-        try {
-            Services.sendToGetAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String avaLink = response.body();
-                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.authorAva);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
-                }
-            }, login);
-        } catch (JSONException e) {
-            Log.d("sendToGetAva: (JSONException)", e.getMessage());
-        }
+        new DoCallBack().setValues(null, this, new Object[]{login, views.authorAva}).sendToGetAvaImage();
         // endregion
     }
 
     private void sendNewRequest() {
-        PagingViewGetAllComments.isEnd = false;
+        PagingAdapterComments.isEnd = false;
         PaginationCurrentForAllComments.resetCurrent();
         pagingView.notifyAdapterToClearAll();
         views.swipeRefreshLayout.setRefreshing(false);
@@ -248,67 +208,33 @@ public class Comments extends AppCompatActivity {
 
                     String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
                     JSONObject comment = Comments.mapComment.second.getJSONCommentToChange(newText, login);
-                    JSONObject changeComment = Comment.getJSONToSendCangeCommnet(comment.toString(), token);
+                    JSONObject jsonObject = Comment.getJSONToSendCangeCommnet(comment.toString(), token);
+                    Comments.mapComment.second.setToChange(false);
 
                     pagingView.notifyLibraryByPosition(Comments.mapComment.first, newText);
-
-                    Comments.mapComment.second.setToChange(false);
-                    Services.sendToChangeComment(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            Log.d("sendToChangeComment: (onResponse)", response.body());
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToChangeComment: (onFailure)", t.getMessage());
-                        }
-                    }, changeComment.toString());
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToChangeComment();
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             } else {
                 CommentToAdd.postId = NewsLine.mapPost.second.getPostId();
                 CommentToAdd.content = views.message.getText().toString().trim();
                 Toast.makeText(this, getString(R.string.comment_has_been_sent), Toast.LENGTH_SHORT).show();
+                JSONObject jsonObject;
 
                 try {
                     if (toReply != null) {
                         CommentToAdd.commentId = toReply.getCommentId();
-                        JSONObject jsonObject = Comment.getJSONReply(login, CommentToAdd.commentId, CommentToAdd.postId, CommentToAdd.content);
-                        Services.sendToAddNewAnswer(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                Log.d("sendToAddNewAnswer: (onResponse)", response.body());
-                                if (response.isSuccessful()) {
-                                    sendNewRequest();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Log.d("sendToAddNewAnswer: (onFailure)", t.getMessage());
-                            }
-                        }, jsonObject.toString());
+                        jsonObject = Comment.getJSONReply(login, CommentToAdd.commentId, CommentToAdd.postId, CommentToAdd.content);
+                        jsonObject.put("token", Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString()));
+                        new DoCallBack().setValues(this::sendNewRequest, this, new Object[]{jsonObject}).sendToAddNewAnswer();
                     } else {
-                        JSONObject jsonObject = Comment.getJSONComment(CommentToAdd.postId, login, CommentToAdd.content);
-                        Services.sendToAddNewComment(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                Log.d("sendToAddNewComment: (onResponse)", response.body());
-                                if (response.isSuccessful()) {
-                                    sendNewRequest();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Log.d("sendToAddNewComment: (onFailure)", t.getMessage());
-                            }
-                        }, jsonObject.toString());
+                        jsonObject = Comment.getJSONComment(CommentToAdd.postId, login, CommentToAdd.content);
+                        jsonObject.put("token", Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString()));
+                        new DoCallBack().setValues(this::sendNewRequest, this, new Object[]{jsonObject}).sendToAddNewComment();
                     }
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -324,30 +250,9 @@ public class Comments extends AppCompatActivity {
             String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
 
             try {
-                Services.sendToGetCurrentUser(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            JSONObject user;
-
-                            try {
-                                user = new JSONObject(response.body());
-
-                                SelfPage.userPage = User.getPublicUser(user, login);
-                                startActivity(Intents.getSelfPage());
-                            } catch (JSONException | ParseException e) {
-                                Log.d("JSONException", e.getMessage());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                    }
-                }, login);
+                new DoCallBack().setValues(() -> startActivity(Intents.getSelfPage()), this, new Object[]{login}).sendToGetCurrentUser();
             } catch (JSONException e) {
-                Log.d("JSONException: ", e.getMessage());
+                throw new RuntimeException(e);
             }
         });
 

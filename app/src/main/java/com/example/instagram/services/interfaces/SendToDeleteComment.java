@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SendToDeleteComment {
-    @POST("/deleteComment")
+    @POST("/Clickshot/deleteComment")
     Call<String> STRING_CALL(
             @Body String body
     );

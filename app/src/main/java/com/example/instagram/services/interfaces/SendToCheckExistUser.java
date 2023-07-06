@@ -6,7 +6,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface SendToCheckExistUser {
-    @POST("/authorize")
+    @POST("/Clickshot/authorize")
     Call<String> STRING_CALL(
             @Body String info
     );

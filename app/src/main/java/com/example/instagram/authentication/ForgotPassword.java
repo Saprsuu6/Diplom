@@ -9,28 +9,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ForgotPassword extends AppCompatActivity {
     private class Views {
@@ -78,34 +70,13 @@ public class ForgotPassword extends AppCompatActivity {
             String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
-                Services.sendToCheckUsedLickInMail(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            if (response.body().contains("0")) {
-                                int index = response.body().indexOf(":");
-                                String code = response.body().substring(index + 1);
-
-                                // save user repair password email
-                                Cache.saveSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
-
-                                startActivity(Intents.getCreateNewPassword());
-                                handler.removeCallbacks(runnable);
-                                finish();
-                            } else {
-                                handler.postDelayed(runnable, 5000L);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        System.out.println(t.getMessage());
-                    }
-                }, login);
-
+                new DoCallBack().setValues(() -> {
+                    startActivity(Intents.getCreateNewPassword());
+                    handler.removeCallbacks(runnable);
+                    finish();
+                }, this, new Object[]{login, handler, runnable}).sendToCheckUsedLickInMailPassword();
             } catch (JSONException e) {
-                System.out.println(e.getMessage());
+                throw new RuntimeException(e);
             }
         };
     }
@@ -142,44 +113,15 @@ public class ForgotPassword extends AppCompatActivity {
                 String code = views.fieldForCode.getText().toString().trim();
 
                 try {
-                    Services.sendToCheckUserCode(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull retrofit2.Response<String> response) {
-                            String strResponse = response.body();
-                            assert strResponse != null;
-                            assert response.body() != null;
-
-                            Errors.enterCode(getApplicationContext(), response.body()).show();
-
-                            if (strResponse.contains("1")) {
-                                char symbol = strResponse.charAt(strResponse.length() - 1);
-                                int attempts = Integer.parseInt(String.valueOf(symbol));
-
-                                if (attempts > 0) {
-                                    Toast.makeText(getApplicationContext(), attempts, Toast.LENGTH_SHORT).show();
-                                } else {
-                                    startActivity(Intents.getAuthorisation());
-                                    finish();
-                                }
-                            }
-
-                            int index = response.body().indexOf(":");
-                            String code = response.body().substring(index + 1);
-
-                            // save user repair password email
-                            Cache.saveSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
-
-                            startActivity(Intents.getCreateNewPassword());
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            System.out.println("Error: " + t.getMessage());
-                        }
-                    }, login, code);
+                    new DoCallBack().setValues(() -> {
+                        startActivity(Intents.getCreateNewPassword());
+                        finish();
+                    }, this, new Object[]{login, code, (Runnable) () -> {
+                        startActivity(Intents.getAuthorisation());
+                        finish();
+                    }}).sendToCheckUserCode();
                 } catch (Exception e) {
-                    System.out.println("Error: " + e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
         });

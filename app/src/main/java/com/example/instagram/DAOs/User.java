@@ -10,6 +10,25 @@ import java.util.Date;
 import java.util.Locale;
 
 public class User {
+    private String login;
+    private String nickName;
+
+    private String surname;
+    private String emailCode;
+    private String phoneNumber = "";
+    private String password;
+    private String passwordRepeat;
+    private String email = "";
+    private Date birthday;
+    private String avatar;
+    private String token;
+    private String description = "";
+    private int amountPosts;
+    private int amountSubscribers;
+    private int amountSubscribing;
+    private boolean isEmailConfirmed;
+    private UserOtherInfo otherInfo = new UserOtherInfo();
+
     // region getters
     public String getToken() {
         return token;
@@ -38,6 +57,7 @@ public class User {
     public String getPassword() {
         return password;
     }
+
     public int getAmountPosts() {
         return amountPosts;
     }
@@ -73,6 +93,7 @@ public class User {
     public String getEmailCode() {
         return emailCode;
     }
+
     public boolean isEmailConfirmed() {
         return isEmailConfirmed;
     }
@@ -94,6 +115,7 @@ public class User {
     public void setLogin(String name) {
         this.login = name;
     }
+
     public void setAmountPosts(int amountPosts) {
         this.amountPosts = amountPosts;
     }
@@ -147,26 +169,6 @@ public class User {
     }
 
     // endregion
-    private String login;
-    private String nickName;
-
-    private String surname;
-    private String emailCode;
-    private String phoneNumber = "";
-    private String password;
-    private String passwordRepeat;
-    private String email = "";
-    private Date birthday;
-    private String avatar;
-    private String token;
-    private String description = "";
-    private int amountPosts;
-    private int amountSubscribers;
-    private int amountSubscribing;
-
-    private boolean isEmailConfirmed;
-
-    private UserOtherInfo otherInfo = new UserOtherInfo();
 
     public User() {
         otherInfo.setDateOfRegistration(new Date());
@@ -189,8 +191,7 @@ public class User {
     }
 
     // could be changed
-    public static JSONObject getJSONToRegistarate(String login, String password, String email, Date birthday) throws JSONException {
-
+    public static JSONObject getJSONToRegistration(String login, String password, String email, Date birthday) throws JSONException {
         JSONObject userBody = new JSONObject();
         userBody.put("login", login);
         userBody.put("password", password);
@@ -202,6 +203,25 @@ public class User {
         userBody.put("bio", "");
 
         return userBody;
+    }
+
+    public static JSONObject getJSONToKnowIsMeSubscribed(String login, String author) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("login", login);
+        jsonObject.put("author", author);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getJSONToSubscribe(String login, String author, boolean state) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("subscriber", login);
+        jsonObject.put("author", author);
+        jsonObject.put("isSubscribing", state);
+
+        return jsonObject;
     }
 
     public static JSONObject getJSONToSendCodeForEmail(String login, String newEmail, String token) throws JSONException {
@@ -260,6 +280,9 @@ public class User {
         selfPageUser.setDescription(user.getString("bio"));
         Date date = DateFormatting.formatDateFromStandard(user.getString("birthday"));
         selfPageUser.setBirthday(date);
+        selfPageUser.setAmountSubscribers(user.getInt("subscribersAmount"));
+        selfPageUser.setAmountSubscribing(user.getInt("subscribingAmount"));
+        selfPageUser.setEmailConfirmed(user.getBoolean("isEmailConfirmed"));
 
         // TODO add birthday, subscribing, subscribers
         return selfPageUser;

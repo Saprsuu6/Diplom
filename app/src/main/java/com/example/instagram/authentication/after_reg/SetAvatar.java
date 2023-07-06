@@ -7,18 +7,15 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.R;
@@ -26,26 +23,22 @@ import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SetAvatar extends AppCompatActivity {
     private class Views {
@@ -128,6 +121,7 @@ public class SetAvatar extends AppCompatActivity {
         });
 
         views.skip.setOnClickListener(v -> {
+            Cache.saveSP(this, CacheScopes.USER_AVA.toString(), "");
             startActivity(Intents.getNewsList());
             finish();
         });
@@ -150,41 +144,25 @@ public class SetAvatar extends AppCompatActivity {
                     }
 
                     sendAvaToBackEnd();
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
+                } catch (IOException | JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
     });
 
-    private void sendAvaToBackEnd() {
+    private void sendAvaToBackEnd() throws JSONException {
         if (imageBytes.length == 0) {
             Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
             return;
         }
 
         String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+        JSONObject jsonObject = new JSONObject().put("login", login);
         RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
-        RequestBody nickName = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), login);
 
-        try {
-            Services.sendAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String responseStr = response.body().toString();
-                        Errors.sendAvatar(getApplicationContext(), responseStr).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    Log.d("sendAvaToBackEnd: ", t.getMessage());
-                }
-            }, image, nickName);
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
-        }
+        // send avatar
+        new DoCallBack().setValues(null, this, new Object[]{image, jsonObject}).sendAva();
 
         startActivity(Intents.getNewsList());
         finish();

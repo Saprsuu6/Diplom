@@ -3,7 +3,6 @@ package com.example.instagram.services.pagination.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,28 +16,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
 import com.example.instagram.DAOs.CommentsLibrary;
-import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.main_process.Comments;
-import com.example.instagram.main_process.SelfPage;
 import com.example.instagram.services.DateFormatting;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Services;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.text.ParseException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class PaginationAdapterComments extends RecyclerView.Adapter<PaginationAdapterComments.ViewHolderComments> {
+public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewComments.ViewHolderComments> {
     private final Context context;
     private final Activity activity;
     private final CommentsLibrary commentsLibrary;
@@ -47,7 +35,7 @@ public class PaginationAdapterComments extends RecyclerView.Adapter<PaginationAd
         return commentsLibrary;
     }
 
-    public PaginationAdapterComments(@Nullable Activity activity, Context context, CommentsLibrary commentsLibrary) {
+    public PaginationViewComments(@Nullable Activity activity, Context context, CommentsLibrary commentsLibrary) {
         this.activity = activity;
         this.context = context;
         this.commentsLibrary = commentsLibrary;
@@ -55,38 +43,24 @@ public class PaginationAdapterComments extends RecyclerView.Adapter<PaginationAd
 
     @NonNull
     @Override
-    public PaginationAdapterComments.ViewHolderComments onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public PaginationViewComments.ViewHolderComments onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_comment, parent, false);
-        return new PaginationAdapterComments.ViewHolderComments(view);
+        return new PaginationViewComments.ViewHolderComments(view);
     }
 
     @SuppressLint({"RtlHardcoded", "SetTextI18n"})
     @Override
-    public void onBindViewHolder(@NonNull PaginationAdapterComments.ViewHolderComments holder, int position) {
+    public void onBindViewHolder(@NonNull PaginationViewComments.ViewHolderComments holder, int position) {
         Comment data = commentsLibrary.getCommentList().get(position);
 
         // region send request to get avatar
         try {
-            Services.sendToGetAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String avaLink = response.body();
-
-                        // set ava
-                        Glide.with(context).load(Services.BASE_URL + avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.ava);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
-                }
-            }, data.getAuthor());
+            new DoCallBack().setValues(null, context, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
         } catch (JSONException e) {
-            Log.d("sendToGetAva: (JSONException)", e.getMessage());
+            throw new RuntimeException(e);
         }
         // endregion
+
 
         // region set content of comment
         holder.date.setText(DateFormatting.formatDate(data.getDateOfAdd()));
@@ -177,90 +151,27 @@ public class PaginationAdapterComments extends RecyclerView.Adapter<PaginationAd
             // set user page
             ava.setOnClickListener(v -> {
                 try {
-                    Services.sendToGetCurrentUser(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                JSONObject user;
-
-                                try {
-                                    user = new JSONObject(response.body());
-
-                                    SelfPage.userPage = User.getPublicUser(user, author.getText().toString());
-                                    context.startActivity(Intents.getSelfPage());
-                                } catch (JSONException | ParseException e) {
-                                    Log.d("JSONException", e.getMessage());
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                        }
-                    }, author.getText().toString());
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             });
 
             // set user page
             author.setOnClickListener(v -> {
                 try {
-                    Services.sendToGetCurrentUser(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                JSONObject user;
-
-                                try {
-                                    user = new JSONObject(response.body());
-
-                                    SelfPage.userPage = User.getPublicUser(user, author.getText().toString());
-                                    context.startActivity(Intents.getSelfPage());
-                                } catch (JSONException | ParseException e) {
-                                    Log.d("JSONException", e.getMessage());
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                        }
-                    }, author.getText().toString());
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             });
 
             // set user page
             answerToAuthor.setOnClickListener(v -> {
                 try {
-                    Services.sendToGetCurrentUser(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                JSONObject user;
-
-                                try {
-                                    user = new JSONObject(response.body());
-
-                                    SelfPage.userPage = User.getPublicUser(user, author.getText().toString());
-                                    context.startActivity(Intents.getSelfPage());
-                                } catch (JSONException | ParseException e) {
-                                    Log.d("JSONException", e.getMessage());
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                        }
-                    }, author.getText().toString());
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             });
         }

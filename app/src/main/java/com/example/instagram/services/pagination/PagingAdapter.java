@@ -8,9 +8,11 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.CommentsLibrary;
+import com.example.instagram.DAOs.NotificationsLibrary;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.DAOs.UsersLibrary;
 import com.example.instagram.R;
@@ -19,26 +21,28 @@ import org.json.JSONException;
 
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
-abstract public class PagingView {
+abstract public class PagingAdapter {
     private final LinearLayout skeletonsLayout;
     private final ShimmerLayout shimmerLayout;
     protected final RecyclerView recyclerView;
     protected final Context context;
-    protected boolean isBusy = false;
+    protected Boolean isBusy = false;
 
     @Nullable
     protected final Activity activity;
     protected final PostsLibrary postsLibrary = new PostsLibrary();
     protected final CommentsLibrary commentsLibrary = new CommentsLibrary();
     protected final UsersLibrary usersLibrary = new UsersLibrary();
+    protected final NotificationsLibrary notificationsLibrary = new NotificationsLibrary();
 
-    public PagingView(NestedScrollView scrollView, RecyclerView recyclerView,
-                      ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
+    public PagingAdapter(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
         this.activity = activity;
         this.context = context;
         this.recyclerView = recyclerView;
         this.shimmerLayout = shimmerLayout;
 
+        // set layout manager
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         skeletonsLayout = (LinearLayout) shimmerLayout.getChildAt(0);
 
         scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {

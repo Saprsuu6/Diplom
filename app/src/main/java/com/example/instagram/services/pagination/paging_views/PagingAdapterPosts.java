@@ -5,50 +5,40 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.Post;
-import com.example.instagram.services.Services;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
-import com.example.instagram.services.pagination.PagingView;
-import com.example.instagram.services.pagination.adapters.PaginationAdapterPosts;
+import com.example.instagram.services.pagination.PagingAdapter;
+import com.example.instagram.services.pagination.adapters.PaginationViewPosts;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.supercharge.shimmerlayout.ShimmerLayout;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class PagingViewGetAllPosts extends PagingView {
-    private PaginationAdapterPosts paginationAdapter;
-    private final JSONObject body;
+public class PagingAdapterPosts extends PagingAdapter {
+    private PaginationViewPosts paginationAdapter;
+    private final JSONObject jsonObject;
     private boolean isStart = true;
     public static boolean isEnd = false;
 
-    public PagingViewGetAllPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity, JSONObject body) throws JSONException {
+    public PagingAdapterPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity, JSONObject jsonObject) throws JSONException {
         super(scrollView, recyclerView, shimmerLayout, context, activity);
-        this.body = body;
+        this.jsonObject = jsonObject;
         isEnd = false;
         PaginationCurrentForAllPosts.resetCurrent();
 
-        body.put("from", Integer.toString(PaginationCurrentForAllPosts.current));
-        body.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
+        jsonObject.put("from", Integer.toString(PaginationCurrentForAllPosts.current));
+        jsonObject.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
 
         // initialise adapter
-        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
-
-        // set layout manager
-        LinearLayoutManager manager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(manager);
-
+        paginationAdapter = new PaginationViewPosts(activity, context, postsLibrary, this);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -98,7 +88,7 @@ public class PagingViewGetAllPosts extends PagingView {
         paginationAdapter.getPostsLibrary().getDataArrayList().clear();
         paginationAdapter.notifyDataSetChanged();
 
-        PagingViewGetAllPosts.isEnd = false;
+        PagingAdapterPosts.isEnd = false;
         PaginationCurrentForAllPosts.resetCurrent();
     }
 
@@ -115,54 +105,28 @@ public class PagingViewGetAllPosts extends PagingView {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationAdapterPosts(activity, context, postsLibrary);
+        paginationAdapter = new PaginationViewPosts(activity, context, postsLibrary, this);
         recyclerView.setAdapter(paginationAdapter);
     }
 
     @Override
     protected void getData() throws JSONException {
-        if (!PagingViewGetAllPosts.isEnd) {
+        if (!PagingAdapterPosts.isEnd) {
             startSkeletonAnim();
 
             // if it start of find
             if (!isStart) {
-                body.put("from", Integer.toString(PaginationCurrentForAllPosts.current));
-                body.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
+                jsonObject.put("from", Integer.toString(PaginationCurrentForAllPosts.current));
+                jsonObject.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
             }
 
             isStart = false;
 
-            Services.sendToFindPost(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String body = response.body();
-
-                        if (!body.equals("[]")) {
-                            try {
-                                JSONArray jsonArray = new JSONArray(body);
-
-                                if (jsonArray.length() < PaginationCurrentForAllPosts.amountOfPagination) {
-                                    PagingViewGetAllPosts.isEnd = true;
-                                }
-
-                                isBusy = false;
-                                PaginationCurrentForAllPosts.nextCurrent();
-                                postsLibrary.setDataArrayList(jsonArray);
-                                setPaginationAdapter();
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        stopSkeletonAnim();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAllPosts: ", t.getMessage());
-                }
-            }, body.toString());
+            new DoCallBack().setValues(() -> {
+                isBusy = false;
+                PaginationCurrentForAllPosts.nextCurrent();
+                setPaginationAdapter();
+            }, context, new Object[]{jsonObject, postsLibrary, (Runnable) this::stopSkeletonAnim}).sendToFindPost();
         }
     }
 }

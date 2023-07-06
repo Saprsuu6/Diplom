@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -109,36 +110,42 @@ public class ThemesBackgrounds {
         radioButton0.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background0.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background0.getValue(), setBackground);
             }
         });
 
         radioButton1.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background1.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background1.getValue(), setBackground);
             }
         });
 
         radioButton2.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background2.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background2.getValue(), setBackground);
             }
         });
 
         radioButton3.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background3.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background3.getValue(), setBackground);
             }
         });
 
         radioButton4.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background4.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background4.getValue(), setBackground);
             }
         });
 
         radioButton5.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background5.getValue(), setBackground);
+                loadOtherBackgrounds(activity, Backgrounds.Background5.getValue(), setBackground);
             }
         });
         // endregion
@@ -148,7 +155,7 @@ public class ThemesBackgrounds {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private static void saveBackgroundState(Activity activity, int value, LinearLayout setBackground) {
-        saveSP(activity, "background", value);
+        saveSP(activity, CacheScopes.LAST_THEME.toString(), value);
         Cache.saveSP(activity, CacheScopes.USER_PREFER_THEME.toString(), value);
         background = value;
 
@@ -165,11 +172,27 @@ public class ThemesBackgrounds {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     public static void loadBackground(Activity activity, LinearLayout linearLayout) { // load bg after resume activity
-        int idBackground = loadSP(activity, "background");
-
+        int idBackground = loadSP(activity, CacheScopes.LAST_THEME.toString());
         linearLayout.setBackground(idBackground != 0 ? activity.getResources().getDrawable(idBackground, activity.getTheme()) : activity.getResources().getDrawable(R.drawable.main_theme_template, activity.getTheme()));
-
         saveBackgroundState(activity, idBackground == 0 ? Backgrounds.Background0.getValue() : idBackground, linearLayout);
+        loadOtherBackgrounds(activity, idBackground, linearLayout);
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private static void loadOtherBackgrounds(Activity activity, int idBackground, LinearLayout linearLayout) {
+        try {
+            View view = linearLayout.findViewById(R.id.top);
+            view.setBackground(activity.getResources().getDrawable(Backgrounds.getTop(idBackground), activity.getTheme()));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            View view = linearLayout.findViewById(R.id.bottom_menu);
+            view.setBackground(activity.getResources().getDrawable(Backgrounds.getOther(idBackground), activity.getTheme()));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

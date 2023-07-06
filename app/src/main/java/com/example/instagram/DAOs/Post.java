@@ -4,6 +4,7 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.Nullable;
 
+import com.example.instagram.services.Cache;
 import com.example.instagram.services.DateFormatting;
 
 import org.json.JSONException;
@@ -12,26 +13,6 @@ import org.json.JSONObject;
 import java.util.Date;
 
 public class Post {
-    public Post clone(Post post) {
-        Post clone = new Post();
-        clone.setPostId(post.getPostId());
-        clone.setDateOfAdd(post.getDateOfAdd());
-        clone.setAuthor(post.getAuthor());
-        clone.setDescription(post.getDescription());
-        clone.setLikes(post.getLikes());
-        clone.setResourceMedia(post.getResourceMedia());
-
-        if (metadata != null) clone.setMetadata(post.getMetadata());
-        if (postponePublication != null)
-            clone.setPostponePublication(post.getPostponePublication());
-
-        clone.setTaggedPeople(post.getTaggedPeople());
-        clone.setLiked(post.isLiked());
-        clone.setSaved(post.getSaved());
-
-        return clone;
-    }
-
     private String postId;
     private Date dateOfAdd;
     private String author;
@@ -178,7 +159,6 @@ public class Post {
 
         setDescription(object.getString("description"));
         setAuthor(object.getString("author"));
-        setLikes(object.getInt("likes"));
     }
 
     public static JSONObject getJSONToSetNewPost(String login, String description, String metadata, Date postponePublication, String taggedPeople) throws JSONException {
@@ -186,12 +166,42 @@ public class Post {
         jsonObject.put("author", login);
         jsonObject.put("description", description);
         jsonObject.put("metadata", metadata);
-
         jsonObject.put("postponePublication", postponePublication != null ? DateFormatting.formatToDateWithTime(postponePublication) : DateFormatting.formatToDateWithTime(new Date()));
         jsonObject.put("taggedPeople", taggedPeople);
 
         return jsonObject;
     }
+
+    public static JSONObject getLikedUnliked(String postId, String login, boolean flag) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("postId", postId);
+        jsonObject.put("login", login);
+        jsonObject.put("isLiked", flag);
+
+        return jsonObject;
+    }
+
+    public static JSONObject getSavedUnsaved(String postId, String login, boolean flag) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("postId", postId);
+        jsonObject.put("login", login);
+        jsonObject.put("isSaved", flag);
+
+        return jsonObject;
+    }
+
+//    public static JSONObject getJSONWhenSwipe(String postId, String token, String login, boolean isLiked) throws JSONException {
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("postId", postId);
+//        jsonObject.put("token", token);
+//
+//        jsonObject.put("login", login);
+//        jsonObject.put("isLiked",isLiked);
+//
+//        return jsonObject;
+//    }
 
     public static JSONObject getJSONToDeletePost(String postId, String token) throws JSONException {
         JSONObject jsonObject = new JSONObject();
@@ -234,5 +244,25 @@ public class Post {
 
     public static String getMimeTypeFromExtension(String extension) {
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
+
+    public Post clone(Post post) {
+        Post clone = new Post();
+        clone.setPostId(post.getPostId());
+        clone.setDateOfAdd(post.getDateOfAdd());
+        clone.setAuthor(post.getAuthor());
+        clone.setDescription(post.getDescription());
+        clone.setLikes(post.getLikes());
+        clone.setResourceMedia(post.getResourceMedia());
+
+        if (metadata != null) clone.setMetadata(post.getMetadata());
+        if (postponePublication != null)
+            clone.setPostponePublication(post.getPostponePublication());
+
+        clone.setTaggedPeople(post.getTaggedPeople());
+        clone.setLiked(post.isLiked());
+        clone.setSaved(post.getSaved());
+
+        return clone;
     }
 }

@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SendNewPasswordAfterForgot {
-    @POST("/restore")
+    @POST("/Clickshot/restore")
     Call<String> STRING_CALL (
             @Body String info
     );

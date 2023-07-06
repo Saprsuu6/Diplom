@@ -8,34 +8,42 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Objects;
 
 public class DateFormatting {
     @SuppressLint("SimpleDateFormat")
     public static void setSimpleDateFormat(String locale) {
         switch (locale) {
             case "EN":
-                simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+                simpleDateFormatWithoutTime = new SimpleDateFormat("dd MMMM yyyy");
+                simpleDateFormatWithTime = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
                 break;
             case "UK":
-                simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                simpleDateFormatWithoutTime = new SimpleDateFormat("dd.MM.yyyy");
+                simpleDateFormatWithTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
                 break;
         }
     }
 
     @SuppressLint("SimpleDateFormat")
-    private static SimpleDateFormat simpleDateFormat;
+    private static SimpleDateFormat simpleDateFormatWithoutTime;
+
+    @SuppressLint("SimpleDateFormat")
+    private static SimpleDateFormat simpleDateFormatWithTime;
+
+    public static String formatDateWithTime(Calendar date) {
+        return simpleDateFormatWithTime.format(date.getTime());
+    }
 
     public static String formatDate(Calendar date) {
-        return simpleDateFormat.format(date.getTime());
+        return simpleDateFormatWithoutTime.format(date.getTime());
     }
 
     public static String formatDate(Date date) {
-        return simpleDateFormat.format(date.getTime());
+        return simpleDateFormatWithoutTime.format(date.getTime());
     }
 
     public static Date formatDate(String date) throws ParseException {
-        return simpleDateFormat.parse(date);
+        return simpleDateFormatWithoutTime.parse(date);
     }
 
     @SuppressLint("SimpleDateFormat")

@@ -19,10 +19,21 @@
     <string name="mime_audio" translatable="false">mpeg</string>
     <string name="mime_text_plain" translatable="false">text/plain</string>
     <string name="description" translatable="false">description</string>
-    <string name="root_folder" translatable="false">/media/</string>
+    <string name="root_folder" translatable="false">media/</string>
     <string name="prev" translatable="false">Prev</string>
     <string name="play_stop" translatable="false">PlayStop</string>
     <string name="next" translatable="false">Next</string>
+    <string name="notifications_title">Notifications</string>
+
+    <!--    notification-->
+    <string name="user_notification">User</string>
+    <string name="subscribe_notification">subscribe to you</string>
+    <string name="unsubscribe_notification">unsubscribe to you</string>
+    <string name="like_notification">like your post</string>
+    <string name="save_notification">save to you</string>
+    <string name="tag_notification">tagged you</string>
+    <string name="comment_notification">comment to your post</string>
+    <string name="reply_notification">reply to your comment</string>
 
     <string name="email_successfully_changed">Email has been changed</string>
     <string name="user_are_not_exists">User are not exists</string>
@@ -34,6 +45,8 @@
     <string name="comment_has_been_sent">Comment has been sent</string>
     <string name="find_post">Start type to find post</string>
     <string name="successfull_uesr_update">Successfully update</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="not_confirmed">Not confirmed</string>
 
     <string name="search" translatable="false">search</string>
     <string name="add_post" translatable="false">add_post</string>

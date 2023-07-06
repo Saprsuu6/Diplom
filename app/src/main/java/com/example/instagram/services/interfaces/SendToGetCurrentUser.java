@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface SendToGetCurrentUser {
-    @GET("/getPublicUser")
+    @GET("/Clickshot/getPublicUser")
     Call<String> STRING_CALL(
             @Query("login") String login
     );

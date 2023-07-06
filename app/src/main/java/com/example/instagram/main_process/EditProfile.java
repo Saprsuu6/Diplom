@@ -18,13 +18,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
@@ -37,36 +37,31 @@ import com.example.instagram.services.Animation;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
-import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class EditProfile extends AppCompatActivity {
     private class Views {
         private final Spinner languagesSpinner;
+        private final LinearLayout editProfileLayout;
         private final ImageView close;
         private final ImageView done;
         private final ImageView avatar;
@@ -84,7 +79,8 @@ public class EditProfile extends AppCompatActivity {
 
         public Views() {
             languagesSpinner = findViewById(R.id.languages);
-            close = findViewById(R.id.close);
+            editProfileLayout = findViewById(R.id.edit_profile);
+            close = findViewById(R.id.close_page);
             done = findViewById(R.id.done);
             title = findViewById(R.id.title);
             avatar = findViewById(R.id.ava);
@@ -125,7 +121,22 @@ public class EditProfile extends AppCompatActivity {
         views.languagesSpinner.setAdapter(localisation.getAdapter());
         views.birthday.setInputType(InputType.TYPE_NULL);
 
-        LoadAvatar();
+        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
+
+        if (ava.equals("")) {
+            try {
+                LoadAvatar();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) views.avatar);
+            } catch (Exception e) {
+                Log.d("DoCallBack: ", e.getMessage());
+            }
+        }
+
         setListeners();
         UiVisibility.setUiVisibility(this);
 
@@ -136,38 +147,19 @@ public class EditProfile extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Localisation.setFirstLocale(views.languagesSpinner);
+        ThemesBackgrounds.loadBackground(this, views.editProfileLayout);
     }
 
-    private void LoadAvatar() {
-        // region send request to get avatar
-        try {
-            Services.sendToGetAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String avaLink = response.body();
-                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
-                }
-            }, SelfPage.userPage.getLogin());
-        } catch (JSONException e) {
-            Log.d("sendToGetAva: (JSONException)", e.getMessage());
-        }
-        // endregion
+    private void LoadAvatar() throws JSONException {
+        new DoCallBack().setValues(null, this, new Object[]{UserPage.userPage.getLogin(), views.avatar}).sendToGetAvaImage();
     }
 
     private void setUserInfo() {
-        views.userName.setText(SelfPage.userPage.getNickName());
-        views.surName.setText(SelfPage.userPage.getSurname());
-        views.email.setText(SelfPage.userPage.getEmail());
-        views.bio.setText(SelfPage.userPage.getDescription());
-        views.birthday.setText(DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
+        views.userName.setText(UserPage.userPage.getNickName());
+        views.surName.setText(UserPage.userPage.getSurname());
+        views.email.setText(UserPage.userPage.getEmail());
+        views.bio.setText(!UserPage.userPage.getDescription().equals("") ? UserPage.userPage.getDescription() : "");
+        views.birthday.setText(DateFormatting.formatDate(UserPage.userPage.getBirthday()));
     }
 
     @SuppressLint("IntentReset")
@@ -239,124 +231,69 @@ public class EditProfile extends AppCompatActivity {
             String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
 
             try {
-                Services.sendToGetCurrentUser(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            JSONObject user;
-
-                            try {
-                                user = new JSONObject(response.body());
-                                SelfPage.userPage = User.getPublicUser(user, login);
-                                finish();
-                            } catch (JSONException | ParseException e) {
-                                Log.d("JSONException", e.getMessage());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Log.d("sendToGetCurrentUser: (onFailure)", t.getMessage());
-                    }
-                }, login);
+                new DoCallBack().setValues(this::finish, this, new Object[]{login}).sendToGetCurrentUser();
             } catch (JSONException e) {
-                Log.d("JSONException: ", e.getMessage());
+                throw new RuntimeException(e);
             }
         });
 
         views.done.setOnClickListener(v -> {
             if (views.warningBirthday.getVisibility() == View.GONE && views.warningEmail.getVisibility() == View.GONE) {
                 if (selectedDate == null) {
-                    selectedDate = DateFormatting.getCalendar(SelfPage.userPage.getBirthday());
+                    selectedDate = DateFormatting.getCalendar(UserPage.userPage.getBirthday());
                 }
 
-                SelfPage.userPage.setBirthday(selectedDate.getTime());
-                SelfPage.userPage.setDescription(views.bio.getText().toString().trim());
-                SelfPage.userPage.setNickName(views.userName.getText().toString().trim());
-                SelfPage.userPage.setSurname(views.surName.getText().toString().trim());
-                SelfPage.userPage.setDescription(views.bio.getText().toString().trim());
+                UserPage.userPage.setBirthday(selectedDate.getTime());
+                UserPage.userPage.setDescription(views.bio.getText().toString().trim());
+                UserPage.userPage.setNickName(views.userName.getText().toString().trim());
+                UserPage.userPage.setSurname(views.surName.getText().toString().trim());
+                UserPage.userPage.setDescription(views.bio.getText().toString().trim());
 
-                sendAvaToBackEnd();
-
-                JSONObject toChange;
                 try {
-                    String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
-                    toChange = SelfPage.userPage.getToChange(token);
-
-                    Services.sendToChangeUser(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                Errors.editProfile(getApplicationContext(), response.body()).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToChangeUser: (onFailure) ", t.getMessage());
-                        }
-                    }, toChange.toString());
+                    sendAvaToBackEnd();
                 } catch (JSONException e) {
-                    Log.d("JSONException", e.getMessage());
+                    throw new RuntimeException(e);
+                }
+
+                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+
+                try {
+                    JSONObject jsonObject = UserPage.userPage.getToChange(token);
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToChangeUser();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
 
         // send code to mail
         views.sendCode.setOnClickListener(v -> {
-            if (!SelfPage.userPage.getEmail().equals(views.email.getText().toString())) {
+            if (!UserPage.userPage.isEmailConfirmed()) {
+                String newEmail = views.email.getText().toString().trim();
+                String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
+
                 try {
-                    String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
-                    String newEmail = views.email.getText().toString().trim();
-                    String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
-                    JSONObject body = User.getJSONToSendCodeForEmail(login, newEmail, token);
-
-                    Services.sendToSendCodeForEmail(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                Errors.forgotPasswordCode(getApplicationContext(), response.body()).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
-                        }
-                    }, body.toString());
+                    JSONObject jsonObject = User.getJSONToSendCodeForEmail(login, newEmail, token);
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToSendCodeForChangeEmail();
                 } catch (JSONException e) {
-                    Log.d("JSONException: ", e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
         });
 
         // check code
         views.confirmCodeButton.setOnClickListener(v -> {
-            if (views.confirmCode.getText().length() > 0) {
-                if (!SelfPage.userPage.getEmail().equals(views.confirmCodeButton.getText().toString())) {
-                    try {
-                        String code = views.confirmCode.toString().trim();
-                        String newEmail = views.email.getText().toString().trim();
-                        String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
-                        JSONObject body = User.getJSONToSendCodeForEmail(code, newEmail, token);
+            if (views.confirmCode.getText().length() > 0 && !UserPage.userPage.isEmailConfirmed()) {
+                String code = views.confirmCode.getText().toString().trim();
+                String newEmail = views.email.getText().toString().trim();
+                String token = Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString());
 
-                        Services.sendToChangeEmailFinally(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    Errors.emailCodes(getApplicationContext(), response.body()).show();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Log.d("sendToSendCodeForEmail: (onFailure) ", t.getMessage());
-                            }
-                        }, body.toString());
-                    } catch (JSONException e) {
-                        Log.d("JSONException: ", e.getMessage());
-                    }
+                try {
+                    JSONObject jsonObject = User.getJSONToChangeEmailFinally(code, newEmail, token);
+                    new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToChangeEmailFinally();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -368,29 +305,10 @@ public class EditProfile extends AppCompatActivity {
             String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
-                Services.sendToCheckUsedLickInMail(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            if (response.body().contains("0")) {
-                                String responseStr = response.body();
-                                int index = responseStr.indexOf(":");
-                                responseStr = responseStr.substring(index + 1);
-                                views.confirmCode.setText(responseStr.trim());
-                            } else {
-                                handler.postDelayed(runnable, 5000L);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        System.out.println(t.getMessage());
-                    }
-                }, login);
-
+                // check used link when change email
+                new DoCallBack().setValues(null, this, new Object[]{login, views.confirmCode, handler, runnable}).sendToCheckUsedLickInMailEmail();
             } catch (JSONException e) {
-                System.out.println(e.getMessage());
+                throw new RuntimeException(e);
             }
         };
     }
@@ -418,6 +336,7 @@ public class EditProfile extends AppCompatActivity {
 
                 try {
                     imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri);
+                    Cache.saveSP(this, CacheScopes.USER_AVA.toString(), selectedImageUri.toString());
 
                     if (imageBytes == null) {
                         Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
@@ -431,7 +350,7 @@ public class EditProfile extends AppCompatActivity {
         }
     });
 
-    private void sendAvaToBackEnd() {
+    private void sendAvaToBackEnd() throws JSONException {
         if (imageBytes != null) {
             if (imageBytes.length == 0) {
                 Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
@@ -442,29 +361,12 @@ public class EditProfile extends AppCompatActivity {
         }
 
         String loginFromContext = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+        JSONObject jsonObject = new JSONObject().put("login", loginFromContext);
         RequestBody image = RequestBody.create(MediaType.parse(getString(R.string.mime_image) + "/" + extension), imageBytes);
-        RequestBody login = RequestBody.create(MediaType.parse(getString(R.string.mime_text_plain)), loginFromContext);
 
-        try {
-            Services.sendAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String responseStr = response.body().toString();
-                        Errors.sendAvatar(getApplicationContext(), responseStr).show();
-                    }
-                }
+        // send avatar
+        new DoCallBack().setValues(null, this, new Object[]{image, jsonObject.toString()}).sendAva();
 
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    Log.d("sendAvaToBackEnd: ", t.getMessage());
-                }
-            }, image, login);
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
-        }
-
-        startActivity(Intents.getNewsList());
         finish();
     }
 

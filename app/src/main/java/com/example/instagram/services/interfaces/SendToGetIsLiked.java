@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface SendToGetIsLiked {
-    @GET("/like")
+    @GET("/Clickshot/like")
     Call<String> STRING_CALL (
             @Query("postId") String postId,
             @Query("login") String login

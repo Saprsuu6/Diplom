@@ -13,12 +13,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.instagram.DAOs.User;
@@ -27,11 +25,10 @@ import com.example.instagram.authentication.Authorisation;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
 import com.example.instagram.services.RegistrationActivities;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
@@ -41,10 +38,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SetBirthday extends AppCompatActivity {
     private class Views {
@@ -158,36 +151,16 @@ public class SetBirthday extends AppCompatActivity {
                         String email = Cache.loadStringSP(this, CacheScopes.USER_EMAIL.toString());
                         Date birthday = selectedDate.getTime();
 
-                        JSONObject jsonObject = User.getJSONToRegistarate(login, password, email, birthday);
+                        JSONObject jsonObject = User.getJSONToRegistration(login, password, email, birthday);
 
-                        Services.addUser(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    String responseStr = response.body();
+                        new DoCallBack().setValues(() -> {
+                            // delete unnecessary
+                            Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString());
+                            Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD_REPEAT.toString());
+                        }, this, new Object[]{jsonObject}).sinUp();
 
-                                    // region get token from response
-                                    int indexFrom = responseStr.indexOf(":");
-                                    String token = responseStr.substring(indexFrom + 1).trim();
-                                    // endregion
-
-                                    // delete unnecessary
-                                    Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString());
-                                    Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD_REPEAT.toString());
-
-                                    // save token
-                                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_TOKEN.toString(), token.trim());
-                                    Errors.registrationUser(getApplicationContext(), response.body()).show();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                System.out.println(t.getMessage());
-                            }
-                        }, jsonObject.toString());
-                    } catch (IOException | JSONException e) {
-                        System.out.println(e.getMessage());
+                    } catch (JSONException | IOException e) {
+                        throw new RuntimeException(e);
                     }
 
                     startActivity(Intents.getSetAvatar());

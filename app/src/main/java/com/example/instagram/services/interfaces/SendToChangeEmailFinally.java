@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SendToChangeEmailFinally {
-    @POST("/changeEmail")
+    @POST("/Clickshot/changeEmail")
     Call<String> STRING_CALL(
             @Body String body
     );

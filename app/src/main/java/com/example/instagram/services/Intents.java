@@ -16,11 +16,17 @@ public class Intents {
     private static Intent selfPage;
     private static Intent createNewPost;
     private static Intent editProfile;
+    private static Intent notifications;
 
     //region getters
+    public static Intent getNotifications() {
+        return notifications;
+    }
+
     public static Intent getEditProfile() {
         return editProfile;
     }
+
     public static Intent getCreateNewPost() {
         return createNewPost;
     }
@@ -75,9 +81,14 @@ public class Intents {
         Intents.editProfile = editProfile;
     }
 
+    public static void setNotifications(Intent notifications) {
+        Intents.notifications = notifications;
+    }
+
     public static void setCreateNewPost(Intent createNewPost) {
         Intents.createNewPost = createNewPost;
     }
+
     public static void setCreateNewPassword(Intent createNewPassword) {
         Intents.createNewPassword = createNewPassword;
     }

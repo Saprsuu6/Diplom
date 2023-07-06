@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/media_content_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -13,15 +14,15 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <VideoView
                 android:id="@+id/video_content"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:contentDescription="@string/video"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
                 android:visibility="gone" />
-
         </FrameLayout>
 
         <ImageView
@@ -34,7 +35,7 @@
             android:visibility="gone" />
 
         <include layout="@layout/audio_controller" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -127,9 +128,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="5dp"
-                        android:padding="0dp"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/Bold_text"
                         tools:text="@string/amount_likes_title" />
 
                     <TextView
@@ -137,9 +136,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="top"
-                        android:padding="0dp"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/Text"
                         tools:text="100" />
 
                 </LinearLayout>
@@ -156,18 +153,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="5dp"
-                        android:padding="0dp"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/Bold_text"
                         tools:text="Andrey" />
 
                     <TextView
                         android:id="@+id/description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="top"
-                        android:padding="0dp"
-                        android:textSize="18sp"
+                        style="@style/Text"
                         tools:text="some description" />
 
                 </LinearLayout>
@@ -184,9 +177,7 @@
                         android:id="@+id/tagged_people"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:visibility="visible"
+                        style="@style/Bold_text"
                         tools:text="@string/tagged_people" />
 
                     <LinearLayout
@@ -212,8 +203,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="5dp"
-                        android:padding="0dp"
-                        android:textSize="18sp"
+                        style="@style/Text"
                         tools:text="2" />
 
                 </LinearLayout>

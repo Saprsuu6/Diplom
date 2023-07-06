@@ -12,12 +12,10 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
@@ -27,10 +25,9 @@ import com.example.instagram.services.Animation;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
-import com.example.instagram.services.Errors;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -38,10 +35,6 @@ import com.example.instagram.services.Validator;
 import org.json.JSONObject;
 
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class CreateNewPassword extends AppCompatActivity {
     private class Views {
@@ -204,26 +197,10 @@ public class CreateNewPassword extends AppCompatActivity {
                     String rpPassword = views.fieldRepeatPassword.getText().toString().trim();
                     JSONObject jsonObject = User.getJSONAfterForgotPassword(login, code, password, rpPassword);
 
-                    Services.sendNewPasswordAfterForgot(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            assert response.body() != null;
-                            Errors.afterRestorePassword(getApplicationContext(), response.body()).show();
-
-                            if (response.body().contains("0")) {
-                                // delete unnecessary
-                                Cache.deleteSP(getApplicationContext(), CacheScopes.USER_EMAIL_CODE.toString());
-
-                                startActivity(Intents.getAuthorisation());
-                                finish();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            System.out.println(t.getMessage());
-                        }
-                    }, jsonObject.toString());
+                    new DoCallBack().setValues(() -> {
+                        startActivity(Intents.getAuthorisation());
+                        finish();
+                    }, this, new Object[]{jsonObject}).sendNewPasswordAfterForgot();
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }

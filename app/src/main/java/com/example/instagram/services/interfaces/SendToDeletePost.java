@@ -6,7 +6,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface SendToDeletePost {
-    @POST("/deletePost")
+    @POST("/Clickshot/deletePost")
     Call<String> STRING_CALL (
             @Body String postId
     );

@@ -28,31 +28,32 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DeleteApplicationCache;
+import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Localisation;
-import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
-import com.example.instagram.services.pagination.paging_views.PagingViewGetAllPostsInCells;
+import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class SelfPage extends AppCompatActivity {
+public class UserPage extends AppCompatActivity {
     private class Views {
         public final FlexboxLayout flexboxForCellsLayout;
         public final LinearLayout selfPageLayout;
+        public final LinearLayout followingsLayout;
+        public final LinearLayout followersLayout;
         public final Spinner languagesSpinner;
         public final TextView login;
         public final TextView nick;
         public final TextView surname;
         public final TextView email;
+        public final TextView isEmailConfirmed;
         public final TextView description;
         public final TextView birthday;
         public final TextView amountPosts;
@@ -71,6 +72,8 @@ public class SelfPage extends AppCompatActivity {
 
         public Views() {
             flexboxForCellsLayout = findViewById(R.id.layout);
+            followingsLayout = findViewById(R.id.followings_layout);
+            followersLayout = findViewById(R.id.followers_layout);
             selfPageLayout = findViewById(R.id.self_page_activity);
             languagesSpinner = findViewById(R.id.languages);
             back = findViewById(R.id.back);
@@ -85,6 +88,7 @@ public class SelfPage extends AppCompatActivity {
             nick = findViewById(R.id.user_name);
             surname = findViewById(R.id.user_surname);
             email = findViewById(R.id.user_email);
+            isEmailConfirmed = findViewById(R.id.is_email_confirmed);
             description = findViewById(R.id.user_description);
             birthday = findViewById(R.id.user_birthday);
             amountPosts = findViewById(R.id.amount_posts);
@@ -104,7 +108,7 @@ public class SelfPage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_self_page);
+        setContentView(R.layout.activity_user_page);
 
         // region find users
         try {
@@ -124,11 +128,10 @@ public class SelfPage extends AppCompatActivity {
         setIntents();
         setListeners();
         registerForContextMenu(views.pageContext);
-        LoadAvatar();
         UiVisibility.setUiVisibility(this);
 
         try {
-            new PagingViewGetAllPostsInCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+            new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -138,15 +141,38 @@ public class SelfPage extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+        if (!UserPage.userPage.getLogin().equals(login)) {
+            try {
+                JSONObject jsonObject = User.getJSONToKnowIsMeSubscribed(login, UserPage.userPage.getLogin());
+                new DoCallBack().setValues(null, this, new Object[]{jsonObject, views.subscribe}).sendToGetIsMeSubscribed();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
+
+        if (ava.equals("")) {
+            try {
+                LoadAvatar();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
+                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
+            } catch (Exception e) {
+                Log.d("DoCallBack: ", e.getMessage());
+            }
+        }
+
         if (views != null) {
             setInfo();
             Localisation.setFirstLocale(views.languagesSpinner);
+            ThemesBackgrounds.loadBackground(this, views.selfPageLayout);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 
     private void setIntents() {
@@ -154,29 +180,8 @@ public class SelfPage extends AppCompatActivity {
             Intents.setEditProfile(new Intent(this, EditProfile.class));
     }
 
-    private void LoadAvatar() {
-        // region send request to get avatar
-        try {
-            Services.sendToGetAva(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String avaLink = response.body();
-                        String imagePath = Services.BASE_URL + getString(R.string.root_folder) + avaLink;
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
-                        Glide.with(getApplicationContext()).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Log.d("sendToGetAva: (onFailure)", t.getMessage());
-                }
-            }, SelfPage.userPage.getLogin());
-        } catch (JSONException e) {
-            Log.d("sendToGetAva: (JSONException)", e.getMessage());
-        }
-        // endregion
+    private void LoadAvatar() throws JSONException {
+        new DoCallBack().setValues(null, this, new Object[]{UserPage.userPage.getLogin(), views.avatar, views.selfPage}).sendToGetAvaImage();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -213,6 +218,7 @@ public class SelfPage extends AppCompatActivity {
                 return true;
             case R.id.log_out:
                 DeleteApplicationCache.deleteCache(getApplicationContext());
+                Cache.deleteAppSP(this);
                 finishAffinity();
                 break;
             case R.id.complain:
@@ -225,25 +231,33 @@ public class SelfPage extends AppCompatActivity {
         return true;
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "ResourceType"})
     private void setInfo() {
-        views.login.setText(SelfPage.userPage.getLogin());
+        views.login.setText(UserPage.userPage.getLogin());
 
-        if (SelfPage.userPage.getNickName().equals("")) views.nick.setVisibility(View.GONE);
-        else views.nick.setText(SelfPage.userPage.getNickName());
+        if (UserPage.userPage.getNickName().equals("")) views.nick.setVisibility(View.GONE);
+        else views.nick.setText(UserPage.userPage.getNickName());
 
-        if (SelfPage.userPage.getSurname().equals("")) views.surname.setVisibility(View.GONE);
-        else views.surname.setText(SelfPage.userPage.getSurname());
+        if (UserPage.userPage.getSurname().equals("")) views.surname.setVisibility(View.GONE);
+        else views.surname.setText(UserPage.userPage.getSurname());
 
-        if (SelfPage.userPage.getDescription().equals(""))
+        if (UserPage.userPage.getDescription().equals(""))
             views.description.setVisibility(View.GONE);
-        else views.description.setText(SelfPage.userPage.getDescription());
+        else views.description.setText(UserPage.userPage.getDescription());
 
-        views.amountPosts.setText(Integer.toString(SelfPage.userPage.getAmountPosts()));
-        views.followings.setText("101");
-        views.followers.setText("102");
-        views.email.setText(SelfPage.userPage.getEmail());
-        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
+        views.amountPosts.setText(Integer.toString(UserPage.userPage.getAmountPosts()));
+        views.followings.setText(Integer.toString(UserPage.userPage.getAmountSubscribing()));
+        views.followers.setText(Integer.toString(UserPage.userPage.getAmountSubscribers()));
+        views.email.setText(UserPage.userPage.getEmail());
+
+        views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
+        views.isEmailConfirmed.setTextColor(UserPage.userPage.isEmailConfirmed() ? getColor(R.color.success) : getColor(R.color.error));
+
+        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
+
+        if (UserPage.userPage.getLogin().equals(Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()))) {
+            views.subscribe.setVisibility(View.GONE);
+        }
     }
 
     private void setListeners() {
@@ -263,8 +277,39 @@ public class SelfPage extends AppCompatActivity {
         };
         views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
+
+        views.followersLayout.setOnClickListener(v -> {
+            Cache.saveSP(this, CacheScopes.SELF_PAGE_USER_LOGIN.toString(), UserPage.userPage.getLogin()); // TODO delete after usage
+
+            try {
+                findUser.getToFindUser(true).show();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        views.followingsLayout.setOnClickListener(v -> {
+            Cache.saveSP(this, CacheScopes.SELF_PAGE_USER_LOGIN.toString(), UserPage.userPage.getLogin()); // TODO delete after usage
+
+            try {
+                findUser.getToFindUser(false).show();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         views.subscribe.setOnClickListener(v -> {
-            // TODO realize subscribe
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+            boolean isSubscribed = !Cache.loadBoolSP(this, CacheScopes.IS_SUBSCRIBED.toString());
+            Cache.saveSP(this, CacheScopes.IS_SUBSCRIBED.toString(), isSubscribed);
+            views.subscribe.setText(!isSubscribed ? getResources().getString(R.string.subscribe_btn) : getResources().getString(R.string.unsubscribe_btn));
+            try {
+                JSONObject jsonObject = User.getJSONToSubscribe(login, UserPage.userPage.getLogin(), isSubscribed);
+                jsonObject.put("token", Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString()));
+                new DoCallBack().setValues(null, this, new Object[]{jsonObject}).sendToSetStateSubscribe();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         views.editProfile.setOnClickListener(v -> startActivity(Intents.getEditProfile()));
@@ -275,12 +320,12 @@ public class SelfPage extends AppCompatActivity {
         // home
         views.home.setOnClickListener(v -> {
             finish();
-            SelfPage.userPage = null;
+            UserPage.userPage = null;
         });
         // back
         views.back.setOnClickListener(v -> {
             finish();
-            SelfPage.userPage = null;
+            UserPage.userPage = null;
         });
         // self page
         views.selfPage.setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
@@ -289,10 +334,8 @@ public class SelfPage extends AppCompatActivity {
     // region Localisation
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        views.amountPosts.setText(resources.getString(R.string.posts));
-        views.followings.setText(resources.getString(R.string.followings));
-        views.followers.setText(resources.getString(R.string.followers));
-        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(SelfPage.userPage.getBirthday()));
+        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
+        views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
     }
     // endregion
 }

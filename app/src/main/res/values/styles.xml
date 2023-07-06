@@ -4,18 +4,18 @@
     <style name="Authentication_EditText" parent="TextAppearance.AppCompat">
         <item name="android:background">@drawable/edit_text_auto_reg</item>
         <item name="android:singleLine">true</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:layout_margin">7dp</item>
         <item name="android:padding">12dp</item>
     </style>
 
     <style name="Bold_text" parent="TextAppearance.AppCompat">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Text" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Authentication_Button" parent="Authentication_EditText">
@@ -25,7 +25,7 @@
 
     <style name="Authentication_ForgotPass" parent="TextAppearance.AppCompat">
         <item name="android:layout_marginRight">7dp</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:layout_marginTop">6dp</item>
         <item name="android:layout_marginBottom">16dp</item>
         <item name="android:textColor">@color/blue</item>
@@ -37,7 +37,7 @@
 
     <style name="Authentication_Link" parent="TextAppearance.AppCompat">
         <item name="android:layout_marginRight">7dp</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/blue</item>
     </style>

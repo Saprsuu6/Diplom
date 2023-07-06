@@ -82,6 +82,19 @@
     <string name="tiramisu_or_better">Має бути версія "Тірамісу" або новіша</string>
     <string name="find_post">Почніть вводити, щоб знайти публікацію</string>
     <string name="successfull_uesr_update">Вдачне оновлення</string>
+    <string name="confirmed">Підтвержен</string>
+    <string name="notifications_title">Повідомлення</string>
+    <string name="not_confirmed">Не підтвержен</string>
+
+    <!--    notification-->
+    <string name="user_notification">Користувач</string>
+    <string name="subscribe_notification">підписався на вас</string>
+    <string name="unsubscribe_notification">відписався від вас</string>
+    <string name="like_notification">сподобався ваш пост</string>
+    <string name="save_notification">зберіг ваш пост</string>
+    <string name="tag_notification">протегав вас</string>
+    <string name="comment_notification">залишив коментар</string>
+    <string name="reply_notification">відповів на ваш коментар</string>
 
     <!--    User page-->
     <string name="posts">Постів</string>

@@ -6,7 +6,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface SendToGetAva {
-    @GET("/ava")
+    @GET("/Clickshot/ava")
     Call<String> STRING_CALL (
             @Query("login") String nickName
     );

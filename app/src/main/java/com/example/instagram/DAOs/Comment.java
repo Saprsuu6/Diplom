@@ -17,7 +17,6 @@ public class Comment {
     private String author;
     private String content;
 
-
     //region setters
     public void setToChange(boolean toChange) {
         this.toChange = toChange;
@@ -87,6 +86,9 @@ public class Comment {
         } else {
             parseComment(jsonObject);
         }
+    }
+
+    public Comment() {
     }
 
     private void parseComment(JSONObject jsonObject) throws JSONException, ParseException {
