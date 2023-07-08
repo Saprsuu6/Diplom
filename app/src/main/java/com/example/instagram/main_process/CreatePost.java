@@ -6,8 +6,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -17,14 +15,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -42,8 +37,9 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
+import com.example.instagram.services.GFG;
+import com.example.instagram.services.GetFileInfo;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Localisation;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
@@ -75,22 +71,18 @@ public class CreatePost extends AppCompatActivity {
         private final ImageView playNext;
         private final ImageView playStop;
         private final TextView timeLine;
-        private final TextView title;
         private final TextView tagPeople;
         private final TextView postponePublication;
         private final EditText description;
-        private final Spinner languagesSpinner;
         private final SeekBar seekBar;
         private final VideoView videoView;
         private final ImageView photoView;
-        private final RelativeLayout videoRealtiveLayout;
         private final CardView imageCard;
         private final CardView videoCard;
         private final CardView audioCard;
 
         public Views() {
             audioControllerLinearLayout = findViewById(R.id.audio_controller);
-            videoRealtiveLayout = findViewById(R.id.video_layout);
             createPostLayout = findViewById(R.id.create_post);
             timeLine = findViewById(R.id.time_line);
             playPrev = findViewById(R.id.play_prev);
@@ -101,11 +93,9 @@ public class CreatePost extends AppCompatActivity {
             btnImage = findViewById(R.id.btn_image);
             close = findViewById(R.id.close_page);
             done = findViewById(R.id.done);
-            title = findViewById(R.id.new_post_title);
             tagPeople = findViewById(R.id.tag_people);
             postponePublication = findViewById(R.id.postpone_publication);
             description = findViewById(R.id.new_post_description);
-            languagesSpinner = findViewById(R.id.languages);
             seekBar = findViewById(R.id.seek_bar);
             videoView = findViewById(R.id.video_content);
             photoView = findViewById(R.id.preview_photo);
@@ -123,8 +113,6 @@ public class CreatePost extends AppCompatActivity {
     }
 
     private AudioController audioController;
-    private Resources resources;
-    private Localisation localisation;
     private String extension;
     private TagPeople tagPeople;
     private Calendar selectedDate;
@@ -136,11 +124,8 @@ public class CreatePost extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
-        resources = getResources();
         views = new Views();
-        tagPeople = new TagPeople(this, resources, this);
-        localisation = new Localisation(this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
+        tagPeople = new TagPeople(this, getResources(), this);
 
         setIntents();
         setListeners();
@@ -150,7 +135,7 @@ public class CreatePost extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(views.languagesSpinner);
+        setStringResources();
         ThemesBackgrounds.loadBackground(this, views.createPostLayout);
     }
 
@@ -172,6 +157,15 @@ public class CreatePost extends AppCompatActivity {
             if (data != null) {
                 Uri selectedUri = data.getData();
 
+                long fileSizeInBytes = GetFileInfo.getSize(CreatePost.this, selectedUri);
+                long fileSizeInKB = fileSizeInBytes / 1024;
+                long fileSizeInMB = fileSizeInKB / 1024;
+
+                if (fileSizeInMB > 1) {
+                    Toast.makeText(CreatePost.this, getString(R.string.size_restriction), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 extension = FindExtension.getExtension(selectedUri, getApplicationContext());
                 String mime = Post.getMimeTypeFromExtension(extension);
                 Bitmap selectedImage;
@@ -192,30 +186,33 @@ public class CreatePost extends AppCompatActivity {
                         selectedImage = BitmapFactory.decodeByteArray(mediaBytes, 0, mediaBytes.length);
 
                         if (selectedImage != null) {
-                            views.photoView.setVisibility(View.VISIBLE);
                             views.photoView.setImageURI(selectedUri);
-
-                            metadata.put("Size", selectedImage.getHeight() + "x" + selectedImage.getWidth());
+                            metadata.put("ViewSize", selectedImage.getHeight() + "x" + selectedImage.getWidth());
                         }
                     } else if (mime.contains(getString(R.string.mime_video))) {
                         // set video
                         views.videoCard.setVisibility(View.VISIBLE);
-                        views.videoRealtiveLayout.setVisibility(View.VISIBLE);
                         views.videoView.setVideoURI(selectedUri);
-                        views.videoView.start();
                         views.videoView.requestFocus();
-
-                        metadata.put("Size", views.videoView.getHeight() + "x" + views.videoView.getWidth());
+                        views.videoView.start();
+                        metadata.put("ViewSize", views.videoView.getHeight() + "x" + views.videoView.getWidth());
+                        metadata.put("Duration", GFG.convert(views.videoView.getDuration()));
                     } else if (mime.contains(getString(R.string.mime_audio))) {
                         // set audio
-                        views.audioCard.setVisibility(View.VISIBLE);
                         views.audioControllerLinearLayout.setVisibility(View.VISIBLE);
+                        views.audioCard.setVisibility(View.VISIBLE);
                         audioController = new AudioController(views.timeLine, views.seekBar, views.playStop, views.playPrev, views.playNext, getApplicationContext(), selectedUri);
                         audioController.initHandler(new Handler());
-
-                        metadata.put("Duration", audioController.getDuration());
+                        metadata.put("Duration", GFG.convert(audioController.getDuration()));
                     }
 
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("bytes", fileSizeInBytes);
+                    jsonObject.put("kilobytes", fileSizeInKB);
+                    jsonObject.put("megabytes", fileSizeInMB);
+
+                    metadata.put("FileName", GetFileInfo.getName(CreatePost.this, selectedUri));
+                    metadata.put("FileSize", jsonObject);
                     PostToAdd.metadata = metadata.toString();
                     // endregion
                 } catch (IOException e) {
@@ -250,26 +247,6 @@ public class CreatePost extends AppCompatActivity {
             goneButtons();
         });
 
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-
-                if (selectedDate != null) {
-                    views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -289,7 +266,7 @@ public class CreatePost extends AppCompatActivity {
             selectedDate.set(year1, month1, dayOfMonth);
 
             if (year >= year1 && month >= month1 && dayOfMonth >= day) {
-                views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDateWithTime(selectedDate));
+                views.postponePublication.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDateWithTime(selectedDate));
             } else {
                 Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
             }
@@ -297,7 +274,7 @@ public class CreatePost extends AppCompatActivity {
 
         views.postponePublication.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, dateSetListener, year, month, day);
-            TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Localisation.chosenLocale.getCountry().equals("EN"));
+            TimePickerDialog timePickerDialog = new TimePickerDialog(CreatePost.this, android.R.style.Theme_DeviceDefault_Dialog, timeSetListener, hours, minutes, !Locale.getDefault().getCountry().equals("EN") || !Locale.getDefault().getCountry().equals("US"));
 
             timePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
             timePickerDialog.show();
@@ -350,18 +327,14 @@ public class CreatePost extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        views.description.setHint(resources.getString(R.string.add_description));
-        views.title.setText(resources.getString(R.string.new_post));
-        views.postponePublication.setText(resources.getString(R.string.postpone_publication));
-
         if (PostToAdd.taggedPeople != null) {
-            views.tagPeople.setText(resources.getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople);
+            views.tagPeople.setText(getResources().getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople);
         }
 
         if (selectedDate != null) {
-            views.postponePublication.setText(resources.getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+            views.postponePublication.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
         } else {
-            views.postponePublication.setText(resources.getString(R.string.postpone_publication));
+            views.postponePublication.setText(getResources().getString(R.string.postpone_publication));
         }
     }
 }

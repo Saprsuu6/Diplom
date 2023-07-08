@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -14,13 +12,10 @@ import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -39,7 +34,6 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
-import com.example.instagram.services.Localisation;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
@@ -60,12 +54,10 @@ import okhttp3.RequestBody;
 
 public class EditProfile extends AppCompatActivity {
     private class Views {
-        private final Spinner languagesSpinner;
         private final LinearLayout editProfileLayout;
         private final ImageView close;
         private final ImageView done;
         private final ImageView avatar;
-        private final TextView title;
         private final EditText userName;
         private final EditText surName;
         private final EditText birthday;
@@ -78,11 +70,9 @@ public class EditProfile extends AppCompatActivity {
         private final ImageView warningBirthday;
 
         public Views() {
-            languagesSpinner = findViewById(R.id.languages);
             editProfileLayout = findViewById(R.id.edit_profile);
             close = findViewById(R.id.close_page);
             done = findViewById(R.id.done);
-            title = findViewById(R.id.title);
             avatar = findViewById(R.id.ava);
             userName = findViewById(R.id.info_for_name);
             surName = findViewById(R.id.info_for_surname);
@@ -97,8 +87,6 @@ public class EditProfile extends AppCompatActivity {
         }
     }
 
-    private Resources resources;
-    private Localisation localisation;
     private Calendar selectedDate;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private String extension;
@@ -112,13 +100,10 @@ public class EditProfile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        resources = getResources();
         handler = new Handler();
         runnable = checkUsedLink();
         handler.postDelayed(runnable, 5000L);
         views = new Views();
-        localisation = new Localisation(this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
         views.birthday.setInputType(InputType.TYPE_NULL);
 
         String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
@@ -146,7 +131,6 @@ public class EditProfile extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(views.languagesSpinner);
         ThemesBackgrounds.loadBackground(this, views.editProfileLayout);
     }
 
@@ -164,35 +148,19 @@ public class EditProfile extends AppCompatActivity {
 
     @SuppressLint("IntentReset")
     private void setListeners() {
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
         views.email.addTextChangedListener(new Validator(views.email) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
 
                 try {
-                    Validations.validateEmail(text, "", resources);
+                    Validations.validateEmail(text, "", getResources());
                     setValidationError(views.warningEmail, false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
                 } catch (Exception exception) {
                     setValidationError(views.warningEmail, true, getResources().getString(R.string.error_send_password1));
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
                 }
             }
         });
@@ -368,17 +336,5 @@ public class EditProfile extends AppCompatActivity {
         new DoCallBack().setValues(null, this, new Object[]{image, jsonObject.toString()}).sendAva();
 
         finish();
-    }
-
-    private void setStringResources() {
-        views.title.setText(resources.getString(R.string.change_your_info_to_be_individual));
-        views.userName.setHint(resources.getString(R.string.login_hint_username));
-        views.surName.setHint(resources.getString(R.string.login_hint_surname));
-        views.email.setHint(resources.getString(R.string.login_hint_email));
-        views.birthday.setHint(resources.getString(R.string.login_hint_bio));
-        views.birthday.setHint(resources.getString(R.string.birthday_hint));
-        views.confirmCode.setHint(R.string.confirm_code);
-        views.sendCode.setText(resources.getString(R.string.send_code));
-        views.confirmCodeButton.setText(resources.getString(R.string.confirm_code));
     }
 }

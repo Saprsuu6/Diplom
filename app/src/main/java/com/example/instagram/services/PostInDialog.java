@@ -22,8 +22,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
-import com.example.instagram.services.pagination.paging_views.PagingAdapterNotifications;
-import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +36,6 @@ public class PostInDialog {
     private ImageView save;
     private ImageView imageContent;
     private VideoView videoContent;
-    private TextView amountLikesTitle;
     private TextView amountLikes;
     private TextView authorLogin;
     private TextView description;
@@ -53,10 +50,8 @@ public class PostInDialog {
     private ImageView playStop;
     private ImageView playPrev;
     private ImageView playNext;
-    private Boolean like_flag = false;
-    private Boolean bookmark_flag = false;
 
-    public AlertDialog.Builder getPostDialog(Context context, Post post, Object pagingView) throws JSONException {
+    public AlertDialog.Builder getPostDialog(Context context, Post post) throws JSONException {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.post, null, false);
 
         this.context = context;
@@ -67,10 +62,6 @@ public class PostInDialog {
 
         return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> {
             if (audioController != null) audioController.clearHandler();
-            if (pagingView.getClass() == PagingAdapterPostsCells.class)
-                ((PagingAdapterPostsCells) pagingView).notifyAdapterToClearAll();
-            else if (pagingView.getClass() == PagingAdapterNotifications.class)
-                ((PagingAdapterNotifications) pagingView).notifyAdapterToClearAll();
         });
     }
 
@@ -82,7 +73,6 @@ public class PostInDialog {
 
         imageContent = view.findViewById(R.id.image_content);
         videoContent = view.findViewById(R.id.video_content);
-        amountLikesTitle = view.findViewById(R.id.amount_likes_title);
         amountLikes = view.findViewById(R.id.amount_likes);
         authorLogin = view.findViewById(R.id.author_nickname);
         description = view.findViewById(R.id.description);
@@ -120,6 +110,7 @@ public class PostInDialog {
 
             videoContent.start();
             videoContent.requestFocus();
+            videoContent.setOnPreparedListener(mp -> mp.setLooping(true));
             videoContent.setVisibility(View.VISIBLE);
         } else if (mime.contains(context.getString(R.string.mime_audio))) {
             // set audio
@@ -130,10 +121,12 @@ public class PostInDialog {
         }
 
         // region set other text info
-        taggedPeople.setText(context.getResources().getString(R.string.tagged_people));
-        amountLikesTitle.setText(R.string.amount_likes_title);
         authorLogin.setText(post.getAuthor());
         description.setText(post.getDescription());
+
+        description.setOnClickListener(v -> {
+            description.setMaxLines(description.getMaxLines() == 1 ? 100 : 1);
+        });
 
         Calendar calendar = DateFormatting.getCalendar(post.getDateOfAdd());
         date.setText(DateFormatting.formatDate(calendar.getTime()));
@@ -142,18 +135,16 @@ public class PostInDialog {
         // region set like, save
         if (post.isLiked() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, like_flag, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
+            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
         } else {
-            like_flag = post.isLiked();
             postLike.setImageDrawable(context.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
             amountLikes.setText(Integer.toString(post.getLikes()));
         }
 
         if (post.isSaved() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, bookmark_flag, save, post}).sendToGetIsSaved();
+            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, save, post}).sendToGetIsSaved();
         } else {
-            bookmark_flag = post.isSaved();
             save.setImageDrawable(context.getResources().getDrawable(post.isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
         }
         // endregion
@@ -185,53 +176,26 @@ public class PostInDialog {
         });
 
         postLike.setOnClickListener(v -> {
-            if (!like_flag) {
-                post.setLikes(post.getLikes() + 1);
-                postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
-            } else {
-                post.setLikes(post.getLikes() - 1);
-                postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
-            }
-
-            TransitPost.postsToChangeFromOtherPage.removeIf(toRemove -> toRemove.getPostId().equals(post.getPostId()));
-            TransitPost.postsToChangeFromOtherPage.add(post);
-
-            like_flag = !like_flag;
-            post.setLiked(like_flag);
-            amountLikes.setText(Integer.toString(post.getLikes()));
-
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-
-            // region send unlike
-            try {
-                JSONObject jsonObject = Post.getLikedUnliked(post.getPostId(), login, like_flag);
-                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
-                // like unlike post
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
-            } catch (JSONException e) {
-                Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
-            }
-            // endregion
+            postSetStateLike(post);
         });
 
         save.setOnClickListener(v -> {
-            if (!bookmark_flag) {
+            if (!post.isSaved()) {
+                post.setSaved(true);
                 save.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
             } else {
+                post.setSaved(false);
                 save.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark, context.getTheme()));
             }
 
             TransitPost.postsToChangeFromOtherPage.removeIf(toRemove -> toRemove.getPostId().equals(post.getPostId()));
             TransitPost.postsToChangeFromOtherPage.add(post);
 
-            bookmark_flag = !bookmark_flag;
-            post.setSaved(bookmark_flag);
-
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
 
             // region send save
             try {
-                JSONObject jsonObject = Post.getSavedUnsaved(post.getPostId(), login, bookmark_flag);
+                JSONObject jsonObject = Post.getSavedUnsaved(post.getPostId(), login, post.isSaved());
                 jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
                 new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSaveUnsavedPost();
             } catch (JSONException e) {
@@ -251,5 +215,38 @@ public class PostInDialog {
         send.setOnClickListener(v -> {
             // TODO: send
         });
+    }
+
+    @SuppressLint({"SetTextI18n", "UseCompatLoadingForDrawables"})
+    private void postSetStateLike(Post post) {
+        if (!post.isLiked()) {
+            post.setLiked(true);
+            post.setLikes(post.getLikes() + 1);
+            postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
+        } else {
+            post.setLiked(false);
+            post.setLikes(post.getLikes() - 1);
+            postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
+        }
+
+        TransitPost.postsToChangeFromOtherPage.forEach(postToFind -> {
+            if (postToFind.getPostId().equals(post.getPostId()))
+                postToFind.setLikes(post.getLikes());
+        });
+
+        amountLikes.setText(Integer.toString(post.getLikes()));
+
+        String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+
+        // region send unlike
+        try {
+            JSONObject jsonObject = Post.getLikedUnliked(post.getPostId(), login, post.isLiked());
+            jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+            // like unlike post
+            new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
+        } catch (JSONException e) {
+            Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
+        }
+        // endregion
     }
 }

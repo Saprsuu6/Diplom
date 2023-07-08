@@ -12,47 +12,38 @@
 
     <LinearLayout
         android:id="@+id/top"
-        android:padding="5dp"
+        android:padding="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/main_theme_top"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <include layout="@layout/languages_spinner" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/close_page"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/close" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_weight="5"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:text="@string/change_your_info_to_be_individual" />
 
-            <ImageView
-                android:id="@+id/close_page"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/validation_error"
-                android:src="@drawable/close" />
-
-            <TextView
-                android:id="@+id/title"
-                style="@style/Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="10dp"
-                android:layout_weight="5"
-                android:gravity="center"
-                android:text="@string/change_your_info_to_be_individual" />
-
-            <ImageView
-                android:id="@+id/done"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/validation_error"
-                android:src="@drawable/done" />
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/done"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/validation_error"
+            android:src="@drawable/done" />
 
     </LinearLayout>
 
@@ -85,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:autofillHints="Login"
                     android:inputType="text"
-                    tools:hint="@string/login_hint_username"
+                    android:hint="@string/login_hint_username"
                     tools:ignore="LabelFor" />
 
             </LinearLayout>
@@ -103,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:autofillHints="Login"
                     android:inputType="text"
-                    tools:hint="@string/login_hint_surname"
+                    android:hint="@string/login_hint_surname"
                     tools:ignore="LabelFor" />
 
             </LinearLayout>
@@ -141,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:autofillHints="Password"
                     android:inputType="date"
-                    tools:hint="@string/birthday_hint"
+                    android:hint="@string/birthday_hint"
                     tools:ignore="LabelFor" />
             </LinearLayout>
 
@@ -152,7 +143,7 @@
                 android:layout_height="wrap_content"
                 android:autofillHints="Login"
                 android:inputType="textMultiLine"
-                tools:hint="@string/login_hint_bio"
+                android:hint="@string/login_hint_bio"
                 tools:ignore="LabelFor" />
 
             <LinearLayout
@@ -179,7 +170,7 @@
                     android:layout_weight="1"
                     android:autofillHints="Login"
                     android:inputType="textEmailAddress"
-                    tools:hint="@string/login_hint_email"
+                    android:hint="@string/login_hint_email"
                     tools:ignore="LabelFor" />
 
                 <Button
@@ -187,7 +178,7 @@
                     style="@style/Authentication_LogIn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="@string/send_code" />
+                    android:text="@string/send_code" />
 
 
             </LinearLayout>
@@ -206,7 +197,7 @@
                     android:layout_weight="1"
                     android:autofillHints="Login"
                     android:inputType="textEmailAddress"
-                    tools:hint="@string/confirm_code"
+                    android:hint="@string/confirm_code"
                     tools:ignore="LabelFor" />
 
                 <Button
@@ -214,7 +205,7 @@
                     style="@style/Authentication_LogIn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="@string/confirm_code" />
+                    android:text="@string/confirm_code" />
 
             </LinearLayout>
 

@@ -3,8 +3,8 @@
     android:id="@+id/audio_controller"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/for_skeleton"
     android:visibility="gone"
+    android:background="@color/for_skeleton"
     android:orientation="vertical">
 
     <GridLayout
@@ -17,8 +17,7 @@
         <TextView
             android:id="@+id/time_line"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="01.30 /\ 02.00" />
+            android:layout_height="wrap_content" />
 
         <SeekBar
             android:id="@+id/seek_bar"

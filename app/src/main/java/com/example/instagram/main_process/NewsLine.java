@@ -3,10 +3,6 @@ package com.example.instagram.main_process;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -17,7 +13,6 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +34,6 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.UiVisibility;
@@ -83,9 +77,7 @@ public class NewsLine extends AppCompatActivity {
         }
     }
 
-    private Resources resources;
     private PagingAdapterPosts pagingView;
-    private Localisation localisation;
     private FindUser findUser;
     private Views views;
     static public Pair<Integer, Post> mapPost;
@@ -103,10 +95,7 @@ public class NewsLine extends AppCompatActivity {
         }
         // endregion
 
-        resources = getResources();
         views = new Views();
-        localisation = new Localisation(NewsLine.this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
         setListeners();
         setIntents();
@@ -152,8 +141,6 @@ public class NewsLine extends AppCompatActivity {
             }
         }
 
-        Localisation.setFirstLocale(views.languagesSpinner);
-
         if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
             pagingView.notifyAdapterToClearPosts();
             TransitPost.postsToDeleteFromOtherPage.clear();
@@ -165,8 +152,11 @@ public class NewsLine extends AppCompatActivity {
         }
 
         AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
-        ThemesBackgrounds.setThemeContent(resources, views.changeMainTheme, NewsLine.this);
+        ThemesBackgrounds.setThemeContent(getResources(), views.changeMainTheme, NewsLine.this);
         ThemesBackgrounds.loadBackground(NewsLine.this, views.newsLineLayout);
+
+        setStringResources(); // TODO set getResources();
+        DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -191,7 +181,7 @@ public class NewsLine extends AppCompatActivity {
                 try {
                     JSONObject jsonObject = Post.getJSONToDeletePost(NewsLine.mapPost.second.getPostId(), token);
                     // delete post
-                    new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearAll(), NewsLine.this, new Object[]{jsonObject}).deletePost();
+                    new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first), NewsLine.this, new Object[]{jsonObject}).deletePost();
                 } catch (JSONException e) {
                     Log.d("JSONException: (sendToDeletePost)", e.getMessage());
                 }
@@ -229,7 +219,7 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void chooseTheme() {
-        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, resources, NewsLine.this, views.newsLineLayout);
+        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, getResources(), NewsLine.this, views.newsLineLayout);
         permissionsDialog.setNegativeButton("Cancel", null);
         permissionsDialog.create().show();
     }
@@ -289,22 +279,6 @@ public class NewsLine extends AppCompatActivity {
             }
         });
 
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
         // initialize menu bottom
         BottomMenu.setListeners(NewsLine.this, new ImageView[]{views.searchUsers, views.addNewPost, views.notifications}, findUser);
 
@@ -331,7 +305,7 @@ public class NewsLine extends AppCompatActivity {
 
         // set night/day theme
         views.changeMainTheme.setOnClickListener(v -> {
-            ThemesBackgrounds.theme = ThemesBackgrounds.isNight(resources) ? Themes.DAY : Themes.NIGHT;
+            ThemesBackgrounds.theme = ThemesBackgrounds.isNight(getResources()) ? Themes.DAY : Themes.NIGHT;
             recreate();
         });
 
@@ -340,7 +314,6 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void setStringResources() {
-        views.toFindPost.setHint(getString(R.string.find_post));
         pagingView.notifyAllLibrary();
     }
 }

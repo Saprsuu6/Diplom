@@ -516,20 +516,20 @@ public class DoCallBack implements CallBack {
                             JSONObject object = new JSONObject(response.body());
 
                             // set liked
-                            params[2] = object.getBoolean("isLiked");
-                            ((ImageView) params[3]).setImageDrawable(context.getResources().getDrawable((Boolean) params[2] ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
-                            ((Post) params[5]).setLiked((Boolean) params[2]);
+                            boolean isLiked = object.getBoolean("isLiked");
+                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isLiked ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
+                            ((Post) params[4]).setLiked(isLiked);
 
                             // set amount likes
                             int likes = object.getInt("amountLikes");
-                            ((TextView) params[4]).setText(Integer.toString(likes));
-                            ((Post) params[5]).setLikes(likes);
+                            ((TextView) params[3]).setText(Integer.toString(likes));
+                            ((Post) params[4]).setLikes(likes);
+
+                            if (runnable != null) runnable.run();
                         } catch (JSONException e) {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
                         }
                     }
-
-
                 }
 
                 @Override
@@ -547,8 +547,6 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     Log.d("sendToSaveUnsavedPost: (onResponse)", response.body());
-
-
                 }
 
                 @Override
@@ -571,9 +569,9 @@ public class DoCallBack implements CallBack {
                             JSONObject object = new JSONObject(response.body());
 
                             // set saved
-                            params[2] = object.getBoolean("isSaved");
-                            ((ImageView) params[3]).setImageDrawable(context.getResources().getDrawable((Boolean) params[2] ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
-                            ((Post) params[4]).setSaved((Boolean) params[2]);
+                            boolean isSaved = object.getBoolean("isSaved");
+                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
+                            ((Post) params[3]).setSaved(isSaved);
                         } catch (JSONException e) {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
                         }
@@ -1069,7 +1067,7 @@ public class DoCallBack implements CallBack {
     }
 
     @Override
-    public void sendToGetCommentById() throws JSONException {
+    public void sendToGetCommentById() {
         if (params != null) {
             Services.sendToGetCommentById(new Callback<>() {
                 @Override
@@ -1080,7 +1078,7 @@ public class DoCallBack implements CallBack {
                         if (!body.equals("[]")) {
                             try {
                                 JSONObject jsonObject = new JSONObject(body);
-                                params[1] = new Comment(jsonObject);
+                                PaginationViewNotifications.publicComment = new Comment(jsonObject);
                                 if (runnable != null) runnable.run();
                             } catch (JSONException | ParseException e) {
                                 throw new RuntimeException(e);

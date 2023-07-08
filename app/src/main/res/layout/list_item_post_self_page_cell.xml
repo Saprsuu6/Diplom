@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:alignContent="space_around"
+    android:padding="10dp"
+    app:justifyContent="space_between"
     app:flexDirection="row"
-    app:alignItems="stretch"
     app:flexWrap="wrap">
 
 </com.google.android.flexbox.FlexboxLayout>

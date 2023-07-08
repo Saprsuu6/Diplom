@@ -5,13 +5,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -49,6 +49,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
     private final PagingAdapterNotifications pagingView;
     private final PostInDialog postInDialog = new PostInDialog();
     public static Post publicPost;
+    public static Comment publicComment;
 
     public NotificationsLibrary getNotificationsLibrary() {
         return notificationsLibrary;
@@ -92,41 +93,59 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
     }
 
     private void setResources(@NonNull ViewHolderNotification holder, Notification data) throws JSONException, ParseException {
-        holder.messagePre.setText(context.getResources().getString(R.string.user_notification));
-        holder.messageUser.setText(data.getUser());
+        String message = context.getResources().getString(R.string.user_notification);
+        message += " " + data.getUser();
 
         switch (data.getAction()) {
             case "subscribe":
-                holder.messagePost.setText(context.getResources().getString(R.string.subscribe_notification));
+                message += " " + context.getResources().getString(R.string.subscribe_notification);
                 break;
             case "unsubscribe":
-                holder.messagePost.setText(context.getResources().getString(R.string.unsubscribe_notification));
+                message += " " + context.getResources().getString(R.string.unsubscribe_notification);
                 break;
             case "like":
-                holder.messagePost.setText(context.getResources().getString(R.string.like_notification));
+                message += " " + context.getResources().getString(R.string.like_notification);
                 setMediaContent(holder, data);
                 break;
             case "save":
-                holder.messagePost.setText(context.getResources().getString(R.string.save_notification));
+                message += " " + context.getResources().getString(R.string.save_notification);
                 setMediaContent(holder, data);
                 break;
             case "tage":
-                holder.messagePost.setText(context.getResources().getString(R.string.tag_notification));
+                message += " " + context.getResources().getString(R.string.tag_notification);
                 setMediaContent(holder, data);
                 break;
             case "comment":
-                holder.messagePost.setText(context.getResources().getString(R.string.comment_notification));
+                holder.comment.setVisibility(View.VISIBLE);
+                message += " " + context.getResources().getString(R.string.comment_notification);
+                setCommentContent(holder, data);
                 setMediaContent(holder, data);
                 break;
             case "response":
-                holder.messagePost.setText(context.getResources().getString(R.string.reply_notification));
+                holder.comment.setVisibility(View.VISIBLE);
+                message += " " + context.getResources().getString(R.string.reply_notification);
                 setCommentContent(holder, data);
+                setMediaContent(holder, data);
                 break;
         }
+
+        holder.message.setText(message);
+        holder.comment.setEllipsize(TextUtils.TruncateAt.END);
+        holder.comment.setOnClickListener(v -> {
+            holder.comment.setMaxLines(holder.comment.getMaxLines() == 1 ? 100 : 1);
+        });
+
+        holder.message.setOnClickListener(v -> {
+            try {
+                new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{data.getAuthor()}).sendToGetCurrentUser();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void setMediaContent(@NonNull ViewHolderNotification holder, Notification data) throws JSONException {
+    private void setMediaContent(@NonNull ViewHolderNotification holder, Notification data) {
         if (data.getPostId() != null) {
             new DoCallBack().setValues(() -> {
                 String mime = PaginationViewNotifications.publicPost.getMimeType();
@@ -138,33 +157,42 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                     holder.image.setVisibility(View.VISIBLE);
                     Glide.with(context).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.image);
 
-                    try {
-                        holder.image.setOnClickListener(postInDialog(PaginationViewNotifications.publicPost));
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                    holder.image.setOnClickListener(v -> {
+                        try {
+                            postInDialog(PaginationViewNotifications.publicPost);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else if (mime.contains(context.getString(R.string.mime_video))) {
                     // set video
-                    holder.postVideo.setVisibility(View.VISIBLE);
+                    holder.video.setVisibility(View.VISIBLE);
                     Uri videoUri = Uri.parse(mediaPath);
                     holder.video.setVideoURI(videoUri);
+                    holder.video.setOnPreparedListener(mp -> mp.setLooping(true));
+                    holder.video.start();
+                    holder.video.findFocus();
 
-                    try {
-                        holder.postVideo.setOnClickListener(postInDialog(PaginationViewNotifications.publicPost));
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                    holder.video.setOnClickListener(v -> {
+                        try {
+                            postInDialog(PaginationViewNotifications.publicPost);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else if (mime.contains(context.getString(R.string.mime_audio))) {
                     // set audio
                     holder.audio.setVisibility(View.VISIBLE);
                     holder.audio.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     holder.audio.setImageDrawable(context.getDrawable(R.drawable.play_cell));
 
-                    try {
-                        holder.audio.setOnClickListener(postInDialog(PaginationViewNotifications.publicPost));
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                    holder.audio.setOnClickListener(v -> {
+                        try {
+                            postInDialog(PaginationViewNotifications.publicPost);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 }
             }, context, new Object[]{data.getPostId()}).sendToGetPostById();
         }
@@ -172,16 +200,15 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
 
     private void setCommentContent(@NonNull ViewHolderNotification holder, Notification data) throws JSONException {
         if (data.getCommentId() != null) {
-            Comment comment = new Comment();
             new DoCallBack().setValues(() -> {
-                holder.comment.setText(comment.getContent());
-                // TODO move to comments on this comment
-            }, context, new Object[]{data.getCommentId(), comment}).sendToGetCommentById();
+                holder.comment.setVisibility(View.VISIBLE);
+                holder.comment.setText(PaginationViewNotifications.publicComment.getContent());
+            }, context, new Object[]{data.getCommentId()}).sendToGetCommentById();
         }
     }
 
-    private View.OnClickListener postInDialog(Post post) throws JSONException {
-        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post, pagingView);
+    private void postInDialog(Post post) throws JSONException {
+        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post);
         String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
         String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
 
@@ -194,10 +221,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                         try {
                             JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
                             // delete post
-                            new DoCallBack().setValues(() -> {
-                                UserPage.userPage.setAmountPosts(UserPage.userPage.getAmountPosts() - 1);
-                                pagingView.notifyAdapterToClearAll();
-                            }, context, new Object[]{jsonObject}).deletePost();
+                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).deletePost();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -207,7 +231,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
             }
         }
 
-        return v -> builder.show();
+        builder.show();
     }
 
     @Override
@@ -217,50 +241,24 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
 
     public class ViewHolderNotification extends RecyclerView.ViewHolder {
         private final LinearLayout notificationLayout;
-        private final RelativeLayout postVideo;
         private final VideoView video;
         private final ImageView image;
         private final ImageView audio;
         private final ImageView userAvatar;
-        private final TextView messagePre;
+        private final TextView message;
         private final TextView comment;
-        private final TextView messageUser;
-        private final TextView messagePost;
         private final TextView date;
 
         public ViewHolderNotification(@NonNull View itemView) {
             super(itemView);
             notificationLayout = itemView.findViewById(R.id.notification_layout);
             userAvatar = itemView.findViewById(R.id.ava_view);
-            messagePre = itemView.findViewById(R.id.message_pre);
-            messageUser = itemView.findViewById(R.id.message_user);
-            messagePost = itemView.findViewById(R.id.message_post);
+            message = itemView.findViewById(R.id.message);
             comment = itemView.findViewById(R.id.comment);
             date = itemView.findViewById(R.id.date);
-            postVideo = itemView.findViewById(R.id.video_layout);
             video = itemView.findViewById(R.id.video_content);
             image = itemView.findViewById(R.id.image_content);
             audio = itemView.findViewById(R.id.audio_content);
-
-            setListeners();
-        }
-
-        private void setListeners() {
-            messageUser.setOnClickListener(v -> {
-                try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{messageUser.getText().toString()}).sendToGetCurrentUser();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            userAvatar.setOnClickListener(v -> {
-                try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{messageUser.getText().toString()}).sendToGetCurrentUser();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            });
         }
     }
 }

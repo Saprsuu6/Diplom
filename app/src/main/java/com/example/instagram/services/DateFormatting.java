@@ -14,6 +14,7 @@ public class DateFormatting {
     public static void setSimpleDateFormat(String locale) {
         switch (locale) {
             case "EN":
+            case "US":
                 simpleDateFormatWithoutTime = new SimpleDateFormat("dd MMMM yyyy");
                 simpleDateFormatWithTime = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
                 break;

@@ -3,6 +3,7 @@ package com.example.instagram.services;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.Gravity;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
@@ -13,6 +14,7 @@ public class Permissions {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setPadding(40, 0, 40, 0);
+        linearLayout.setGravity(Gravity.CENTER);
 
         // TODO add phone book
         CheckBox mediaCheckBox = mediaPermission(context, resources);
@@ -29,6 +31,7 @@ public class Permissions {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setPadding(40, 0, 40, 0);
+        linearLayout.setGravity(Gravity.CENTER);
 
         CheckBox mediaCheckBox = mediaPermission(context, resources);
 

@@ -4,7 +4,6 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.Nullable;
 
-import com.example.instagram.services.Cache;
 import com.example.instagram.services.DateFormatting;
 
 import org.json.JSONException;
@@ -36,14 +35,6 @@ public class Post {
     }
 
     public void setSaved(Boolean saved) {
-        isSaved = saved;
-    }
-
-    public void setLiked(boolean liked) {
-        isLiked = liked;
-    }
-
-    public void setSaved(boolean saved) {
         isSaved = saved;
     }
 
@@ -88,10 +79,6 @@ public class Post {
 
     public String getTaggedPeople() {
         return taggedPeople;
-    }
-
-    public Boolean getLiked() {
-        return isLiked;
     }
 
     public Boolean getSaved() {

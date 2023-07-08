@@ -1,8 +1,6 @@
 package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -10,12 +8,9 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,10 +23,8 @@ import com.example.instagram.DAOs.Comment;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
-import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Localisation;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterComments;
@@ -39,8 +32,6 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Locale;
 
 public class Comments extends AppCompatActivity {
     private class Views {
@@ -51,8 +42,6 @@ public class Comments extends AppCompatActivity {
         private final ImageView send;
         private final ImageView closeReply;
         private final EditText message;
-        private final TextView title;
-        private final Spinner languagesSpinner;
         private final SwipeRefreshLayout swipeRefreshLayout;
 
         public Views() {
@@ -63,8 +52,6 @@ public class Comments extends AppCompatActivity {
             authorAva = findViewById(R.id.author_ava);
             send = findViewById(R.id.send);
             message = findViewById(R.id.comment_add);
-            title = findViewById(R.id.comment_title);
-            languagesSpinner = findViewById(R.id.languages);
             swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         }
     }
@@ -76,8 +63,6 @@ public class Comments extends AppCompatActivity {
     }
 
     private PagingAdapterComments pagingView;
-    private Resources resources;
-    private Localisation localisation;
     static public Pair<Integer, Comment> mapComment;
     static public Comment toReply;
     private Views views;
@@ -88,9 +73,6 @@ public class Comments extends AppCompatActivity {
         setContentView(R.layout.activity_comments);
 
         views = new Views();
-        resources = getResources();
-        localisation = new Localisation(this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
 
         setListeners();
 
@@ -117,7 +99,6 @@ public class Comments extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(views.languagesSpinner);
         ThemesBackgrounds.loadBackground(this, views.commentsLayout);
     }
 
@@ -175,22 +156,6 @@ public class Comments extends AppCompatActivity {
 
     private void setListeners() {
         views.swipeRefreshLayout.setOnRefreshListener(this::sendNewRequest);
-
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
 
         views.send.setOnClickListener(v -> {
             String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
@@ -263,11 +228,5 @@ public class Comments extends AppCompatActivity {
         });
         // back
         views.arrowBack.setOnClickListener(v -> finish());
-    }
-
-    private void setStringResources() {
-        views.title.setText(resources.getString(R.string.comments_title));
-        views.message.setHint(resources.getString(R.string.add_comment));
-        pagingView.notifyAllLibrary();
     }
 }

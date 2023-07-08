@@ -85,6 +85,9 @@
     <string name="confirmed">Підтвержен</string>
     <string name="notifications_title">Повідомлення</string>
     <string name="not_confirmed">Не підтвержен</string>
+    <string name="size_restriction">Розмір файлу має бути менше 60 Мб</string>
+    <string name="settings">Налаштування</string>
+    <string name="languages_title">Оберіть мову:</string>
 
     <!--    notification-->
     <string name="user_notification">Користувач</string>

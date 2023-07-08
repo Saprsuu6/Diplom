@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -73,6 +72,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
     @Override
     public void onBindViewHolder(@NonNull PaginationViewPosts.ViewHolderPosts holder, int position) {
         Post data = postsLibrary.getDataArrayList().get(position);
+        holder.post = data;
         String mime = data.getMimeType();
         String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
 
@@ -84,13 +84,8 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         } else if (mime.contains(context.getString(R.string.mime_video))) {
             // set video
             Uri videoUri = Uri.parse(mediaPath);
-
-            MediaController mediaController = new MediaController(context);
-
             holder.contentVideo.setVideoURI(videoUri);
-            mediaController.setAnchorView(holder.contentVideo);
-            holder.contentVideo.setMediaController(mediaController);
-
+            holder.contentVideo.setOnPreparedListener(mp -> mp.setLooping(true));
             holder.contentVideo.start();
             holder.contentVideo.requestFocus();
             holder.contentVideo.setVisibility(View.VISIBLE);
@@ -113,12 +108,22 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         if (postsLibrary.getDataArrayList().get(position).isLiked() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
             try {
-                new DoCallBack().setValues(null, context, new Object[]{data.getPostId(), login, holder.like_flag, holder.like, holder.amountLikes, data}).sendToGetIsLikedForDialogPost();
+                new DoCallBack().setValues(() -> {
+                    String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
+                    try {
+                        JSONObject jsonObjectDelete = Post.getJSONToDeletePost(data.getPostId(), token);
+                        JSONObject jsonObjectLU = Post.getJSONToLikeUnlikePost(data.getPostId(), data.getAuthor(), holder.post.isLiked());
+                        jsonObjectLU.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+                        // set swipe or double touch
+                        holder.mediaContentLayout.setOnTouchListener(new OnSwipeListener(context, holder.mediaContentLayout, new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(position), context, new Object[]{jsonObjectDelete}), new DoCallBack().setValues(holder::likeUnlike, context, new Object[]{jsonObjectLU}), data.getAuthor()));
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                }, context, new Object[]{data.getPostId(), login, holder.like, holder.amountLikes, holder.post}).sendToGetIsLikedForDialogPost();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            holder.like_flag = postsLibrary.getDataArrayList().get(position).isLiked();
             holder.like.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
             holder.amountLikes.setText(Integer.toString(data.getLikes()));
         }
@@ -126,36 +131,26 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         if (postsLibrary.getDataArrayList().get(position).isSaved() == null) {
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
             try {
-                new DoCallBack().setValues(null, context, new Object[]{data.getPostId(), login, holder.bookmark_flag, holder.bookmark, data}).sendToGetIsSaved();
+                new DoCallBack().setValues(null, context, new Object[]{data.getPostId(), login, holder.bookmark, holder.post}).sendToGetIsSaved();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            holder.bookmark_flag = postsLibrary.getDataArrayList().get(position).isSaved();
             holder.bookmark.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
         }
         // endregion
         // region set other text info
         holder.login.setText(data.getAuthor());
-        holder.taggedPeople.setText(context.getResources().getString(R.string.tagged_people));
-        holder.amountLikesTitle.setText(R.string.amount_likes_title);
         holder.authorNickname.setText(data.getAuthor());
         holder.description.setText(data.getDescription());
+
+        holder.description.setOnClickListener(v -> {
+            holder.description.setMaxLines(holder.description.getMaxLines() == 1 ? 100 : 1);
+        });
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
         holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
         // endregion
-
-        String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
-        try {
-            JSONObject jsonObjectDelete = Post.getJSONToDeletePost(data.getPostId(), token);
-            JSONObject jsonObjectLU = Post.getJSONToLikeUnlikePost(data.getPostId(), data.getAuthor(), holder.like_flag);
-            jsonObjectLU.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
-            // set swipe or double touch
-            holder.media_content_layout.setOnTouchListener(new OnSwipeListener(context, holder.media_content_layout, new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObjectDelete}), new DoCallBack().setValues(holder::likeUnlike, context, new Object[]{jsonObjectLU}), data.getAuthor()));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
         holder.postLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
     }
 
@@ -168,7 +163,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final LinearLayout postLayout;
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
-        private final RelativeLayout media_content_layout;
+        private final RelativeLayout mediaContentLayout;
         private final TextView taggedPeople;
         private final TextView login;
         private final ImageView contentImg;
@@ -177,7 +172,6 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final ImageView comment;
         private final ImageView send;
         private final ImageView postContext;
-        private final TextView amountLikesTitle;
         private final ImageView bookmark;
         private final TextView amountLikes;
         private final TextView authorNickname;
@@ -191,14 +185,13 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final ImageView playStop;
         private final ImageView playPrev;
         private final ImageView playNext;
-        boolean like_flag = false;
-        boolean bookmark_flag = false;
+        private Post post;
 
         public ViewHolderPosts(@NonNull View itemView) {
             super(itemView);
 
             audioControllerLayout = itemView.findViewById(R.id.audio_controller);
-            media_content_layout = itemView.findViewById(R.id.media_content_layout);
+            mediaContentLayout = itemView.findViewById(R.id.media_content_layout);
             timeLine = itemView.findViewById(R.id.time_line);
             seekBar = itemView.findViewById(R.id.seek_bar);
             playStop = itemView.findViewById(R.id.play_stop);
@@ -221,7 +214,6 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             send = itemView.findViewById(R.id.send_post);
             bookmark = itemView.findViewById(R.id.bookmark);
 
-            amountLikesTitle = itemView.findViewById(R.id.amount_likes_title);
             amountLikes = itemView.findViewById(R.id.amount_likes);
             authorNickname = itemView.findViewById(R.id.author_nickname);
             description = itemView.findViewById(R.id.description);
@@ -306,24 +298,25 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         @SuppressLint({"NotifyDataSetChanged", "UseCompatLoadingForDrawables"})
         public void likeUnlike() {
             int position = getAdapterPosition();
-            if (!like_flag) {
+            if (!post.isLiked()) {
+                post.setLiked(true);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() + 1);
                 like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
             } else {
+                post.setLiked(false);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() - 1);
                 like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
             }
 
-            like_flag = !like_flag;
-            postsLibrary.getDataArrayList().get(position).setLiked(like_flag);
-            notifyDataSetChanged();
+            postsLibrary.getDataArrayList().get(position).setLiked(post.isLiked());
+            notifyItemChanged(position);
 
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
 
             // region send unlike
             try {
                 String postId = postsLibrary.getDataArrayList().get(position).getPostId();
-                JSONObject jsonObject = Post.getJSONToLikeUnlikePost(postId, login, like_flag);
+                JSONObject jsonObject = Post.getJSONToLikeUnlikePost(postId, login, post.isLiked());
                 jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
                 // like unlike post
                 new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
@@ -336,22 +329,23 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         @SuppressLint({"UseCompatLoadingForDrawables", "NotifyDataSetChanged"})
         public void saveUnsaved() {
             int position = getAdapterPosition();
-            if (!bookmark_flag) {
+            if (!post.isSaved()) {
+                post.setSaved(true);
                 bookmark.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
             } else {
+                post.setSaved(false);
                 bookmark.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark, context.getTheme()));
             }
 
-            bookmark_flag = !bookmark_flag;
-            postsLibrary.getDataArrayList().get(position).setSaved(bookmark_flag);
-            notifyDataSetChanged();
+            postsLibrary.getDataArrayList().get(position).setSaved(post.isSaved());
+            notifyItemChanged(position);
 
             String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
             String postId = postsLibrary.getDataArrayList().get(position).getPostId();
 
             // region send save
             try {
-                JSONObject jsonObject = Post.getJSONToSaveUnsavedPost(postId, login, bookmark_flag);
+                JSONObject jsonObject = Post.getJSONToSaveUnsavedPost(postId, login, post.isSaved());
                 jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
                 new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSaveUnsavedPost();
             } catch (JSONException e) {

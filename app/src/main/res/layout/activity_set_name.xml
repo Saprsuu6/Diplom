@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/set_name"
     android:layout_width="match_parent"
@@ -8,78 +7,70 @@
     android:background="@drawable/main_theme"
     android:gravity="top|center"
     android:orientation="vertical"
+    android:paddingHorizontal="50dp"
     android:theme="@style/Theme.Instagram.System"
     tools:context=".authentication.after_reg.SetName">
 
-    <include layout="@layout/languages_spinner"/>
-
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="30dp"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginVertical="20dp"
+        android:layout_weight="1"
+        android:gravity="center">
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/icon"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginVertical="20dp"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/label"
-                android:src="@drawable/id_card_name" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/let_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                tools:text="@string/let_name" />
-
-            <TextView
-                android:id="@+id/let_name_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:gravity="center"
-                android:textSize="18sp"
-                tools:text="@string/let_name_info" />
-
-            <EditText
-                android:id="@+id/info_for_name"
-                style="@style/Authentication_EditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="Login"
-                android:inputType="text"
-                tools:hint="@string/login_hint_username"
-                tools:ignore="LabelFor" />
-
-            <Button
-                android:id="@+id/let_name_next"
-                style="@style/Authentication_LogIn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="@string/next_step" />
-
-        </LinearLayout>
-
-        <include layout="@layout/footer_have_account" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/label"
+            android:src="@drawable/id_card_name" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/let_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/let_name" />
+
+        <TextView
+            android:id="@+id/let_name_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:text="@string/let_name_info" />
+
+        <EditText
+            android:id="@+id/info_for_name"
+            style="@style/Authentication_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="Login"
+            android:inputType="text"
+            android:hint="@string/login_hint_username"
+            tools:ignore="LabelFor" />
+
+        <Button
+            android:id="@+id/let_name_next"
+            style="@style/Authentication_LogIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/next_step" />
+
+    </LinearLayout>
+
+    <include layout="@layout/footer_have_account" />
+
 
 </LinearLayout>

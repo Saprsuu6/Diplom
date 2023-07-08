@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
+    android:layout_gravity="bottom"
     android:layout_marginBottom="10dp"
     android:orientation="horizontal"
     tools:ignore="MissingConstraints">
@@ -14,13 +15,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="17sp"
-        tools:text="@string/have_an_acc" />
+        android:text="@string/have_an_acc" />
 
     <TextView
         android:id="@+id/link_log_in"
         style="@style/Authentication_Link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="@string/log_in" />
+        android:text="@string/log_in" />
 
 </LinearLayout>

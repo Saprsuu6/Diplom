@@ -45,11 +45,6 @@ public class PagingAdapterNotifications extends PagingAdapter {
 
     // region notifiers
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAllLibrary() {
-        paginationAdapter.notifyDataSetChanged();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearAll() {
         paginationAdapter.getNotificationsLibrary().getNotifications().clear();
         paginationAdapter.notifyDataSetChanged();

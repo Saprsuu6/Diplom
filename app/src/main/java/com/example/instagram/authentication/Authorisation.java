@@ -3,19 +3,14 @@ package com.example.instagram.authentication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +26,6 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Localisation;
 import com.example.instagram.services.Permissions;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
@@ -54,7 +48,6 @@ public class Authorisation extends AppCompatActivity {
         public final ImageView warning;
         public final Button logIn;
         public final Button showPassword;
-        public final Spinner languagesSpinner;
 
         public Views() {
             fieldForLogin = findViewById(R.id.auth_login);
@@ -65,14 +58,11 @@ public class Authorisation extends AppCompatActivity {
             singInLink = findViewById(R.id.link_log_in);
             rememberMe = findViewById(R.id.remember_flag);
             logIn = findViewById(R.id.auth_log_in);
-            languagesSpinner = findViewById(R.id.languages);
             showPassword = findViewById(R.id.auth_eye);
             warning = findViewById(R.id.validation_error);
         }
     }
-
-    private Resources resources;
-    private Localisation localisation;
+    
     private Views views;
     private boolean passwordEyeState = false;
 
@@ -82,10 +72,7 @@ public class Authorisation extends AppCompatActivity {
         setContentView(R.layout.activity_authorisation);
 
         views = new Views();
-        resources = getResources();
-        localisation = new Localisation(this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
-
+        
         // TODO delete someday
         views.fieldForLogin.setText("Andry");
         views.fieldForPassword.setText("MyNewPass123!");
@@ -137,41 +124,25 @@ public class Authorisation extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Localisation.setFirstLocale(views.languagesSpinner);
+        DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
     }
 
     private void setPermissions() {
-        AlertDialog.Builder permissionsDialog = Permissions.getPermissionDialog(this, resources);
+        AlertDialog.Builder permissionsDialog = Permissions.getPermissionDialog(this, getResources());
         permissionsDialog.setNegativeButton("Cancel", (dialog1, which) -> finish());
         permissionsDialog.create().show();
     }
 
     private void setListeners() {
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
         views.showPassword.setOnClickListener(v -> {
             passwordEyeState = !passwordEyeState;
 
             if (passwordEyeState) {
                 views.fieldForPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showPassword.setText(resources.getString(R.string.hide_password));
+                views.showPassword.setText(getResources().getString(R.string.hide_password));
             } else {
                 views.fieldForPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showPassword.setText(resources.getString(R.string.show_password));
+                views.showPassword.setText(getResources().getString(R.string.show_password));
             }
         });
 
@@ -179,15 +150,15 @@ public class Authorisation extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
 
                 try {
-                    Validations.validateUserName(text, resources);
+                    Validations.validateUserName(text, getResources());
                     setValidationError(false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
                 }
             }
         });
@@ -196,15 +167,15 @@ public class Authorisation extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(resources.getColor(R.color.white, getTheme()));
+                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
 
                 try {
-                    Validations.validatePassword(text, resources);
+                    Validations.validatePassword(text, getResources());
                     setValidationError(false, "");
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(resources.getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
+                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
                 }
             }
         });
@@ -213,18 +184,18 @@ public class Authorisation extends AppCompatActivity {
         views.logIn.setOnClickListener(v -> {
             if (views.fieldForLogin.length() != 0 && views.fieldForPassword.length() != 0) {
                 try {
-                    Validations.validateUserName(views.fieldForLogin.getText().toString(), resources);
-                    Validations.validatePassword(views.fieldForPassword.getText().toString(), resources);
+                    Validations.validateUserName(views.fieldForLogin.getText().toString(), getResources());
+                    Validations.validatePassword(views.fieldForPassword.getText().toString(), getResources());
                     setValidationError(false, "");
 
                     if (views.rememberMe.isChecked()) {
                         Cache.saveSP(this, CacheScopes.REMEMBER_ME.toString(), views.rememberMe.isChecked());
                     }
 
+                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
                     JSONObject jsonObject = User.getJSONToCheck(views.fieldForLogin.getText().toString(), views.fieldForPassword.getText().toString());
 
                     new DoCallBack().setValues(() -> {
-                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
                         Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
 
                         startActivity(Intents.getNewsList());
@@ -234,7 +205,7 @@ public class Authorisation extends AppCompatActivity {
                     setValidationError(true, exception.getMessage());
                 }
             } else {
-                Toast.makeText(this, resources.getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getResources().getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -251,7 +222,7 @@ public class Authorisation extends AppCompatActivity {
 
                 startActivity(Intents.getForgotPassword());
             } else {
-                Toast.makeText(getApplicationContext(), resources.getString(R.string.auth_attempt), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.auth_attempt), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -268,16 +239,5 @@ public class Authorisation extends AppCompatActivity {
         }
 
         TooltipCompat.setTooltipText(views.warning, message);
-    }
-
-    private void setStringResources() {
-        views.fieldForLogin.setHint(resources.getString(R.string.login_hint_username));
-        views.fieldForPassword.setHint(resources.getString(R.string.password_hint));
-        views.showPassword.setText(resources.getString(R.string.show_password));
-        views.logIn.setText(resources.getString(R.string.log_in));
-        views.linkForgotPassword.setText(resources.getString(R.string.password_forgot));
-        views.dontHaveAnAccount.setText(resources.getString(R.string.do_not_have_an_acc));
-        views.singInLink.setText(resources.getString(R.string.sing_in));
-        views.gmailName.setText(resources.getString(R.string.gmail));
     }
 }

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,31 +79,41 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                 View content = null;
                 String mime = data.getMimeType();
 
+                LinearLayout layout = new LinearLayout(context);
+                CardView cardView = new CardView(context);
+
                 // region set media content
                 if (mime.contains(context.getString(R.string.mime_image))) {
                     //set image
                     content = setImage(data);
+                    cardView.setLayoutParams(holder.cellParams);
                 } else if (mime.contains(context.getString(R.string.mime_video))) {
                     // set image
                     content = setVideo(data);
+                    layout.setLayoutParams(holder.cellParams);
+                    layout.setGravity(Gravity.CENTER);
+                    cardView.setLayoutParams(holder.mediaParams);
                 } else if (mime.contains(context.getString(R.string.mime_audio))) {
                     // set audio
                     content = setImageForAudio();
+                    cardView.setLayoutParams(holder.cellParams);
                 }
                 // endregion
 
                 if (content != null) {
-                    CardView cardView = new CardView(context);
                     cardView.addView(content);
-                    cardView.setLayoutParams(holder.mediaParams);
                     cardView.setRadius(50);
-                    holder.flexboxLayout.addView(cardView);
 
-                    try {
-                        content.setOnClickListener(postInDialog(data));
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                    layout.addView(cardView);
+                    holder.flexboxLayout.addView(layout);
+
+                    content.setOnClickListener(v -> {
+                        try {
+                            postInDialog(data);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 }
             } else {
                 break;
@@ -138,13 +149,14 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         video.setVideoURI(videoUri);
 
         video.start();
+        video.setOnPreparedListener(mp -> mp.setLooping(true));
         video.requestFocus();
 
         return video;
     }
 
-    private View.OnClickListener postInDialog(Post post) throws JSONException {
-        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post, pagingView);
+    private void postInDialog(Post post) throws JSONException {
+        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post);
         String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
         String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
 
@@ -168,7 +180,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
             });
         }
 
-        return v -> builder.show();
+        builder.show();
     }
 
     @Override
@@ -179,13 +191,15 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
     public class ViewHolderPostsCells extends RecyclerView.ViewHolder {
         private final FlexboxLayout flexboxLayout;
         private final LinearLayout.LayoutParams mediaParams;
+        private final LinearLayout.LayoutParams cellParams;
 
         public ViewHolderPostsCells(@NonNull View itemView) {
             super(itemView);
 
             flexboxLayout = itemView.findViewById(R.id.layout);
-            mediaParams = new LinearLayout.LayoutParams(size.x / 3, size.x / 3);
-            mediaParams.setMargins(5, 5, 5, 5);
+            mediaParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cellParams = new LinearLayout.LayoutParams(size.x / 4, size.x / 4);
+            cellParams.setMargins(20, 20, 20, 20);
         }
     }
 }

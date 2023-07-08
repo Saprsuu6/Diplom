@@ -2,15 +2,12 @@ package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -40,10 +38,9 @@ import com.google.android.flexbox.FlexboxLayout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Locale;
-
 public class UserPage extends AppCompatActivity {
     private class Views {
+        public final SwipeRefreshLayout swipeRefreshLayout;
         public final FlexboxLayout flexboxForCellsLayout;
         public final LinearLayout selfPageLayout;
         public final LinearLayout followingsLayout;
@@ -71,6 +68,7 @@ public class UserPage extends AppCompatActivity {
         public final Button editProfile;
 
         public Views() {
+            swipeRefreshLayout = findViewById(R.id.swipe_refresh);
             flexboxForCellsLayout = findViewById(R.id.layout);
             followingsLayout = findViewById(R.id.followings_layout);
             followersLayout = findViewById(R.id.followers_layout);
@@ -99,9 +97,8 @@ public class UserPage extends AppCompatActivity {
         }
     }
 
+    private PagingAdapterPostsCells pagingView;
     public static User userPage;
-    private Resources resources;
-    private Localisation localisation;
     private FindUser findUser;
     private Views views;
 
@@ -117,11 +114,8 @@ public class UserPage extends AppCompatActivity {
             System.out.println(e.getMessage());
         }
         // endregion
-
-        resources = getResources();
+        
         views = new Views();
-        localisation = new Localisation(this);
-        views.languagesSpinner.setAdapter(localisation.getAdapter());
         String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
         views.editProfile.setVisibility(login.equals(userPage.getLogin()) ? View.VISIBLE : View.GONE);
 
@@ -131,7 +125,7 @@ public class UserPage extends AppCompatActivity {
         UiVisibility.setUiVisibility(this);
 
         try {
-            new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -170,9 +164,10 @@ public class UserPage extends AppCompatActivity {
 
         if (views != null) {
             setInfo();
-            Localisation.setFirstLocale(views.languagesSpinner);
             ThemesBackgrounds.loadBackground(this, views.selfPageLayout);
         }
+
+        setStringResources();
     }
 
     private void setIntents() {
@@ -221,6 +216,9 @@ public class UserPage extends AppCompatActivity {
                 Cache.deleteAppSP(this);
                 finishAffinity();
                 break;
+            case R.id.languages_context:
+                Localisation.getLanguagesMenu(UserPage.this).show();
+                return true;
             case R.id.complain:
                 System.out.println("complain"); // TODO: favorites
                 return true;
@@ -253,30 +251,30 @@ public class UserPage extends AppCompatActivity {
         views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
         views.isEmailConfirmed.setTextColor(UserPage.userPage.isEmailConfirmed() ? getColor(R.color.success) : getColor(R.color.error));
 
-        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
+        views.birthday.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
 
         if (UserPage.userPage.getLogin().equals(Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()))) {
             views.subscribe.setVisibility(View.GONE);
         }
     }
 
+    private void showAgain() throws JSONException {
+        if (pagingView != null) {
+            pagingView.notifyAdapterToClearAll();
+        } else {
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, UserPage.this);
+        }
+        views.swipeRefreshLayout.setRefreshing(false);
+    }
+
     private void setListeners() {
-        AdapterView.OnItemSelectedListener itemLocaliseSelectedListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Configuration configuration = Localisation.setLocalize(parent, localisation, position);
-                getBaseContext().getResources().updateConfiguration(configuration, null);
-                setStringResources();
-
-                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+        views.swipeRefreshLayout.setOnRefreshListener(() -> {
+            try {
+                showAgain();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        views.languagesSpinner.setOnItemSelectedListener(itemLocaliseSelectedListener);
-
+        });
 
         views.followersLayout.setOnClickListener(v -> {
             Cache.saveSP(this, CacheScopes.SELF_PAGE_USER_LOGIN.toString(), UserPage.userPage.getLogin()); // TODO delete after usage
@@ -330,12 +328,10 @@ public class UserPage extends AppCompatActivity {
         // self page
         views.selfPage.setOnClickListener(v -> (findViewById(R.id.scroll_view)).scrollTo(0, 0));
     }
-
-    // region Localisation
+    
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        views.birthday.setText(resources.getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
+        views.birthday.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
         views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
     }
-    // endregion
 }
