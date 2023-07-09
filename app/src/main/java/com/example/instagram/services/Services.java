@@ -41,7 +41,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://3ee8-2a09-bac5-5978-52d-00-84-6c.ngrok-free.app/Clickshot/";
+    public final static String BASE_URL = "https://b307-2a09-bac1-7500-18-00-84-76.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {
@@ -192,8 +192,6 @@ public class Services {
         Call<String> call = mainInterface.STRING_CALL(from, amount, login);
         call.enqueue(callback);
     }
-
-    // TODO callbacks for that
 
     public static void sendToGetCurrentUser(Callback<String> callback, String login) {
         SendToGetCurrentUser mainInterface = retrofit.create(SendToGetCurrentUser.class);

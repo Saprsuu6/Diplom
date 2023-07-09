@@ -175,7 +175,7 @@
 
                 <Button
                     android:id="@+id/send_new_email"
-                    style="@style/Authentication_LogIn"
+                    style="@style/Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/send_code" />
@@ -202,7 +202,7 @@
 
                 <Button
                     android:id="@+id/confirm_code_button"
-                    style="@style/Authentication_LogIn"
+                    style="@style/Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/confirm_code" />

@@ -248,4 +248,13 @@
     <string name="incorrect_token_2">Incorrect token</string>
     <string name="empty_3">Email can not be empty</string>
     <string name="match_4">Email can not match previous one</string>
+
+    <string name="sort_by_date_from">From (required)</string>
+    <string name="sort_by_date_to">To (required)</string>
+
+    <string-array name="sort">
+        <item>Author</item>
+        <item>Description</item>
+        <item>Date of add</item>
+    </string-array>
 </resources>

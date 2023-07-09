@@ -3,11 +3,13 @@ package com.example.instagram.main_process;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
@@ -29,11 +32,13 @@ import com.example.instagram.services.DeleteApplicationCache;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
-import com.example.instagram.services.Localisation;
+import com.example.instagram.services.QRGenerator;
+import com.example.instagram.services.Settings;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.zxing.WriterException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +64,7 @@ public class UserPage extends AppCompatActivity {
         public final ImageView back;
         public final ImageView pageContext;
         public final ImageView avatar;
+        public final ImageView qr;
         public final ImageView home;
         public final ImageView search;
         public final ImageView addPost;
@@ -66,6 +72,7 @@ public class UserPage extends AppCompatActivity {
         public final ImageView selfPage;
         public final Button subscribe;
         public final Button editProfile;
+        public final CardView cardViewQr;
 
         public Views() {
             swipeRefreshLayout = findViewById(R.id.swipe_refresh);
@@ -79,6 +86,7 @@ public class UserPage extends AppCompatActivity {
             avatar = findViewById(R.id.avatar);
             home = findViewById(R.id.home);
             search = findViewById(R.id.search);
+            cardViewQr = findViewById(R.id.card_qr);
             addPost = findViewById(R.id.add_post);
             notifications = findViewById(R.id.notifications);
             selfPage = findViewById(R.id.self_page);
@@ -94,6 +102,7 @@ public class UserPage extends AppCompatActivity {
             followers = findViewById(R.id.amount_followers);
             subscribe = findViewById(R.id.subscribe);
             editProfile = findViewById(R.id.edit_profile);
+            qr = findViewById(R.id.qr);
         }
     }
 
@@ -114,7 +123,7 @@ public class UserPage extends AppCompatActivity {
             System.out.println(e.getMessage());
         }
         // endregion
-        
+
         views = new Views();
         String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
         views.editProfile.setVisibility(login.equals(userPage.getLogin()) ? View.VISIBLE : View.GONE);
@@ -128,6 +137,12 @@ public class UserPage extends AppCompatActivity {
             pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
+        }
+
+        try {
+            views.qr.setImageBitmap(QRGenerator.generateQR(UserPage.userPage.getLogin()));
+        } catch (WriterException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -205,19 +220,25 @@ public class UserPage extends AppCompatActivity {
             case R.id.favorites:
                 System.out.println("favorites"); // TODO: favorites
                 return true;
-            case R.id.link:
-                System.out.println("link"); // TODO: favorites
-                return true;
             case R.id.qr_link:
-                System.out.println("qr_link"); // TODO: favorites
+                views.qr.setVisibility(View.VISIBLE);
+                //views.qr.startAnimation(AnimationUtils.loadAnimation(UserPage.this, R.anim.anim_paging));
+                new Handler().postDelayed(() -> {
+                    views.qr.setVisibility(View.GONE);
+                    //views.qr.startAnimation(AnimationUtils.loadAnimation(UserPage.this, R.anim.anim_gone));
+                }, 10000L);
                 return true;
             case R.id.log_out:
                 DeleteApplicationCache.deleteCache(getApplicationContext());
                 Cache.deleteAppSP(this);
                 finishAffinity();
                 break;
-            case R.id.languages_context:
-                Localisation.getLanguagesMenu(UserPage.this).show();
+            case R.id.settings:
+                try {
+                    Settings.getSettingsMenu(UserPage.this).show();
+                } catch (WriterException e) {
+                    throw new RuntimeException(e);
+                }
                 return true;
             case R.id.complain:
                 System.out.println("complain"); // TODO: favorites

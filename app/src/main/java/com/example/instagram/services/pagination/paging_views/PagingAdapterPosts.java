@@ -79,27 +79,12 @@ public class PagingAdapterPosts extends PagingAdapter {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAllLibrary() {
-        paginationAdapter.notifyDataSetChanged();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void clearAdapter() {
+    public void notifyAdapterToClearAll() {
         paginationAdapter.getPostsLibrary().getDataArrayList().clear();
         paginationAdapter.notifyDataSetChanged();
 
         PagingAdapterPosts.isEnd = false;
         PaginationCurrentForAllPosts.resetCurrent();
-    }
-
-    public void notifyAdapterToClearAll() {
-        clearAdapter();
-
-        try {
-            getData();
-        } catch (JSONException e) {
-            Log.d("sendToGetAllPosts: ", e.getMessage());
-        }
     }
     // endregion
 

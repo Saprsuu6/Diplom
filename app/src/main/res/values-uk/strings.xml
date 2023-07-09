@@ -205,4 +205,13 @@
     <string name="incorrect_token_2">Невірний токен</string>
     <string name="empty_3">Email не може бути порожнім</string>
     <string name="match_4">Email не може збігатися з попередньою</string>
+
+    <string name="sort_by_date_from">З (необхідне)</string>
+    <string name="sort_by_date_to">По (необхідне)</string>
+
+    <string-array name="sort">
+        <item>Автор</item>
+        <item>Опис</item>
+        <item>Дата додавання</item>
+    </string-array>
 </resources>

@@ -1,8 +1,8 @@
 package com.example.instagram.authentication;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
@@ -87,10 +88,23 @@ public class Authorisation extends AppCompatActivity {
 
         setListeners();
         UiVisibility.setUiVisibility(this);
+        Permissions.setPermissions(Authorisation.this);
+    }
 
-        // check on permissions
-        boolean mediaPermission = Cache.loadBoolSP(this, CacheScopes.MEDIA_PERMISSION.toString());
-        if (!mediaPermission) setPermissions();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == Permissions.STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("storage granted");
+                } else if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("read contacts granted");
+                } else if (grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("camera granted");
+                }
+            }
+        }
     }
 
     private boolean setRememberMe() throws JSONException {
@@ -125,12 +139,6 @@ public class Authorisation extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-    }
-
-    private void setPermissions() {
-        AlertDialog.Builder permissionsDialog = Permissions.getPermissionDialog(this, getResources());
-        permissionsDialog.setNegativeButton("Cancel", (dialog1, which) -> finish());
-        permissionsDialog.create().show();
     }
 
     private void setListeners() {

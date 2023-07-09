@@ -63,7 +63,7 @@
 
         <Button
             android:id="@+id/let_name_next"
-            style="@style/Authentication_LogIn"
+            style="@style/Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/next_step" />

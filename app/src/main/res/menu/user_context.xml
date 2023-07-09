@@ -10,15 +10,12 @@
         android:id="@+id/favorites"
         android:title="@string/favorites_context" />
     <item
-        android:id="@+id/link"
-        android:title="@string/link_to_page" />
-    <item
         android:id="@+id/qr_link"
         android:title="@string/qr_link_to_page" />
     <item
+        android:id="@+id/settings"
+        android:title="@string/settings" />
+    <item
         android:id="@+id/log_out"
         android:title="@string/log_out" />
-    <item
-        android:id="@+id/languages_context"
-        android:title="@string/settings" />
 </menu>

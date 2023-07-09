@@ -33,7 +33,7 @@
 
             <TextView
                 android:id="@+id/reg_phone"
-                style="@style/Authentication_Button"
+                style="@style/Button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -42,7 +42,7 @@
 
             <TextView
                 android:id="@+id/reg_email"
-                style="@style/Authentication_Button"
+                style="@style/Button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -60,7 +60,7 @@
 
             <TextView
                 android:id="@+id/country_code"
-                style="@style/Authentication_Button"
+                style="@style/Button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:visibility="gone"
@@ -79,7 +79,7 @@
 
             <TextView
                 android:id="@+id/email_name"
-                style="@style/Authentication_Button"
+                style="@style/Button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/gmail" />
@@ -132,7 +132,7 @@
 
             <Button
                 android:id="@+id/reg_log_in"
-                style="@style/Authentication_LogIn"
+                style="@style/Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/sing_in" />

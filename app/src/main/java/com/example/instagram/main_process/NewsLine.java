@@ -2,10 +2,14 @@ package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
@@ -13,6 +17,8 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,14 +50,21 @@ import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class NewsLine extends AppCompatActivity {
     private class Views {
         public final SwipeRefreshLayout swipeRefreshLayout;
+        public final Spinner sortBy;
         public final LinearLayout newsLineLayout;
-        public final Spinner languagesSpinner;
-        public final EditText toFindPost;
+        public final LinearLayout findPostDateLayout;
+        public final EditText toFindPostText;
+        public final EditText toFindPostFrom;
+        public final EditText toFindPostTo;
+        public final CheckBox images;
+        public final CheckBox videos;
+        public final CheckBox audios;
         public final ImageView logo;
         public final ImageView changeMainTheme;
         public final ImageView changeTheme;
@@ -63,9 +76,12 @@ public class NewsLine extends AppCompatActivity {
 
         public Views() {
             swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+            findPostDateLayout = findViewById(R.id.to_find_post_date);
+            toFindPostFrom = findViewById(R.id.to_find_post_date_from);
+            toFindPostTo = findViewById(R.id.to_find_post_date_to);
+            sortBy = findViewById(R.id.sort_by);
             newsLineLayout = findViewById(R.id.news_list);
-            toFindPost = findViewById(R.id.toFindPost);
-            languagesSpinner = findViewById(R.id.languages);
+            toFindPostText = findViewById(R.id.to_find_post_text);
             logo = findViewById(R.id.logo);
             changeMainTheme = findViewById(R.id.change_main_theme);
             changeTheme = findViewById(R.id.change_theme);
@@ -74,6 +90,9 @@ public class NewsLine extends AppCompatActivity {
             addNewPost = findViewById(R.id.add_post);
             notifications = findViewById(R.id.notifications);
             selfPage = findViewById(R.id.self_page);
+            images = findViewById(R.id.only_image);
+            videos = findViewById(R.id.only_video);
+            audios = findViewById(R.id.only_audio);
         }
     }
 
@@ -81,6 +100,8 @@ public class NewsLine extends AppCompatActivity {
     private FindUser findUser;
     private Views views;
     static public Pair<Integer, Post> mapPost;
+    private Calendar dateFrom;
+    private Calendar dateTo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +117,9 @@ public class NewsLine extends AppCompatActivity {
         // endregion
 
         views = new Views();
+
+        views.toFindPostFrom.setInputType(InputType.TYPE_NULL);
+        views.toFindPostTo.setInputType(InputType.TYPE_NULL);
 
         setListeners();
         setIntents();
@@ -118,12 +142,6 @@ public class NewsLine extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        try {
-            showAgain();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
 
         String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
 
@@ -155,7 +173,6 @@ public class NewsLine extends AppCompatActivity {
         ThemesBackgrounds.setThemeContent(getResources(), views.changeMainTheme, NewsLine.this);
         ThemesBackgrounds.loadBackground(NewsLine.this, views.newsLineLayout);
 
-        setStringResources(); // TODO set getResources();
         DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
     }
 
@@ -225,12 +242,13 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void showAgain() throws JSONException {
+        JSONObject bodyJSON = getJSONToFind();
+
         if (pagingView != null) {
             pagingView.notifyAdapterToClearAll();
-        } else {
-            JSONObject bodyJSON = getJSONToFind();
-            pagingView = new PagingAdapterPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), NewsLine.this, NewsLine.this, bodyJSON);
         }
+
+        pagingView = new PagingAdapterPosts(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), NewsLine.this, NewsLine.this, bodyJSON);
         views.swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -239,7 +257,34 @@ public class NewsLine extends AppCompatActivity {
         JSONObject paramsJSON;
 
         paramsJSON = new JSONObject();
-        paramsJSON.put("author", views.toFindPost.getText());
+        switch (views.sortBy.getSelectedItemPosition()) {
+            case 0:
+                paramsJSON.put("author", views.toFindPostText.getText());
+                break;
+            case 1:
+                paramsJSON.put("description", views.toFindPostText.getText());
+                break;
+            case 2:
+                JSONObject timeInterval = new JSONObject();
+                if (dateFrom != null && dateTo != null) {
+                    timeInterval.put("from", DateFormatting.formatToDateWithoutTime(dateFrom.getTime()));
+                    timeInterval.put("to", DateFormatting.formatToDateWithoutTime(dateTo.getTime()));
+                    paramsJSON.put("addDate", timeInterval);
+                }
+                break;
+        }
+
+        if (views.images.isChecked() || views.videos.isChecked() || views.audios.isChecked()) {
+            JSONObject onlyMedia = new JSONObject();
+            if (views.images.isChecked())
+                onlyMedia.put(String.valueOf(onlyMedia.length()), "image");
+            if (views.videos.isChecked())
+                onlyMedia.put(String.valueOf(onlyMedia.length()), "video");
+            if (views.audios.isChecked())
+                onlyMedia.put(String.valueOf(onlyMedia.length()), "audio");
+
+            if (onlyMedia.length() > 0) paramsJSON.put("onlyMedia", onlyMedia);
+        }
 
         bodyJSON = new JSONObject();
         bodyJSON.put("params", paramsJSON);
@@ -249,15 +294,109 @@ public class NewsLine extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void setListeners() {
-        views.toFindPost.addTextChangedListener(new TextWatcher() {
+        views.images.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            try {
+                showAgain();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        views.videos.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            try {
+                showAgain();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        views.audios.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            try {
+                showAgain();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        views.toFindPostFrom.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(NewsLine.this, android.R.style.Theme_DeviceDefault_Dialog, (view, year1, month1, dayOfMonth) -> {
+                dateFrom = Calendar.getInstance();
+                dateFrom.set(year1, month1, dayOfMonth);
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+                views.toFindPostFrom.setText(DateFormatting.formatDate(dateFrom));
+
+                try {
+                    showAgain();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }, year, month, day);
+
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            datePickerDialog.show();
+        });
+
+        views.toFindPostTo.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(NewsLine.this, android.R.style.Theme_DeviceDefault_Dialog, (view, year12, month12, dayOfMonth) -> {
+                dateTo = Calendar.getInstance();
+                dateTo.set(year12, month12, dayOfMonth);
+                DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+                views.toFindPostTo.setText(DateFormatting.formatDate(dateTo));
+
+                try {
+                    showAgain();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }, year, month, day);
+
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+            datePickerDialog.show();
+        });
+
+        views.sortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                    case 1:
+                        views.toFindPostText.setVisibility(View.VISIBLE);
+                        views.findPostDateLayout.setVisibility(View.GONE);
+                        break;
+                    case 2:
+                        views.findPostDateLayout.setVisibility(View.VISIBLE);
+                        views.toFindPostText.setVisibility(View.GONE);
+                        break;
+
+                }
+
+                try {
+                    showAgain();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                System.out.println("onNothingSelected");
+            }
+        });
+
+        views.toFindPostText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                System.out.println("beforeTextChanged");
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                System.out.println("onTextChanged");
             }
 
             @Override
@@ -311,9 +450,5 @@ public class NewsLine extends AppCompatActivity {
 
         // choose background
         views.changeTheme.setOnClickListener(v -> chooseTheme());
-    }
-
-    private void setStringResources() {
-        pagingView.notifyAllLibrary();
     }
 }

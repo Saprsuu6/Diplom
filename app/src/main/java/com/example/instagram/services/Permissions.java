@@ -1,53 +1,32 @@
 package com.example.instagram.services;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.res.Resources;
-import android.view.Gravity;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 
-import com.example.instagram.R;
+import androidx.core.app.ActivityCompat;
 
 public class Permissions {
-    public static AlertDialog.Builder getPermissionDialog(Context context, Resources resources) {
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setPadding(40, 0, 40, 0);
-        linearLayout.setGravity(Gravity.CENTER);
+    public static int STORAGE_PERMISSION_CODE = 1;
+    private static final String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS, Manifest.permission.CAMERA};
 
-        // TODO add phone book
-        CheckBox mediaCheckBox = mediaPermission(context, resources);
-        linearLayout.addView(mediaCheckBox);
-
-        return new AlertDialog.Builder(context)
-                .setMessage(resources.getString(R.string.permission)) // set Locale Resources
-                .setCancelable(false)
-                .setView(linearLayout)
-                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> Cache.saveSP(context, CacheScopes.MEDIA_PERMISSION.toString(), mediaCheckBox.isChecked()));
+    public static boolean isExternalStoragePermissionGranted(Activity activity) {
+        return ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static AlertDialog.Builder getPermissionMediaDialog(Context context, Resources resources) {
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setPadding(40, 0, 40, 0);
-        linearLayout.setGravity(Gravity.CENTER);
+    private static boolean checkPermissions(Activity activity) {
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
 
-        CheckBox mediaCheckBox = mediaPermission(context, resources);
-
-        linearLayout.addView(mediaCheckBox);
-
-        return new AlertDialog.Builder(context)
-                .setMessage(resources.getString(R.string.media_permission)) // set Locale Resources
-                .setCancelable(false)
-                .setView(linearLayout)
-                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog1, which) -> Cache.saveSP(context, CacheScopes.MEDIA_PERMISSION.toString(), mediaCheckBox.isChecked()));
+        return true;
     }
 
-    private static CheckBox mediaPermission(Context context, Resources resources) {
-        CheckBox mediaPermission = new CheckBox(context);
-        mediaPermission.setText(resources.getString(R.string.media_permission));
-
-        return mediaPermission;
+    public static void setPermissions(Activity activity) {
+        if (!checkPermissions(activity)) {
+            ActivityCompat.requestPermissions(activity, permissions, Permissions.STORAGE_PERMISSION_CODE);
+        }
     }
 }

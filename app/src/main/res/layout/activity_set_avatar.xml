@@ -54,7 +54,7 @@
 
         <Button
             android:id="@+id/photo_button"
-            style="@style/Authentication_Button"
+            style="@style/Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/add_photo_btn_info" />

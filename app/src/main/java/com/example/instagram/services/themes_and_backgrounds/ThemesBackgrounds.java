@@ -173,7 +173,7 @@ public class ThemesBackgrounds {
     @SuppressLint("UseCompatLoadingForDrawables")
     public static void loadBackground(Activity activity, LinearLayout linearLayout) { // load bg after resume activity
         int idBackground = loadSP(activity, CacheScopes.LAST_THEME.toString());
-        linearLayout.setBackground(idBackground != 0 ? activity.getResources().getDrawable(idBackground, activity.getTheme()) : activity.getResources().getDrawable(R.drawable.main_theme_template, activity.getTheme()));
+        linearLayout.setBackground(idBackground != 0 ? activity.getResources().getDrawable(idBackground, activity.getTheme()) : activity.getResources().getDrawable(R.drawable.main_theme, activity.getTheme()));
         saveBackgroundState(activity, idBackground == 0 ? Backgrounds.Background0.getValue() : idBackground, linearLayout);
         loadOtherBackgrounds(activity, idBackground, linearLayout);
     }

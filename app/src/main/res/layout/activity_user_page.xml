@@ -66,14 +66,40 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/avatar"
-                    android:scaleType="centerCrop"
-                    android:src="@color/for_skeleton" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/avatar"
+                        android:layout_width="0dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:contentDescription="@string/avatar"
+                        android:scaleType="centerCrop"
+                        android:src="@color/for_skeleton" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_qr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
+                        app:cardCornerRadius="20dp">
+
+                        <ImageView
+                            android:id="@+id/qr"
+                            android:layout_width="150dp"
+                            android:animateLayoutChanges="true"
+                            android:layout_height="150dp"
+                            android:contentDescription="@string/qr_code"
+                            android:visibility="gone" />
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -163,7 +189,7 @@
 
                         <Button
                             android:id="@+id/subscribe"
-                            style="@style/Authentication_Button"
+                            style="@style/Button"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
@@ -174,7 +200,7 @@
 
                         <Button
                             android:id="@+id/edit_profile"
-                            style="@style/Authentication_Button"
+                            style="@style/Button"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_margin="20dp"

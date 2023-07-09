@@ -53,7 +53,7 @@
 
         <CheckBox
             android:id="@+id/btn_subscribe"
-            style="@style/Authentication_LogIn"
+            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="3dp"

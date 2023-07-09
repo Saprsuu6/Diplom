@@ -1,8 +1,7 @@
 package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.provider.MediaStore;
 
@@ -10,8 +9,8 @@ import androidx.activity.result.ActivityResultLauncher;
 
 public class OpenMedia {
     @SuppressLint("IntentReset")
-    public static void openGallery(Context context, MediaTypes type, ActivityResultLauncher<Intent> someActivityResultLauncher) {
-        if (Cache.loadBoolSP(context, CacheScopes.MEDIA_PERMISSION.toString())) {
+    public static void openGallery(Activity activity, MediaTypes type, ActivityResultLauncher<Intent> someActivityResultLauncher) {
+        if (Permissions.isExternalStoragePermissionGranted(activity)) {
             Intent intent = null;
 
             if (type == MediaTypes.IMAGE) {
@@ -29,9 +28,7 @@ public class OpenMedia {
 
             someActivityResultLauncher.launch(intent);
         } else {
-            AlertDialog.Builder permissionsDialog = Permissions.getPermissionMediaDialog(context, context.getResources());
-            permissionsDialog.setNegativeButton("Cancel", null);
-            permissionsDialog.create().show();
+            Permissions.setPermissions(activity);
         }
     }
 }
