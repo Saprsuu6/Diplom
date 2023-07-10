@@ -216,15 +216,6 @@ public class NewsLine extends AppCompatActivity {
                     }
                 }
                 break;
-            case R.id.copy_link_media:
-                System.out.println("copy link to media content"); // TODO: copy link to media content
-                break;
-            case R.id.copy_link:
-                System.out.println("copy link to post"); // TODO: copy link to post
-                break;
-            case R.id.copy_post_qr:
-                System.out.println("copy qr link to post"); // TODO: copy qr link to post
-                break;
             case R.id.complain_post:
                 System.out.println("complain post"); // TODO: complain post
                 break;

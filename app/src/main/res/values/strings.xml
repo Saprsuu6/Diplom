@@ -151,9 +151,7 @@
     <!--    Post context-->
     <string name="remove_post">Remove</string>
     <string name="download">Download</string>
-    <string name="copy_link_media">Copy link to media content</string>
-    <string name="copy_link">Copy link</string>
-    <string name="copy_post_qr">Copy QR</string>
+    <string name="copy_post_qr">Copy QR to post</string>
     <string name="complain_post">Complain</string>
 
     <!--    Permissions-->
@@ -174,8 +172,6 @@
     <string name="edit_profile_context">Edit profile</string>
     <string name="statistic_context">Statistic</string>
     <string name="saved_context">Saved</string>
-    <string name="favorites_context">Favorites</string>
-    <string name="ur_contacts_context">Your contacts</string>
     <string name="log_out">Log out</string>
     <string name="link_to_page">Copy link to page</string>
     <string name="qr_link_to_page">Copy qr link to page</string>
@@ -251,6 +247,7 @@
 
     <string name="sort_by_date_from">From (required)</string>
     <string name="sort_by_date_to">To (required)</string>
+    <string name="saved">Saved</string>
 
     <string-array name="sort">
         <item>Author</item>

@@ -21,6 +21,7 @@ import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -36,8 +37,11 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.OnSwipeListener;
+import com.example.instagram.services.QRGenerator;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
+import com.google.zxing.WriterException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,9 +96,9 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         } else if (mime.contains(context.getString(R.string.mime_audio))) {
             // set audio
             Uri audioUri = Uri.parse(mediaPath);
-            holder.audioControllerLayout.setVisibility(View.VISIBLE);
             holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, context, audioUri);
             holder.audioController.initHandler(new Handler());
+            holder.audioControllerLayout.setVisibility(View.VISIBLE);
         }
         // endregion
         // region send request to get avatar
@@ -144,6 +148,19 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         holder.authorNickname.setText(data.getAuthor());
         holder.description.setText(data.getDescription());
 
+        try {
+            holder.qr.setImageBitmap(QRGenerator.generateQR(data.getAuthor()));
+        } catch (WriterException e) {
+            throw new RuntimeException(e);
+        }
+
+        holder.qrLink.setOnClickListener(v -> {
+            holder.cardViewQr.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(() -> {
+                holder.cardViewQr.setVisibility(View.GONE);
+            }, 10000L);
+        });
+
         holder.description.setOnClickListener(v -> {
             holder.description.setMaxLines(holder.description.getMaxLines() == 1 ? 100 : 1);
         });
@@ -165,6 +182,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final LinearLayout taggedPeopleLayout;
         private final RelativeLayout mediaContentLayout;
         private final TextView taggedPeople;
+        private final TextView qrLink;
         private final TextView login;
         private final ImageView contentImg;
         private final VideoView contentVideo;
@@ -177,6 +195,8 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final TextView authorNickname;
         private final TextView description;
         private final TextView hours;
+        private final CardView cardViewQr;
+        private final ImageView qr;
         // audio
         private AudioController audioController;
         private final LinearLayout audioControllerLayout;
@@ -197,6 +217,9 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             playStop = itemView.findViewById(R.id.play_stop);
             playPrev = itemView.findViewById(R.id.play_prev);
             playNext = itemView.findViewById(R.id.play_next);
+            qrLink = itemView.findViewById(R.id.qr_link);
+            cardViewQr = itemView.findViewById(R.id.card_qr);
+            qr = itemView.findViewById(R.id.qr);
 
             postLayout = itemView.findViewById(R.id.post_layout);
 

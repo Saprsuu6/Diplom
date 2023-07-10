@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,6 +47,7 @@ import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.TagPeople;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
+import com.google.android.material.shape.MaterialShapeDrawable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -161,13 +163,14 @@ public class CreatePost extends AppCompatActivity {
                 long fileSizeInKB = fileSizeInBytes / 1024;
                 long fileSizeInMB = fileSizeInKB / 1024;
 
-                if (fileSizeInMB > 1) {
+                extension = FindExtension.getExtension(selectedUri, getApplicationContext());
+                String mime = Post.getMimeTypeFromExtension(extension);
+
+                if (mime.contains(getString(R.string.mime_video)) && fileSizeInMB > 1) {
                     Toast.makeText(CreatePost.this, getString(R.string.size_restriction), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                extension = FindExtension.getExtension(selectedUri, getApplicationContext());
-                String mime = Post.getMimeTypeFromExtension(extension);
                 Bitmap selectedImage;
 
                 try {
@@ -224,27 +227,18 @@ public class CreatePost extends AppCompatActivity {
         }
     });
 
-    private void goneButtons() {
-        views.btnVideo.setVisibility(View.GONE);
-        views.btnImage.setVisibility(View.GONE);
-        views.btnAudio.setVisibility(View.GONE);
-    }
-
     @SuppressLint("SetTextI18n")
     private void setListeners() {
         views.btnVideo.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.VIDEO, someActivityResultLauncher);
-            goneButtons();
         });
 
         views.btnImage.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher);
-            goneButtons();
         });
 
         views.btnAudio.setOnClickListener(v -> {
             OpenMedia.openGallery(this, MediaTypes.AUDIO, someActivityResultLauncher);
-            goneButtons();
         });
 
         Calendar calendar = Calendar.getInstance();

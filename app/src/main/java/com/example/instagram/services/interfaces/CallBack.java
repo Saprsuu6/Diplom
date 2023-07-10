@@ -78,4 +78,5 @@ public interface CallBack {
     void sendToGetPostById() throws JSONException;
 
     void sendToGetCommentById() throws JSONException;
+    void getSavedPosts() throws JSONException;
 }

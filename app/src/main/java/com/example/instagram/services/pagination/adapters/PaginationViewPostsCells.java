@@ -160,7 +160,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
         String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
 
-        if (login.equals(UserPage.userPage.getLogin())) {
+        if (login.equals(post.getAuthor())) {
             builder.setNegativeButton(context.getApplicationContext().getString(R.string.remove_post), (dialog, which) -> {
                 AlertDialog.Builder negativeButton = new AlertDialog.Builder(context).setMessage(context.getApplicationContext().getString(R.string.remove_post_question)).setPositiveButton(context.getApplicationContext().getString(R.string.yes), (dialog1, which1) -> {
                     TransitPost.postsToDeleteFromOtherPage.add(post);

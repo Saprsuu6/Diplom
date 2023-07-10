@@ -17,8 +17,13 @@ public class Intents {
     private static Intent createNewPost;
     private static Intent editProfile;
     private static Intent notifications;
+    private static Intent saved;
 
     //region getters
+    public static Intent getSaved() {
+        return saved;
+    }
+
     public static Intent getNotifications() {
         return notifications;
     }
@@ -77,6 +82,9 @@ public class Intents {
 
     //endregion
     // region setters
+    public static void setSaved(Intent saved) {
+        Intents.saved = saved;
+    }
     public static void setEditProfile(Intent editProfile) {
         Intents.editProfile = editProfile;
     }

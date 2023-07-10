@@ -50,7 +50,7 @@ abstract public class PagingAdapter {
                 int positionLastChild = v.getChildAt(0).getMeasuredHeight();
                 int height = v.getMeasuredHeight();
 
-                int bottom = positionLastChild - height;
+                int bottom = positionLastChild + height;
                 if (scrollY == bottom) {
                     try {
                         isBusy = true;

@@ -1,5 +1,6 @@
 package com.example.instagram.services;
 
+import com.example.instagram.services.interfaces.GetSavedPosts;
 import com.example.instagram.services.interfaces.SendAva;
 import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendToAddNewAnswer;
@@ -41,7 +42,7 @@ import retrofit2.Retrofit;
 
 public class Services {
     //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
-    public final static String BASE_URL = "https://b307-2a09-bac1-7500-18-00-84-76.ngrok-free.app/Clickshot/";
+    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {
@@ -281,6 +282,13 @@ public class Services {
         SendToGetCommentById mainInterface = retrofit.create(SendToGetCommentById.class);
 
         Call<String> call = mainInterface.STRING_CALL(commentId);
+        call.enqueue(callback);
+    }
+
+    public static void getSavedPosts(Callback<String> callback, String from, String amount, String login) {
+        GetSavedPosts mainInterface = retrofit.create(GetSavedPosts.class);
+
+        Call<String> call = mainInterface.STRING_CALL(from, amount, login);
         call.enqueue(callback);
     }
 }

@@ -1,63 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_menu"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/main_theme_bottom"
+    android:elevation="0dp"
+    android:orientation="horizontal"
+    android:padding="5dp">
 
-    <LinearLayout
-        android:id="@+id/bottom_menu"
-        android:background="@color/main_theme_other"
-        android:padding="5dp"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/home"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        tools:ignore="UselessParent">
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:contentDescription="@string/home"
+        android:src="@drawable/home" />
 
-        <ImageView
-            android:id="@+id/home"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:contentDescription="@string/home"
-            android:src="@drawable/home" />
+    <ImageView
+        android:id="@+id/search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:contentDescription="@string/search"
+        android:src="@drawable/search" />
 
-        <ImageView
-            android:id="@+id/search"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:contentDescription="@string/search"
-            android:src="@drawable/search" />
+    <ImageView
+        android:id="@+id/add_post"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:contentDescription="@string/notifications"
+        android:src="@drawable/add_post" />
 
-        <ImageView
-            android:id="@+id/add_post"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:contentDescription="@string/notifications"
-            android:src="@drawable/add_post" />
+    <ImageView
+        android:id="@+id/notifications"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:contentDescription="@string/add_post"
+        android:src="@drawable/like_empty" />
 
-        <ImageView
-            android:id="@+id/notifications"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:contentDescription="@string/add_post"
-            android:src="@drawable/like_empty" />
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/self_page"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/avatar"
-            android:scaleType="centerCrop"
-            android:src="@color/for_skeleton" />
-    </LinearLayout>
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/self_page"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:contentDescription="@string/avatar"
+        android:scaleType="centerCrop"
+        android:src="@color/for_skeleton" />
 
 </LinearLayout>

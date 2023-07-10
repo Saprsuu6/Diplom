@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/comments"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_theme"
+    android:clipToPadding="false"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".main_process.Comments">
+
+    <LinearLayout
+        android:id="@+id/top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/main_theme_top"
+        android:elevation="10dp"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/back"
+            android:paddingHorizontal="10dp"
+            android:src="@drawable/arrow_back" />
+
+        <TextView
+            android:id="@+id/comment_title"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/comments_title" />
+    </LinearLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    tools:ignore="RtlSymmetry"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/list_item_comment" />
+
+                <io.supercharge.shimmerlayout.ShimmerLayout
+                    android:id="@+id/skeleton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible"
+                    app:shimmer_animation_duration="1200">
+
+                    <LinearLayout
+                        android:id="@+id/skeletons_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                        <include layout="@layout/skeleton_comment_layout" />
+
+                    </LinearLayout>
+
+                </io.supercharge.shimmerlayout.ShimmerLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/reply_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#4D000000"
+        android:elevation="10dp"
+        android:gravity="left|center"
+        android:orientation="horizontal"
+        android:padding="15dp"
+        android:visibility="visible"
+        tools:ignore="RtlHardcoded">
+
+        <TextView
+            android:id="@+id/replayed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="0dp"
+            android:textColor="@color/white_secondary"
+            android:textSize="18sp"
+            tools:text="Author: Andry" />
+
+        <ImageView
+            android:id="@+id/close_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/close_reply"
+            android:src="@drawable/close_reply" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#4D000000"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingVertical="10dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/author_ava"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="15dp"
+            android:contentDescription="@string/avatar"
+            android:scaleType="centerCrop"
+            android:src="@color/for_skeleton" />
+
+        <EditText
+            android:id="@+id/comment_add"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="Comment"
+            android:background="@null"
+            android:hint="@string/add_comment"
+            android:inputType="text"
+            android:textColorHint="@color/white_secondary" />
+
+        <ImageView
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="15dp"
+            android:contentDescription="@string/send_comment"
+            android:src="@drawable/send_message" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/news_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_theme"
+    android:clipToPadding="false"
+    android:gravity="top|center"
+    android:orientation="vertical"
+    android:theme="@style/Theme.Instagram.System"
+    tools:context=".main_process.NewsLine">
+
+    <LinearLayout
+        android:id="@id/top"
+        android:elevation="10dp"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/main_theme_top"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/instagram_logo" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:orientation="horizontal"
+            tools:ignore="RtlHardcoded">
+
+            <ImageView
+                android:id="@+id/change_main_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="5dp"
+                android:contentDescription="@string/changeTheme"
+                android:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/change_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="5dp"
+                android:contentDescription="@string/changeTheme"
+                android:src="@drawable/change_theme" />
+
+            <ImageView
+                android:id="@+id/direct"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="5dp"
+                android:contentDescription="@string/direct"
+                android:src="@drawable/direct"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/only_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:text="@string/image_btn" />
+
+        <CheckBox
+            android:id="@+id/only_video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:text="@string/video_btn" />
+
+        <CheckBox
+            android:id="@+id/only_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:text="@string/audio_btn" />
+
+        <Spinner
+            android:id="@+id/sort_by"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:entries="@array/sort"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/to_find_post_text"
+        android:visibility="gone"
+        style="@style/Authentication_EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Nickname"
+        android:inputType="text"
+        android:hint="@string/find_post"
+        tools:ignore="LabelFor" />
+
+    <LinearLayout
+        android:id="@+id/to_find_post_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/to_find_post_date_from"
+            style="@style/Authentication_EditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="Nickname"
+            android:hint="@string/sort_by_date_from"
+            android:inputType="date"
+            tools:ignore="LabelFor" />
+
+        <EditText
+            android:id="@+id/to_find_post_date_to"
+            style="@style/Authentication_EditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="Nickname"
+            android:hint="@string/sort_by_date_to"
+            android:inputType="date"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    tools:ignore="RtlSymmetry"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/list_item_post" />
+
+                <io.supercharge.shimmerlayout.ShimmerLayout
+                    android:id="@+id/skeleton"
+                    app:shimmer_animation_duration="1200"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible">
+
+                    <LinearLayout
+                        android:id="@+id/skeletons_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                        <include layout="@layout/skeleton_post_layout" />
+
+                    </LinearLayout>
+
+                </io.supercharge.shimmerlayout.ShimmerLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <include layout="@layout/bottom_menu" />
+
+</LinearLayout>

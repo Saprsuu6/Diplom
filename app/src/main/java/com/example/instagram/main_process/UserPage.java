@@ -9,7 +9,6 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -134,12 +133,6 @@ public class UserPage extends AppCompatActivity {
         UiVisibility.setUiVisibility(this);
 
         try {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
-        }
-
-        try {
             views.qr.setImageBitmap(QRGenerator.generateQR(UserPage.userPage.getLogin()));
         } catch (WriterException e) {
             throw new RuntimeException(e);
@@ -182,12 +175,20 @@ public class UserPage extends AppCompatActivity {
             ThemesBackgrounds.loadBackground(this, views.selfPageLayout);
         }
 
+        try {
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, false);
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+        }
+
         setStringResources();
     }
 
     private void setIntents() {
         if (Intents.getEditProfile() == null)
             Intents.setEditProfile(new Intent(this, EditProfile.class));
+
+        if (Intents.getSaved() == null) Intents.setSaved(new Intent(this, Saved.class));
     }
 
     private void LoadAvatar() throws JSONException {
@@ -215,17 +216,13 @@ public class UserPage extends AppCompatActivity {
                 System.out.println("statistic"); // TODO: statistic
                 return true;
             case R.id.saved:
-                System.out.println("saved"); // TODO: saved
-                return true;
-            case R.id.favorites:
-                System.out.println("favorites"); // TODO: favorites
+                System.out.println("saved");
+                startActivity(Intents.getSaved());
                 return true;
             case R.id.qr_link:
-                views.qr.setVisibility(View.VISIBLE);
-                //views.qr.startAnimation(AnimationUtils.loadAnimation(UserPage.this, R.anim.anim_paging));
+                views.cardViewQr.setVisibility(View.VISIBLE);
                 new Handler().postDelayed(() -> {
-                    views.qr.setVisibility(View.GONE);
-                    //views.qr.startAnimation(AnimationUtils.loadAnimation(UserPage.this, R.anim.anim_gone));
+                    views.cardViewQr.setVisibility(View.GONE);
                 }, 10000L);
                 return true;
             case R.id.log_out:
@@ -241,7 +238,7 @@ public class UserPage extends AppCompatActivity {
                 }
                 return true;
             case R.id.complain:
-                System.out.println("complain"); // TODO: favorites
+                System.out.println("complain"); // TODO: complain
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -283,7 +280,7 @@ public class UserPage extends AppCompatActivity {
         if (pagingView != null) {
             pagingView.notifyAdapterToClearAll();
         } else {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, UserPage.this);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, UserPage.this, false);
         }
         views.swipeRefreshLayout.setRefreshing(false);
     }

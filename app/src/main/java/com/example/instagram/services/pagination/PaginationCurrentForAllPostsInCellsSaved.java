@@ -1,6 +1,6 @@
 package com.example.instagram.services.pagination;
 
-public class PaginationCurrentForAllPostsInCells {
+public class PaginationCurrentForAllPostsInCellsSaved {
     public static final int amountOfPagination = 30;
     public static int current = 0;
 

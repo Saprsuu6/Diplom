@@ -31,7 +31,7 @@ import com.example.instagram.main_process.UserPage;
 import com.example.instagram.services.interfaces.CallBack;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
-import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCells;
+import com.example.instagram.services.pagination.PaginationCurrentForAllPostsInCellsPosts;
 import com.example.instagram.services.pagination.PaginationCurrentForAllUsers;
 import com.example.instagram.services.pagination.adapters.PaginationViewNotifications;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterComments;
@@ -329,8 +329,6 @@ public class DoCallBack implements CallBack {
                     if (response.isSuccessful() && response.body() != null) {
                         Toast.makeText(context, R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
                     }
-
-
                 }
 
                 @Override
@@ -722,7 +720,7 @@ public class DoCallBack implements CallBack {
                             try {
                                 JSONArray jsonArray = new JSONArray(body);
 
-                                if (jsonArray.length() < PaginationCurrentForAllPostsInCells.amountOfPagination) {
+                                if (jsonArray.length() < PaginationCurrentForAllPostsInCellsPosts.amountOfPagination) {
                                     PagingAdapterPostsCells.isEnd = true;
                                 }
 
@@ -868,8 +866,6 @@ public class DoCallBack implements CallBack {
                         }
                         if (params[2] != null) ((Runnable) params[2]).run();
                     }
-
-
                 }
 
                 @Override
@@ -1092,6 +1088,43 @@ public class DoCallBack implements CallBack {
                     Log.d("sendToGetAllPosts: ", t.getMessage());
                 }
             }, params[0].toString());
+        }
+    }
+
+    @Override
+    public void getSavedPosts() {
+        if (params != null) {
+            Services.getSavedPosts(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String body = response.body();
+
+                        if (!body.equals("[]")) {
+                            try {
+                                JSONArray jsonArray = new JSONArray(body);
+
+                                if (jsonArray.length() < PaginationCurrentForAllPostsInCellsPosts.amountOfPagination) {
+                                    PagingAdapterPostsCells.isEnd = true;
+                                }
+
+                                ((PostsLibrary) params[3]).setDataArrayList(jsonArray);
+                                if (runnable != null) {
+                                    runnable.run();
+                                }
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        if (params[4] != null) ((Runnable) params[4]).run();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    Log.d("sendToGetAllPosts: ", t.getMessage());
+                }
+            }, params[0].toString(), params[1].toString(), params[2].toString());
         }
     }
 }

@@ -83,21 +83,7 @@
                         android:scaleType="centerCrop"
                         android:src="@color/for_skeleton" />
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/card_qr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:animateLayoutChanges="true"
-                        app:cardCornerRadius="20dp">
-
-                        <ImageView
-                            android:id="@+id/qr"
-                            android:layout_width="150dp"
-                            android:animateLayoutChanges="true"
-                            android:layout_height="150dp"
-                            android:contentDescription="@string/qr_code"
-                            android:visibility="gone" />
-                    </androidx.cardview.widget.CardView>
+                    <include layout="@layout/qr" />
 
                 </LinearLayout>
 
@@ -303,6 +289,7 @@
                             android:layout_height="wrap_content"
                             android:nestedScrollingEnabled="true"
                             tools:ignore="RtlSymmetry"
+                            tools:itemCount="0"
                             tools:listitem="@layout/list_item_post_self_page_cell" />
 
                         <io.supercharge.shimmerlayout.ShimmerLayout

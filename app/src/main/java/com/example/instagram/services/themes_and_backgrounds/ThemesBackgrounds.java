@@ -154,7 +154,7 @@ public class ThemesBackgrounds {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private static void saveBackgroundState(Activity activity, int value, LinearLayout setBackground) {
+    private static void saveBackgroundState(Activity activity, int value, View setBackground) {
         saveSP(activity, CacheScopes.LAST_THEME.toString(), value);
         Cache.saveSP(activity, CacheScopes.USER_PREFER_THEME.toString(), value);
         background = value;
@@ -171,7 +171,7 @@ public class ThemesBackgrounds {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    public static void loadBackground(Activity activity, LinearLayout linearLayout) { // load bg after resume activity
+    public static void loadBackground(Activity activity, View linearLayout) { // load bg after resume activity
         int idBackground = loadSP(activity, CacheScopes.LAST_THEME.toString());
         linearLayout.setBackground(idBackground != 0 ? activity.getResources().getDrawable(idBackground, activity.getTheme()) : activity.getResources().getDrawable(R.drawable.main_theme, activity.getTheme()));
         saveBackgroundState(activity, idBackground == 0 ? Backgrounds.Background0.getValue() : idBackground, linearLayout);
@@ -179,7 +179,7 @@ public class ThemesBackgrounds {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private static void loadOtherBackgrounds(Activity activity, int idBackground, LinearLayout linearLayout) {
+    private static void loadOtherBackgrounds(Activity activity, int idBackground, View linearLayout) {
         try {
             View view = linearLayout.findViewById(R.id.top);
             view.setBackground(activity.getResources().getDrawable(Backgrounds.getTop(idBackground), activity.getTheme()));

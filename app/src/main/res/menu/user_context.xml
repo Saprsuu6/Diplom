@@ -7,9 +7,6 @@
         android:id="@+id/saved"
         android:title="@string/saved_context" />
     <item
-        android:id="@+id/favorites"
-        android:title="@string/favorites_context" />
-    <item
         android:id="@+id/qr_link"
         android:title="@string/qr_link_to_page" />
     <item

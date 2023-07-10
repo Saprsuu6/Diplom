@@ -3,10 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/download"
         android:title="@string/download" />
-    <item android:id="@+id/copy_link"
-        android:title="@string/copy_link" />
-    <item android:id="@+id/copy_post_qr"
-        android:title="@string/copy_post_qr" />
     <item android:id="@+id/complain_post"
         android:title="@string/complain_post" />
 </menu>

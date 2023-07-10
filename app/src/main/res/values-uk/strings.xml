@@ -108,8 +108,6 @@
     <!--    Post context-->
     <string name="remove_post">Видалити</string>
     <string name="download">Завантадити</string>
-    <string name="copy_link_media">Скопіювати посилання на медіа контент</string>
-    <string name="copy_link">Скопіювати посилання на пост</string>
     <string name="copy_post_qr">Скопіювати QR посилання на пост</string>
     <string name="complain_post">Поскаржитися</string>
 
@@ -123,8 +121,6 @@
     <string name="edit_profile_context">Налаштувати профіль</string>
     <string name="statistic_context">Статистика</string>
     <string name="saved_context">Збережене</string>
-    <string name="favorites_context">Предпочетаемое</string>
-    <string name="ur_contacts_context">Контактні данні</string>
     <string name="log_out">Вихід</string>
     <string name="link_to_page">Скопіювати посилання на сторінку</string>
     <string name="qr_link_to_page">Скопіювати QR посилання на сторінку</string>
@@ -208,6 +204,7 @@
 
     <string name="sort_by_date_from">З (необхідне)</string>
     <string name="sort_by_date_to">По (необхідне)</string>
+    <string name="saved">Збережене</string>
 
     <string-array name="sort">
         <item>Автор</item>
