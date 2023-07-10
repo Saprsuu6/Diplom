@@ -1,19 +1,17 @@
 package com.example.instagram.services.interfaces;
 
-import com.example.instagram.DAOs.Post;
-
 import org.json.JSONException;
 
 import java.io.IOException;
 
 public interface CallBack {
-    void deletePost() throws JSONException;
+    void sendToDeletePost() throws JSONException;
 
-    void likeUnlikePost() throws JSONException;
+    void sendToLikeUnlikePost() throws JSONException;
 
-    void logIn() throws JSONException;
+    void sendToLogIn() throws JSONException;
 
-    void sinUp() throws JSONException, IOException;
+    void sendToSinUp() throws JSONException, IOException;
 
     void sendToCodeToRestorePassword() throws JSONException;
 

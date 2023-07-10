@@ -1,39 +1,39 @@
 package com.example.instagram.services;
 
 import com.example.instagram.services.interfaces.GetSavedPosts;
-import com.example.instagram.services.interfaces.SendAva;
-import com.example.instagram.services.interfaces.SendNewPasswordAfterForgot;
-import com.example.instagram.services.interfaces.SendToAddNewAnswer;
-import com.example.instagram.services.interfaces.SendToAddNewComment;
-import com.example.instagram.services.interfaces.SendToAddPost;
-import com.example.instagram.services.interfaces.SendToAddUser;
-import com.example.instagram.services.interfaces.SendToChangeComment;
-import com.example.instagram.services.interfaces.SendToChangeEmailFinally;
-import com.example.instagram.services.interfaces.SendToChangeUser;
-import com.example.instagram.services.interfaces.SendToCheckExistUser;
-import com.example.instagram.services.interfaces.SendToCheckUsedLinkInMail;
-import com.example.instagram.services.interfaces.SendToCheckUserCode;
-import com.example.instagram.services.interfaces.SendToDeleteComment;
-import com.example.instagram.services.interfaces.SendToDeletePost;
-import com.example.instagram.services.interfaces.SendToFindPost;
-import com.example.instagram.services.interfaces.SendToFindUser;
-import com.example.instagram.services.interfaces.SendToGetAllComments;
-import com.example.instagram.services.interfaces.SendToGetAva;
-import com.example.instagram.services.interfaces.SendToGetCommentById;
+import com.example.instagram.services.interfaces.NewAva;
+import com.example.instagram.services.interfaces.NewPasswordAfterForgot;
+import com.example.instagram.services.interfaces.AddNewAnswer;
+import com.example.instagram.services.interfaces.AddNewComment;
+import com.example.instagram.services.interfaces.AddPost;
+import com.example.instagram.services.interfaces.AddUser;
+import com.example.instagram.services.interfaces.ChangeComment;
+import com.example.instagram.services.interfaces.ChangeEmailFinally;
+import com.example.instagram.services.interfaces.ChangeUser;
+import com.example.instagram.services.interfaces.CheckExistUser;
+import com.example.instagram.services.interfaces.CheckUsedLinkInMail;
+import com.example.instagram.services.interfaces.CheckUserCode;
+import com.example.instagram.services.interfaces.DeleteComment;
+import com.example.instagram.services.interfaces.DeletePost;
+import com.example.instagram.services.interfaces.FindPost;
+import com.example.instagram.services.interfaces.FindUser;
+import com.example.instagram.services.interfaces.GetAllComments;
+import com.example.instagram.services.interfaces.GetAva;
+import com.example.instagram.services.interfaces.GetCommentById;
 import com.example.instagram.services.interfaces.GetPublicUser;
-import com.example.instagram.services.interfaces.SendToGetIsLiked;
-import com.example.instagram.services.interfaces.SendToGetIsMeSubscribed;
-import com.example.instagram.services.interfaces.SendToGetIsSaved;
-import com.example.instagram.services.interfaces.SendToGetNotifications;
-import com.example.instagram.services.interfaces.SendToGetPostById;
-import com.example.instagram.services.interfaces.SendToGetPostsOfUser;
-import com.example.instagram.services.interfaces.SendToGetSubscribers;
-import com.example.instagram.services.interfaces.SendToGetSubscribing;
-import com.example.instagram.services.interfaces.SendToGetTaggedPeople;
-import com.example.instagram.services.interfaces.SendToSendCodeToEmail;
-import com.example.instagram.services.interfaces.SendToSetStateOfSavePost;
-import com.example.instagram.services.interfaces.SendToSetStateSubscribe;
-import com.example.instagram.services.interfaces.SendToSteStateOfLikePost;
+import com.example.instagram.services.interfaces.GetIsLiked;
+import com.example.instagram.services.interfaces.GetIsMeSubscribed;
+import com.example.instagram.services.interfaces.GetIsSaved;
+import com.example.instagram.services.interfaces.GetNotifications;
+import com.example.instagram.services.interfaces.GetPostById;
+import com.example.instagram.services.interfaces.GetPostsOfUser;
+import com.example.instagram.services.interfaces.GetSubscribers;
+import com.example.instagram.services.interfaces.GetSubscribing;
+import com.example.instagram.services.interfaces.GetTaggedPeople;
+import com.example.instagram.services.interfaces.SendCodeToEmail;
+import com.example.instagram.services.interfaces.SetStateOfSavePost;
+import com.example.instagram.services.interfaces.SetStateSubscribe;
+import com.example.instagram.services.interfaces.SetStateOfLikePost;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -45,12 +45,12 @@ public class Services {
     // TODO add links to web
     // link to server /Clickshot/some path/app/profile/Clickshot/getPublicUser/?login=LOGIN_OF_USER
     // link to server /Clickshot/some path/app/components/Post/Clickshot/getPublicUser/?login=POST_ID
-    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/";
+    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {
         // create main interface
-        SendToAddUser mainInterface = retrofit.create(SendToAddUser.class);
+        AddUser mainInterface = retrofit.create(AddUser.class);
 
         // initialize call
         Call<String> call = mainInterface.STRING_CALL(body);
@@ -58,140 +58,140 @@ public class Services {
     }
 
     public static void authorizeUser(Callback<String> callback, String body) {
-        SendToCheckExistUser mainInterface = retrofit.create(SendToCheckExistUser.class);
+        CheckExistUser mainInterface = retrofit.create(CheckExistUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToForgotPassword(Callback<String> callback, String body) {
-        SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
+        SendCodeToEmail mainInterface = retrofit.create(SendCodeToEmail.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToCheckUsedLickInMail(Callback<String> callback, String login) {
-        SendToCheckUsedLinkInMail mainInterface = retrofit.create(SendToCheckUsedLinkInMail.class);
+        CheckUsedLinkInMail mainInterface = retrofit.create(CheckUsedLinkInMail.class);
 
         Call<String> call = mainInterface.STRING_CALL(login);
         call.enqueue(callback);
     }
 
     public static void sendToCheckUserCode(Callback<String> callback, String login, String code) {
-        SendToCheckUserCode mainInterface = retrofit.create(SendToCheckUserCode.class);
+        CheckUserCode mainInterface = retrofit.create(CheckUserCode.class);
 
         Call<String> call = mainInterface.STRING_CALL(login, code);
         call.enqueue(callback);
     }
 
     public static void sendNewPasswordAfterForgot(Callback<String> callback, String body) {
-        SendNewPasswordAfterForgot mainInterface = retrofit.create(SendNewPasswordAfterForgot.class);
+        NewPasswordAfterForgot mainInterface = retrofit.create(NewPasswordAfterForgot.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendMultipartPost(Callback<String> callback, RequestBody image, String body) {
-        SendToAddPost mainInterface = retrofit.create(SendToAddPost.class);
+        AddPost mainInterface = retrofit.create(AddPost.class);
 
         Call<String> call = mainInterface.STRING_CALL(image, body);
         call.enqueue(callback);
     }
 
     public static void sendAva(Callback<String> callback, RequestBody image, String login) {
-        SendAva mainInterface = retrofit.create(SendAva.class);
+        NewAva mainInterface = retrofit.create(NewAva.class);
 
         Call<String> call = mainInterface.STRING_CALL(image, login);
         call.enqueue(callback);
     }
 
     public static void sendToGetAva(Callback<String> callback, String nickName) {
-        SendToGetAva mainInterface = retrofit.create(SendToGetAva.class);
+        GetAva mainInterface = retrofit.create(GetAva.class);
 
         Call<String> call = mainInterface.STRING_CALL(nickName);
         call.enqueue(callback);
     }
 
     public static void sendToGetTaggedPeople(Callback<String> callback, String postId) {
-        SendToGetTaggedPeople mainInterface = retrofit.create(SendToGetTaggedPeople.class);
+        GetTaggedPeople mainInterface = retrofit.create(GetTaggedPeople.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId);
         call.enqueue(callback);
     }
 
     public static void sendToDeletePost(Callback<String> callback, String postId) {
-        SendToDeletePost mainInterface = retrofit.create(SendToDeletePost.class);
+        DeletePost mainInterface = retrofit.create(DeletePost.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId);
         call.enqueue(callback);
     }
 
     public static void sendToLikeUnlikePost(Callback<String> callback, String body) {
-        SendToSteStateOfLikePost mainInterface = retrofit.create(SendToSteStateOfLikePost.class);
+        SetStateOfLikePost mainInterface = retrofit.create(SetStateOfLikePost.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetIsLiked(Callback<String> callback, String postId, String login) {
-        SendToGetIsLiked mainInterface = retrofit.create(SendToGetIsLiked.class);
+        GetIsLiked mainInterface = retrofit.create(GetIsLiked.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId, login);
         call.enqueue(callback);
     }
 
     public static void sendToSaveUnsavedPost(Callback<String> callback, String body) {
-        SendToSetStateOfSavePost mainInterface = retrofit.create(SendToSetStateOfSavePost.class);
+        SetStateOfSavePost mainInterface = retrofit.create(SetStateOfSavePost.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetIsSaved(Callback<String> callback, String postId, String login) {
-        SendToGetIsSaved mainInterface = retrofit.create(SendToGetIsSaved.class);
+        GetIsSaved mainInterface = retrofit.create(GetIsSaved.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId, login);
         call.enqueue(callback);
     }
 
     public static void sendToAddNewComment(Callback<String> callback, String comment) {
-        SendToAddNewComment mainInterface = retrofit.create(SendToAddNewComment.class);
+        AddNewComment mainInterface = retrofit.create(AddNewComment.class);
 
         Call<String> call = mainInterface.STRING_CALL(comment);
         call.enqueue(callback);
     }
 
     public static void sendToGetAllComments(Callback<String> callback, int from, int amount, String postId) {
-        SendToGetAllComments mainInterface = retrofit.create(SendToGetAllComments.class);
+        GetAllComments mainInterface = retrofit.create(GetAllComments.class);
 
         Call<String> call = mainInterface.STRING_CALL(from, amount, postId);
         call.enqueue(callback);
     }
 
     public static void sendToDeleteComment(Callback<String> callback, String body) {
-        SendToDeleteComment mainInterface = retrofit.create(SendToDeleteComment.class);
+        DeleteComment mainInterface = retrofit.create(DeleteComment.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToAddNewAnswer(Callback<String> callback, String body) {
-        SendToAddNewAnswer mainInterface = retrofit.create(SendToAddNewAnswer.class);
+        AddNewAnswer mainInterface = retrofit.create(AddNewAnswer.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToChangeComment(Callback<String> callback, String body) {
-        SendToChangeComment mainInterface = retrofit.create(SendToChangeComment.class);
+        ChangeComment mainInterface = retrofit.create(ChangeComment.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetPostsOfUser(Callback<String> callback, int from, int amount, String login) {
-        SendToGetPostsOfUser mainInterface = retrofit.create(SendToGetPostsOfUser.class);
+        GetPostsOfUser mainInterface = retrofit.create(GetPostsOfUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(from, amount, login);
         call.enqueue(callback);
@@ -205,84 +205,84 @@ public class Services {
     }
 
     public static void sendToChangeUser(Callback<String> callback, String body) {
-        SendToChangeUser mainInterface = retrofit.create(SendToChangeUser.class);
+        ChangeUser mainInterface = retrofit.create(ChangeUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToSendCodeForEmail(Callback<String> callback, String body) {
-        SendToSendCodeToEmail mainInterface = retrofit.create(SendToSendCodeToEmail.class);
+        SendCodeToEmail mainInterface = retrofit.create(SendCodeToEmail.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToChangeEmailFinally(Callback<String> callback, String body) {
-        SendToChangeEmailFinally mainInterface = retrofit.create(SendToChangeEmailFinally.class);
+        ChangeEmailFinally mainInterface = retrofit.create(ChangeEmailFinally.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToFindUser(Callback<String> callback, String body) {
-        SendToFindUser mainInterface = retrofit.create(SendToFindUser.class);
+        FindUser mainInterface = retrofit.create(FindUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToFindPost(Callback<String> callback, String body) {
-        SendToFindPost mainInterface = retrofit.create(SendToFindPost.class);
+        FindPost mainInterface = retrofit.create(FindPost.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetIsMeSubscribed(Callback<String> callback, String body) {
-        SendToGetIsMeSubscribed mainInterface = retrofit.create(SendToGetIsMeSubscribed.class);
+        GetIsMeSubscribed mainInterface = retrofit.create(GetIsMeSubscribed.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToSetStateOfSubscribe(Callback<String> callback, String body) {
-        SendToSetStateSubscribe mainInterface = retrofit.create(SendToSetStateSubscribe.class);
+        SetStateSubscribe mainInterface = retrofit.create(SetStateSubscribe.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetSubscribers(Callback<String> callback, String body) {
-        SendToGetSubscribers mainInterface = retrofit.create(SendToGetSubscribers.class);
+        GetSubscribers mainInterface = retrofit.create(GetSubscribers.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetSubscribing(Callback<String> callback, String body) {
-        SendToGetSubscribing mainInterface = retrofit.create(SendToGetSubscribing.class);
+        GetSubscribing mainInterface = retrofit.create(GetSubscribing.class);
 
         Call<String> call = mainInterface.STRING_CALL(body);
         call.enqueue(callback);
     }
 
     public static void sendToGetNotifications(Callback<String> callback, String login, String from, String amount) {
-        SendToGetNotifications mainInterface = retrofit.create(SendToGetNotifications.class);
+        GetNotifications mainInterface = retrofit.create(GetNotifications.class);
 
         Call<String> call = mainInterface.STRING_CALL(login, from, amount);
         call.enqueue(callback);
     }
 
     public static void sendToGetPostById(Callback<String> callback, String postId) {
-        SendToGetPostById mainInterface = retrofit.create(SendToGetPostById.class);
+        GetPostById mainInterface = retrofit.create(GetPostById.class);
 
         Call<String> call = mainInterface.STRING_CALL(postId);
         call.enqueue(callback);
     }
 
     public static void sendToGetCommentById(Callback<String> callback, String commentId) {
-        SendToGetCommentById mainInterface = retrofit.create(SendToGetCommentById.class);
+        GetCommentById mainInterface = retrofit.create(GetCommentById.class);
 
         Call<String> call = mainInterface.STRING_CALL(commentId);
         call.enqueue(callback);

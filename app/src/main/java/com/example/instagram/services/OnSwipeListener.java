@@ -2,13 +2,10 @@ package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Point;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
@@ -78,7 +75,7 @@ public class OnSwipeListener implements View.OnTouchListener {
         public boolean onDoubleTap(@NonNull MotionEvent e) {
             super.onDoubleTap(e);
             try {
-                callBackLike.likeUnlikePost();
+                callBackLike.sendToLikeUnlikePost();
             } catch (JSONException ex) {
                 throw new RuntimeException(ex);
             }
@@ -94,7 +91,7 @@ public class OnSwipeListener implements View.OnTouchListener {
                     float dy = e2.getY() - e1.getY();
                     if (Math.abs(dx) > Math.abs(dy)) {
                         if (Math.abs(dx) >= MIN_SWIPE_DISTANCE && Math.abs(velocityX) >= MIN_SWIPE_VELOCITY) {
-                            callBackDelete.deletePost();
+                            callBackDelete.sendToDeletePost();
                             return true;
                         }
                     } else {

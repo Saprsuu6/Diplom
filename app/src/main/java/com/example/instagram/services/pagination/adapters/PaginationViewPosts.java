@@ -40,7 +40,6 @@ import com.example.instagram.services.OnSwipeListener;
 import com.example.instagram.services.QRGenerator;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
-import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import com.google.zxing.WriterException;
 
 import org.json.JSONException;
@@ -342,7 +341,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 JSONObject jsonObject = Post.getJSONToLikeUnlikePost(postId, login, post.isLiked());
                 jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
                 // like unlike post
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
+                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToLikeUnlikePost();
             } catch (JSONException e) {
                 Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
             }

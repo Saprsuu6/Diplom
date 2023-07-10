@@ -221,7 +221,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                         try {
                             JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
                             // delete post
-                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).deletePost();
+                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).sendToDeletePost();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }

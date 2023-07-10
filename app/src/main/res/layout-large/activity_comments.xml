@@ -108,7 +108,7 @@
         android:gravity="left|center"
         android:orientation="horizontal"
         android:padding="15dp"
-        android:visibility="visible"
+        android:visibility="gone"
         tools:ignore="RtlHardcoded">
 
         <TextView
