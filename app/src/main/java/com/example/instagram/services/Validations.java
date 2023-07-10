@@ -8,20 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Validations {
-    public static void validatePhoneNumber(String text, String countryCode, Resources resources) throws Exception {
-        String[] numbersArray = text.split("\\D+");
-        StringBuilder phoneNumber = new StringBuilder(String.join("", numbersArray));
-        phoneNumber.insert(0, countryCode);
-
-        Validator.matcherPhone = Validator.phone.matcher(phoneNumber.toString());
-        if (!Validator.matcherPhone.find()) {
-            if (phoneNumber.length() > 13) {
-                throw new Exception(resources.getString(R.string.phone_number_error_length));
-            } else {
-                throw new Exception(resources.getString(R.string.phone_number_error_values));
-            }
-        }
-    }
 
     public static void validateUserName(String text, Resources resources) throws Exception {
         Validator.matcherUserName = Validator.userName.matcher(text);
