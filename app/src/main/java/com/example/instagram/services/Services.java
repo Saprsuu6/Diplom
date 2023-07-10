@@ -20,7 +20,7 @@ import com.example.instagram.services.interfaces.SendToFindUser;
 import com.example.instagram.services.interfaces.SendToGetAllComments;
 import com.example.instagram.services.interfaces.SendToGetAva;
 import com.example.instagram.services.interfaces.SendToGetCommentById;
-import com.example.instagram.services.interfaces.SendToGetCurrentUser;
+import com.example.instagram.services.interfaces.GetPublicUser;
 import com.example.instagram.services.interfaces.SendToGetIsLiked;
 import com.example.instagram.services.interfaces.SendToGetIsMeSubscribed;
 import com.example.instagram.services.interfaces.SendToGetIsSaved;
@@ -42,7 +42,10 @@ import retrofit2.Retrofit;
 
 public class Services {
     // TODO set link to tom cat
-    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/Clickshot/";
+    // TODO add links to web
+    // link to server /Clickshot/some path/app/profile/Clickshot/getPublicUser/?login=LOGIN_OF_USER
+    // link to server /Clickshot/some path/app/components/Post/Clickshot/getPublicUser/?login=POST_ID
+    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {
@@ -195,7 +198,7 @@ public class Services {
     }
 
     public static void sendToGetCurrentUser(Callback<String> callback, String login) {
-        SendToGetCurrentUser mainInterface = retrofit.create(SendToGetCurrentUser.class);
+        GetPublicUser mainInterface = retrofit.create(GetPublicUser.class);
 
         Call<String> call = mainInterface.STRING_CALL(login);
         call.enqueue(callback);
