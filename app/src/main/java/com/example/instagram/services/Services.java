@@ -41,7 +41,6 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 public class Services {
-    //private final static String BASE_URL = "https://clickshot-374911.lm.r.appspot.com";
     public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
