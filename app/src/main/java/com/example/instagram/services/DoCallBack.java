@@ -67,7 +67,7 @@ public class DoCallBack implements CallBack {
     }
 
     @Override
-    public void deletePost() throws JSONException {
+    public void sendToDeletePost() throws JSONException {
         if (params != null) {
             Services.sendToDeletePost(new Callback<>() {
                 @Override
@@ -89,7 +89,7 @@ public class DoCallBack implements CallBack {
     }
 
     @Override
-    public void likeUnlikePost() throws JSONException {
+    public void sendToLikeUnlikePost() throws JSONException {
         if (params != null) {
             if (runnable != null) runnable.run();
             else {
@@ -113,7 +113,7 @@ public class DoCallBack implements CallBack {
     }
 
     @Override
-    public void logIn() {
+    public void sendToLogIn() {
         if (params != null) {
             Services.authorizeUser(new Callback<>() {
                 @Override
@@ -144,8 +144,7 @@ public class DoCallBack implements CallBack {
         }
     }
 
-    @Override
-    public void sinUp() throws JSONException, IOException {
+    public void sendToSinUp() throws JSONException, IOException {
         if (params != null) {
             Services.addUser(new Callback<>() {
                 @Override

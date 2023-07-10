@@ -243,7 +243,7 @@ public class PostInDialog {
             JSONObject jsonObject = Post.getLikedUnliked(post.getPostId(), login, post.isLiked());
             jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
             // like unlike post
-            new DoCallBack().setValues(null, context, new Object[]{jsonObject}).likeUnlikePost();
+            new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToLikeUnlikePost();
         } catch (JSONException e) {
             Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
         }

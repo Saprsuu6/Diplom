@@ -171,7 +171,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                         new DoCallBack().setValues(() -> {
                             UserPage.userPage.setAmountPosts(UserPage.userPage.getAmountPosts() - 1);
                             pagingView.notifyAdapterToClearAll();
-                        }, context, new Object[]{jsonObject}).deletePost();
+                        }, context, new Object[]{jsonObject}).sendToDeletePost();
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }

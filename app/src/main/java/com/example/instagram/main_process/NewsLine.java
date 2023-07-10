@@ -198,7 +198,7 @@ public class NewsLine extends AppCompatActivity {
                 try {
                     JSONObject jsonObject = Post.getJSONToDeletePost(NewsLine.mapPost.second.getPostId(), token);
                     // delete post
-                    new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first), NewsLine.this, new Object[]{jsonObject}).deletePost();
+                    new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(NewsLine.mapPost.first), NewsLine.this, new Object[]{jsonObject}).sendToDeletePost();
                 } catch (JSONException e) {
                     Log.d("JSONException: (sendToDeletePost)", e.getMessage());
                 }

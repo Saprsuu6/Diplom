@@ -121,7 +121,7 @@ public class Authorisation extends AppCompatActivity {
 
                 startActivity(Intents.getNewsList());
                 finish();
-            }, this, new Object[]{jsonObject}).logIn();
+            }, this, new Object[]{jsonObject}).sendToLogIn();
             return true;
         }
 
@@ -208,7 +208,7 @@ public class Authorisation extends AppCompatActivity {
 
                         startActivity(Intents.getNewsList());
                         finish();
-                    }, this, new Object[]{jsonObject}).logIn();
+                    }, this, new Object[]{jsonObject}).sendToLogIn();
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
                 }
