@@ -5,6 +5,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface FindUser {
-    @POST("/Clickshot/findUser")
+    @POST("findUser")
     Call<String> STRING_CALL(@Body String body);
 }

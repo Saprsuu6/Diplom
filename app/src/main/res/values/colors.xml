@@ -7,6 +7,7 @@
     <color name="teal_700">#FF018786</color>
 
     <color name="main_theme">#7A8B7F</color>
+    <color name="main_theme_2">#424AB6</color>
     <color name="main_theme_other">#AAB7AE</color>
 
     <color name="theme_1_day">#00785D</color>
@@ -48,9 +49,9 @@
 
     <color name="for_skeleton">#99B3B3B3</color>
 
-    <color name="orange_alert">#FFC107</color>
+    <color name="orange_alert">#80D1B45D</color>
     <color name="transparent">#00000000</color>
-    <color name="blue">#4DB4F8</color>
-    <color name="error">#EE6861</color>
-    <color name="success">#A0C872</color>
+    <color name="blue">#7CB0FF</color>
+    <color name="error">#80D56862</color>
+    <color name="success">#809ED560</color>
 </resources>

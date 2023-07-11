@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface AddNewAnswer {
-    @POST("/Clickshot/addAnswer")
+    @POST("addAnswer")
     Call<String> STRING_CALL(
             @Body String comment
     );

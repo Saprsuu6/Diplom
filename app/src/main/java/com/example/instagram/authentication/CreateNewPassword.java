@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.DAOs.User;
@@ -32,8 +33,8 @@ public class CreateNewPassword extends AppCompatActivity {
     private class Views {
         private final EditText fieldPassword;
         private final EditText fieldRepeatPassword;
-        private final Button showPassword;
-        private final Button showRepeatPassword;
+        private final ImageView showPassword;
+        private final ImageView showRepeatPassword;
         private final Button next;
         private final ImageView warning;
         private final TextView haveAnAccountLink;
@@ -55,6 +56,7 @@ public class CreateNewPassword extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_password);
         
@@ -71,16 +73,17 @@ public class CreateNewPassword extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void setListeners() {
         views.showPassword.setOnClickListener(v -> {
             passwordEyeState = !passwordEyeState;
 
             if (passwordEyeState) {
                 views.fieldPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showPassword.setText(getResources().getString(R.string.hide_password));
+                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
             } else {
                 views.fieldPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showPassword.setText(getResources().getString(R.string.show_password));
+                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
             }
         });
 
@@ -89,10 +92,10 @@ public class CreateNewPassword extends AppCompatActivity {
 
             if (passwordEyeStateRepeat) {
                 views.fieldRepeatPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showRepeatPassword.setText(getResources().getString(R.string.hide_password));
+                views.showRepeatPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
             } else {
                 views.fieldRepeatPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showRepeatPassword.setText(getResources().getString(R.string.show_password));
+                views.showRepeatPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
             }
         });
 

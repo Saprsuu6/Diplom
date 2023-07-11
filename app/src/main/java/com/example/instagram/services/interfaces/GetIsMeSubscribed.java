@@ -5,6 +5,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface GetIsMeSubscribed {
-    @POST("/Clickshot/isSubscribed")
+    @POST("isSubscribed")
     Call<String> STRING_CALL(@Body String info);
 }

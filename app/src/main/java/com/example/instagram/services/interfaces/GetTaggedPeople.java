@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface GetTaggedPeople {
-    @GET("/Clickshot/taggedPeople")
+    @GET("taggedPeople")
     Call<String> STRING_CALL (
             @Query("postId") String postId
     );

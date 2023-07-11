@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface ChangeUser {
-    @POST("/Clickshot/changeUser")
+    @POST("changeUser")
     Call<String> STRING_CALL(
             @Body String body
     );

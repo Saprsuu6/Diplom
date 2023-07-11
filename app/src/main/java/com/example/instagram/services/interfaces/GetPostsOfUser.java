@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface GetPostsOfUser {
-    @GET("/Clickshot/postsOfUser")
+    @GET("postsOfUser")
     Call<String> STRING_CALL(
             @Query("from") int from,
             @Query("amount") int amount,

@@ -440,6 +440,8 @@ public class NewsLine extends AppCompatActivity {
         });
 
         // choose background
-        views.changeTheme.setOnClickListener(v -> chooseTheme());
+        views.changeTheme.setOnClickListener(v -> {
+            chooseTheme();
+        });
     }
 }

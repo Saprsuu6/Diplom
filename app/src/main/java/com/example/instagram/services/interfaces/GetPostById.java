@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface GetPostById {
-    @GET("/Clickshot/getPostById")
+    @GET("getPostById")
     Call<String> STRING_CALL (
             @Query("postId") String posId
     );

@@ -2,22 +2,23 @@ package com.example.instagram.services.pagination.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Handler;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +33,6 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.PostInDialog;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
 import com.google.android.flexbox.FlexboxLayout;
@@ -44,6 +44,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
     private final Context context;
     private final PostsLibrary postsLibrary;
     private final Point size;
+    private final Activity activity;
     private final PagingAdapterPostsCells pagingView;
     private final PostInDialog postInDialog = new PostInDialog();
 
@@ -51,10 +52,11 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         return postsLibrary;
     }
 
-    public PaginationViewPostsCells(Context context, @Nullable Activity activity, PostsLibrary postsLibrary, PagingAdapterPostsCells pagingView) {
+    public PaginationViewPostsCells(Context context, Activity activity, PostsLibrary postsLibrary, PagingAdapterPostsCells pagingView) {
         this.context = context;
         this.postsLibrary = postsLibrary;
         this.pagingView = pagingView;
+        this.activity = activity;
 
         size = new Point();
         if (activity != null) {
@@ -155,29 +157,63 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         return video;
     }
 
+    @SuppressLint("SetTextI18n")
     private void postInDialog(Post post) throws JSONException {
-        AlertDialog.Builder builder = postInDialog.getPostDialog(context, post);
+        Dialog builder = postInDialog.getPostDialog(activity, post);
         String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
         String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
 
-        if (login.equals(post.getAuthor())) {
-            builder.setNegativeButton(context.getApplicationContext().getString(R.string.remove_post), (dialog, which) -> {
-                AlertDialog.Builder negativeButton = new AlertDialog.Builder(context).setMessage(context.getApplicationContext().getString(R.string.remove_post_question)).setPositiveButton(context.getApplicationContext().getString(R.string.yes), (dialog1, which1) -> {
-                    TransitPost.postsToDeleteFromOtherPage.add(post);
+        if (UserPage.userPage != null) {
+            if (login.equals(UserPage.userPage.getLogin())) {
+                Button delete = postInDialog.getDelete();
+                Button close = postInDialog.getClose();
+                delete.setVisibility(View.VISIBLE);
+                delete.setOnClickListener(v -> {
+                    Handler handler = new Handler();
+                    final int[] timer = {11};
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (timer[0] == 1) {
+                                try {
+                                    JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
+                                    // delete post
+                                    new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).sendToDeletePost();
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
 
-                    try {
-                        JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
-                        // delete post
-                        new DoCallBack().setValues(() -> {
-                            UserPage.userPage.setAmountPosts(UserPage.userPage.getAmountPosts() - 1);
-                            pagingView.notifyAdapterToClearAll();
-                        }, context, new Object[]{jsonObject}).sendToDeletePost();
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).setNegativeButton(context.getApplicationContext().getString(R.string.no), null);
-                negativeButton.show();
-            });
+                                handler.removeCallbacks(this);
+                                delete.setText(activity.getString(R.string.remove_post));
+                                if(postInDialog.getRunable() != null) postInDialog.getRunable().run();
+                            }
+                            timer[0]--;
+                            delete.setText(timer[0] + " " + activity.getString(R.string.remove_post));
+                            handler.postDelayed(this, 1000L);
+                        }
+                    };
+
+                    handler.postDelayed(runnable, 1000L);
+
+                    delete.setOnClickListener(v1 -> {
+                        handler.removeCallbacks(runnable);
+                        try {
+                            JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
+                            // delete post
+                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).sendToDeletePost();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        builder.dismiss();
+                    });
+
+                    close.setOnClickListener(v12 -> {
+                        handler.removeCallbacks(runnable);
+                        delete.setText(activity.getString(R.string.remove_post));
+                        if(postInDialog.getRunable() != null) postInDialog.getRunable().run();
+                    });
+                });
+            }
         }
 
         builder.show();
