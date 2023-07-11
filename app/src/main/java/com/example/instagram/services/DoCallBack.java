@@ -374,8 +374,6 @@ public class DoCallBack implements CallBack {
                             Log.d("DoCallBack: ", e.getMessage());
                         }
                     }
-
-
                 }
 
                 @Override
