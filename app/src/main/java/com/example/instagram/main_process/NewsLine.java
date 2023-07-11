@@ -143,21 +143,27 @@ public class NewsLine extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
-
-        if (ava.equals("")) {
-            try {
-                LoadAvatar();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                Glide.with(NewsLine.this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
-            } catch (Exception e) {
-                Log.d("DoCallBack: ", e.getMessage());
-            }
+        try {
+            LoadAvatar();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
+
+//        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
+//
+//        if (ava.equals("")) {
+//            try {
+//                LoadAvatar();
+//            } catch (JSONException e) {
+//                throw new RuntimeException(e);
+//            }
+//        } else {
+//            try {
+//                Glide.with(NewsLine.this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
+//            } catch (Exception e) {
+//                Log.d("DoCallBack: ", e.getMessage());
+//            }
+//        }
 
         if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
             pagingView.notifyAdapterToClearPosts();

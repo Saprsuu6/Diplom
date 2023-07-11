@@ -45,7 +45,7 @@ public class Services {
     // link to server /Clickshot/some path/app/profile/getPublicUser/?login=LOGIN_OF_USER
     // link to server /Clickshot/some path/app/components/Post/getPublicUser/?login=POST_ID
     // https://tomcat.clickshot.com.ua/Clickshot/
-    public final static String BASE_URL = "https://19ff-2a09-bac5-597c-52d-00-84-6f.ngrok-free.app/Clickshot/";
+    public final static String BASE_URL = "https://a45d-2a09-bac1-7500-18-00-84-5a.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {
