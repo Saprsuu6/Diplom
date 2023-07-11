@@ -2,18 +2,22 @@ package com.example.instagram.services.themes_and_backgrounds;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
@@ -29,129 +33,102 @@ public class ThemesBackgrounds {
         return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
-    public static AlertDialog.Builder getThemeDialog(Context context, Resources resources, Activity activity, LinearLayout setBackground) {
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setPadding(0, 50, 0, 0);
+    public static Dialog getThemeDialog(Context context, Resources resources, Activity activity, LinearLayout setBackground) {
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.choose_theme, null, true);
+        setListeners(activity, view, setBackground);
 
-        RadioGroup radioGroup = new RadioGroup(context);
-        radioGroup.setOrientation(LinearLayout.VERTICAL);
-        radioGroup.setGravity(Gravity.CENTER);
+        Button close = view.findViewById(R.id.close);
 
-        RadioButton[] radioButtons = getRadioButtons(context, resources, activity, setBackground);
+        Point point = new Point();
+        activity.getWindowManager().getDefaultDisplay().getSize(point);
 
-        // region set to views
-        for (RadioButton radioButton : radioButtons) {
-            radioGroup.addView(radioButton);
-        }
-        linearLayout.addView(radioGroup);
-        // endregion
+        Dialog dialog = new Dialog(activity);
+        dialog.setCancelable(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setGravity(Gravity.CENTER);
+        dialog.setContentView(view);
+        Window window = dialog.getWindow();
+        window.setLayout(point.x / 2, LinearLayout.LayoutParams.WRAP_CONTENT);
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        // region select
-        int background = Cache.loadIntSP(context, CacheScopes.USER_PREFER_THEME.toString());
+        close.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
 
-        if (background == Backgrounds.Background0.getValue()) {
-            radioButtons[0].setChecked(true);
-        } else if (background == Backgrounds.Background1.getValue()) {
-            radioButtons[1].setChecked(true);
-        } else if (background == Backgrounds.Background2.getValue()) {
-            radioButtons[2].setChecked(true);
-        } else if (background == Backgrounds.Background3.getValue()) {
-            radioButtons[3].setChecked(true);
-        } else if (background == Backgrounds.Background4.getValue()) {
-            radioButtons[4].setChecked(true);
-        } else if (background == Backgrounds.Background5.getValue()) {
-            radioButtons[5].setChecked(true);
-        } else {
-            radioButtons[0].setChecked(true);
-        }
-
-        // endregion
-
-        // TODO save prefer theme load user on start app
-
-        return new AlertDialog.Builder(context)
-                .setCancelable(false)
-                .setView(linearLayout)
-                .setPositiveButton(resources.getString(R.string.permission_ok), null);
+        return dialog;
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private static RadioButton[] getRadioButtons(Context context, Resources resources, Activity activity, LinearLayout setBackground) {
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(700, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(0, 10, 0, 10);
+    private static void setListeners(Activity activity, View view, LinearLayout setBackground) {
+        RadioButton mainTheme = view.findViewById(R.id.main_theme);
+        RadioButton first = view.findViewById(R.id.first_theme);
+        RadioButton second = view.findViewById(R.id.second_theme);
+        RadioButton third = view.findViewById(R.id.third_theme);
+        RadioButton fourth = view.findViewById(R.id.fourth_theme);
+        RadioButton fives = view.findViewById(R.id.fives_theme);
 
-        // region create check box
-        RadioButton radioButton0 = new RadioButton(context);
-        radioButton0.setLayoutParams(layoutParams);
-        radioButton0.setBackground(resources.getDrawable(R.drawable.main_theme_template, context.getTheme()));
-
-        RadioButton radioButton1 = new RadioButton(context);
-        radioButton1.setLayoutParams(layoutParams);
-        radioButton1.setBackground(resources.getDrawable(R.drawable.theme_1_template, context.getTheme()));
-
-        RadioButton radioButton2 = new RadioButton(context);
-        radioButton2.setLayoutParams(layoutParams);
-        radioButton2.setBackground(resources.getDrawable(R.drawable.theme_2_template, context.getTheme()));
-
-        RadioButton radioButton3 = new RadioButton(context);
-        radioButton3.setLayoutParams(layoutParams);
-        radioButton3.setBackground(resources.getDrawable(R.drawable.theme_3_template, context.getTheme()));
-
-        RadioButton radioButton4 = new RadioButton(context);
-        radioButton4.setLayoutParams(layoutParams);
-        radioButton4.setBackground(resources.getDrawable(R.drawable.theme_4_template, context.getTheme()));
-
-        RadioButton radioButton5 = new RadioButton(context);
-        radioButton5.setLayoutParams(layoutParams);
-        radioButton5.setBackground(resources.getDrawable(R.drawable.theme_5_template, context.getTheme()));
-        // endregion
-
-        // region set listeners
-        radioButton0.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        mainTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background0.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background0.getValue(), setBackground);
             }
         });
 
-        radioButton1.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        first.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background1.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background1.getValue(), setBackground);
             }
         });
 
-        radioButton2.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        second.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background2.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background2.getValue(), setBackground);
             }
         });
 
-        radioButton3.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        third.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background3.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background3.getValue(), setBackground);
             }
         });
 
-        radioButton4.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        fourth.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background4.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background4.getValue(), setBackground);
             }
         });
 
-        radioButton5.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        fives.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 saveBackgroundState(activity, Backgrounds.Background5.getValue(), setBackground);
                 loadOtherBackgrounds(activity, Backgrounds.Background5.getValue(), setBackground);
             }
         });
-        // endregion
 
-        return new RadioButton[]{radioButton0, radioButton1, radioButton2, radioButton3, radioButton4, radioButton5};
+        //region check prefer theme
+        int background = Cache.loadIntSP(activity, CacheScopes.USER_PREFER_THEME.toString());
+
+        if (background == Backgrounds.Background0.getValue()) {
+            mainTheme.setChecked(true);
+        } else if (background == Backgrounds.Background1.getValue()) {
+            first.setChecked(true);
+        } else if (background == Backgrounds.Background2.getValue()) {
+            second.setChecked(true);
+        } else if (background == Backgrounds.Background3.getValue()) {
+            third.setChecked(true);
+        } else if (background == Backgrounds.Background4.getValue()) {
+            fourth.setChecked(true);
+        } else if (background == Backgrounds.Background5.getValue()) {
+            fives.setChecked(true);
+        } else {
+            mainTheme.setChecked(true);
+        }
+        //endregion
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tag_people"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_theme_template_2"
+    android:gravity="top|center"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:theme="@style/Theme.Instagram.System">
+
+    <RadioButton
+        android:id="@+id/main_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/main_theme_template" />
+
+    <RadioButton
+        android:id="@+id/first_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/theme_1_template" />
+
+    <RadioButton
+        android:id="@+id/second_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/theme_2_template" />
+
+    <RadioButton
+        android:id="@+id/third_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/theme_3_template" />
+
+    <RadioButton
+        android:id="@+id/fourth_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/theme_4_template" />
+
+    <RadioButton
+        android:id="@+id/fives_theme"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/theme_5_template" />
+
+    <Button
+        android:id="@+id/close"
+        style="@style/Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_ok" />
+
+</RadioGroup>

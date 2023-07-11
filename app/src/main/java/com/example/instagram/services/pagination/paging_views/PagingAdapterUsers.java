@@ -2,12 +2,10 @@ package com.example.instagram.services.pagination.paging_views;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.services.DoCallBack;
@@ -21,16 +19,19 @@ import org.json.JSONObject;
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
 public class PagingAdapterUsers extends PagingAdapter {
+    private final Activity activity;
     private final JSONObject jsonObject;
     private PaginationViewUsers paginationAdapter;
     public static boolean isEnd = false;
     private boolean isStart = true;
     private final Boolean isSubscribers;
 
-    public PagingAdapterUsers(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity, JSONObject jsonObject, @Nullable Boolean isSubscribers) throws JSONException {
-        super(scrollView, recyclerView, shimmerLayout, context, activity);
+    public PagingAdapterUsers(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Activity activity, JSONObject jsonObject, @Nullable Boolean isSubscribers) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, activity);
         this.jsonObject = jsonObject;
         this.isSubscribers = isSubscribers;
+        this.activity = activity;
+        
         isEnd = false;
         PaginationCurrentForAllUsers.resetCurrent();
 
@@ -38,7 +39,7 @@ public class PagingAdapterUsers extends PagingAdapter {
         jsonObject.put("amount", Integer.toString(PaginationCurrentForAllUsers.amountOfPagination));
 
         // initialise adapter
-        paginationAdapter = new PaginationViewUsers(context, usersLibrary);
+        paginationAdapter = new PaginationViewUsers(activity, usersLibrary);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -51,7 +52,7 @@ public class PagingAdapterUsers extends PagingAdapter {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationViewUsers(context, usersLibrary);
+        paginationAdapter = new PaginationViewUsers(activity, usersLibrary);
         recyclerView.setAdapter(paginationAdapter);
     }
 
@@ -92,11 +93,11 @@ public class PagingAdapterUsers extends PagingAdapter {
             };
 
             if (isSubscribers == null) {
-                new DoCallBack().setValues(runnable, context, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToFindUser();
+                new DoCallBack().setValues(runnable, activity, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToFindUser();
             } else if (isSubscribers) {
-                new DoCallBack().setValues(runnable, context, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetSubscribers();
+                new DoCallBack().setValues(runnable, activity, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetSubscribers();
             } else {
-                new DoCallBack().setValues(runnable, context, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetSubscribing();
+                new DoCallBack().setValues(runnable, activity, new Object[]{jsonObject, usersLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetSubscribing();
             }
         }
     }

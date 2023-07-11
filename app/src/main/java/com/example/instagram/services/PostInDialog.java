@@ -66,10 +66,10 @@ public class PostInDialog {
     private LinearLayout buttons;
     private Button close;
     private Button delete;
-    private Runnable runable;
+    private Runnable runnable;
 
-    public Runnable getRunable() {
-        return runable;
+    public Runnable getRunnable() {
+        return runnable;
     }
 
     public Button getDelete() {
@@ -99,14 +99,12 @@ public class PostInDialog {
         window.setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        runable = () -> {
+        runnable = () -> {
             if (audioController != null) audioController.clearHandler();
             dialog.dismiss();
         };
 
-        close.setOnClickListener(v -> {
-            runable.run();
-        });
+        close.setOnClickListener(v -> runnable.run());
         return dialog;
     }
 
@@ -143,18 +141,17 @@ public class PostInDialog {
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     private void setContent(Post post) throws JSONException {
         String mime = post.getMimeType();
-        String mediaPath = Services.BASE_URL + activity.getString(R.string.root_folder) + post.getResourceMedia();
-
+        String link = GetMediaLink.getMediaLink(activity, post.getResourceMedia());
         buttons.setVisibility(View.VISIBLE);
 
         // region set media content
         if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
-            Glide.with(activity.getApplicationContext()).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
+            Glide.with(activity.getApplicationContext()).load(link).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
             imageContent.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_video))) {
             // set video
-            Uri videoUri = Uri.parse(mediaPath);
+            Uri videoUri = Uri.parse(link);
 
             MediaController mediaController = new MediaController(activity);
 
@@ -168,7 +165,7 @@ public class PostInDialog {
             videoContent.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_audio))) {
             // set audio
-            Uri audioUri = Uri.parse(mediaPath);
+            Uri audioUri = Uri.parse(link);
             audioCard.setVisibility(View.VISIBLE);
             audioControllerLayout.setVisibility(View.VISIBLE);
             audioController = new AudioController(timeLine, seekBar, playStop, playPrev, playNext, activity, audioUri);
@@ -179,9 +176,7 @@ public class PostInDialog {
         authorLogin.setText(post.getAuthor());
         description.setText(post.getDescription());
 
-        description.setOnClickListener(v -> {
-            description.setMaxLines(description.getMaxLines() == 1 ? 100 : 1);
-        });
+        description.setOnClickListener(v -> description.setMaxLines(description.getMaxLines() == 1 ? 100 : 1));
 
         Calendar calendar = DateFormatting.getCalendar(post.getDateOfAdd());
         date.setText(DateFormatting.formatDate(calendar.getTime()));
@@ -212,9 +207,7 @@ public class PostInDialog {
 
         qrLink.setOnClickListener(v -> {
             cardViewQr.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> {
-                cardViewQr.setVisibility(View.GONE);
-            }, 10000L);
+            new Handler().postDelayed(() -> cardViewQr.setVisibility(View.GONE), 10000L);
         });
     }
 
@@ -243,9 +236,7 @@ public class PostInDialog {
             }
         });
 
-        postLike.setOnClickListener(v -> {
-            postSetStateLike(post);
-        });
+        postLike.setOnClickListener(v -> postSetStateLike(post));
 
         save.setOnClickListener(v -> {
             if (!post.isSaved()) {

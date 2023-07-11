@@ -121,8 +121,8 @@ public class SetBirthday extends AppCompatActivity {
 
                         new DoCallBack().setValues(() -> {
                             // delete unnecessary
-                            Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString());
-                            Cache.deleteSP(getApplicationContext(), CacheScopes.USER_PASSWORD_REPEAT.toString());
+                            Cache.deleteSP(this, CacheScopes.USER_PASSWORD.toString());
+                            Cache.deleteSP(this, CacheScopes.USER_PASSWORD_REPEAT.toString());
                         }, this, new Object[]{jsonObject}).sendToSinUp();
 
                     } catch (JSONException | IOException e) {

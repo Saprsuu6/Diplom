@@ -1,8 +1,5 @@
 package com.example.instagram.services;
 
-import com.example.instagram.services.interfaces.GetSavedPosts;
-import com.example.instagram.services.interfaces.NewAva;
-import com.example.instagram.services.interfaces.NewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.AddNewAnswer;
 import com.example.instagram.services.interfaces.AddNewComment;
 import com.example.instagram.services.interfaces.AddPost;
@@ -20,20 +17,23 @@ import com.example.instagram.services.interfaces.FindUser;
 import com.example.instagram.services.interfaces.GetAllComments;
 import com.example.instagram.services.interfaces.GetAva;
 import com.example.instagram.services.interfaces.GetCommentById;
-import com.example.instagram.services.interfaces.GetPublicUser;
 import com.example.instagram.services.interfaces.GetIsLiked;
 import com.example.instagram.services.interfaces.GetIsMeSubscribed;
 import com.example.instagram.services.interfaces.GetIsSaved;
 import com.example.instagram.services.interfaces.GetNotifications;
 import com.example.instagram.services.interfaces.GetPostById;
 import com.example.instagram.services.interfaces.GetPostsOfUser;
+import com.example.instagram.services.interfaces.GetPublicUser;
+import com.example.instagram.services.interfaces.GetSavedPosts;
 import com.example.instagram.services.interfaces.GetSubscribers;
 import com.example.instagram.services.interfaces.GetSubscribing;
 import com.example.instagram.services.interfaces.GetTaggedPeople;
+import com.example.instagram.services.interfaces.NewAva;
+import com.example.instagram.services.interfaces.NewPasswordAfterForgot;
 import com.example.instagram.services.interfaces.SendCodeToEmail;
+import com.example.instagram.services.interfaces.SetStateOfLikePost;
 import com.example.instagram.services.interfaces.SetStateOfSavePost;
 import com.example.instagram.services.interfaces.SetStateSubscribe;
-import com.example.instagram.services.interfaces.SetStateOfLikePost;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -41,12 +41,8 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 public class Services {
-    // TODO add links to web
-    // link to server /Clickshot/some path/app/profile/getPublicUser/?login=LOGIN_OF_USER
-    // link to server /Clickshot/some path/app/components/Post/getPublicUser/?login=POST_ID
-    // https://tomcat.clickshot.com.ua/Clickshot/
-    public final static String BASE_URL = "https://tomcat.clickshot.com.ua/Clickshot/";
-    private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
+    public static String BASE_URL;
+    public static Retrofit retrofit;
 
     public static void addUser(Callback<String> callback, String body) {
         // create main interface

@@ -43,7 +43,7 @@ public class Saved extends AppCompatActivity {
         setListeners();
 
         try {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, true);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, true);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -59,7 +59,7 @@ public class Saved extends AppCompatActivity {
         if (pagingView != null) {
             pagingView.notifyAdapterToClearAll();
         } else {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), Saved.this, Saved.this, true);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this,true);
         }
         views.swipeRefreshLayout.setRefreshing(false);
     }

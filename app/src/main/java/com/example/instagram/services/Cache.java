@@ -1,10 +1,11 @@
 package com.example.instagram.services;
 
+import android.app.Activity;
 import android.content.Context;
 
 public class Cache {
-    public static void saveSP(Context context, String key, Object obj) {
-        android.content.SharedPreferences preferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static void saveSP(Activity activity, String key, Object obj) {
+        android.content.SharedPreferences preferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
 
         android.content.SharedPreferences.Editor editor = preferences.edit();
 
@@ -19,30 +20,30 @@ public class Cache {
         editor.apply();
     }
 
-    public static void deleteAppSP(Context context) {
-        android.content.SharedPreferences sharedPreferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static void deleteAppSP(Activity activity) {
+        android.content.SharedPreferences sharedPreferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear().apply();
     }
 
-    public static void deleteSP(Context context, String key) {
-        android.content.SharedPreferences sharedPreferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static void deleteSP(Activity activity, String key) {
+        android.content.SharedPreferences sharedPreferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(key).apply();
     }
 
-    public static boolean loadBoolSP(Context context, String key) {
-        android.content.SharedPreferences sharedPreferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static boolean loadBoolSP(Activity activity, String key) {
+        android.content.SharedPreferences sharedPreferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean(key, false);
     }
 
-    public static int loadIntSP(Context context, String key) {
-        android.content.SharedPreferences sharedPreferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static int loadIntSP(Activity activity, String key) {
+        android.content.SharedPreferences sharedPreferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
         return sharedPreferences.getInt(key, 0);
     }
 
-    public static String loadStringSP(Context context, String key) {
-        android.content.SharedPreferences sharedPreferences = context.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
+    public static String loadStringSP(Activity activity, String key) {
+        android.content.SharedPreferences sharedPreferences = activity.getSharedPreferences(CacheScopes.MAIN_SCOPE.toString(), Context.MODE_PRIVATE);
         return sharedPreferences.getString(key, "");
     }
 }

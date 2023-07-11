@@ -2,15 +2,14 @@ package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +46,6 @@ import com.example.instagram.services.ReadBytesForMedia;
 import com.example.instagram.services.TagPeople;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
-import com.google.android.material.shape.MaterialShapeDrawable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,8 +146,8 @@ public class CreatePost extends AppCompatActivity {
     }
 
     private void setToTagPeople() {
-        AlertDialog.Builder permissionsDialog = tagPeople.getToTagPeople();
-        permissionsDialog.create().show();
+        Dialog permissionsDialog = tagPeople.getToTagPeople();
+        permissionsDialog.show();
     }
 
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {

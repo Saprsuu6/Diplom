@@ -25,7 +25,6 @@ abstract public class PagingAdapter {
     private final LinearLayout skeletonsLayout;
     private final ShimmerLayout shimmerLayout;
     protected final RecyclerView recyclerView;
-    protected final Context context;
     protected Boolean isBusy = false;
 
     @Nullable
@@ -35,14 +34,13 @@ abstract public class PagingAdapter {
     protected final UsersLibrary usersLibrary = new UsersLibrary();
     protected final NotificationsLibrary notificationsLibrary = new NotificationsLibrary();
 
-    public PagingAdapter(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
+    public PagingAdapter(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, @Nullable Activity activity) {
         this.activity = activity;
-        this.context = context;
         this.recyclerView = recyclerView;
         this.shimmerLayout = shimmerLayout;
 
         // set layout manager
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         skeletonsLayout = (LinearLayout) shimmerLayout.getChildAt(0);
 
         scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
@@ -66,7 +64,7 @@ abstract public class PagingAdapter {
     protected void startSkeletonAnim() {
         shimmerLayout.setVisibility(View.VISIBLE);
         shimmerLayout.startShimmerAnimation();
-        skeletonsLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
+        skeletonsLayout.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging));
     }
 
     protected void stopSkeletonAnim() {

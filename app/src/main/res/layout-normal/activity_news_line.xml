@@ -110,13 +110,13 @@
 
     <EditText
         android:id="@+id/to_find_post_text"
-        android:visibility="gone"
         style="@style/EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autofillHints="Nickname"
-        android:inputType="text"
         android:hint="@string/find_post"
+        android:inputType="text"
+        android:visibility="gone"
         tools:ignore="LabelFor" />
 
     <LinearLayout
@@ -176,13 +176,15 @@
                     tools:itemCount="1"
                     tools:listitem="@layout/list_item_post" />
 
+                <include layout="@layout/end" />
+
                 <io.supercharge.shimmerlayout.ShimmerLayout
                     android:id="@+id/skeleton"
-                    app:shimmer_animation_duration="1200"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:visibility="visible">
+                    android:visibility="visible"
+                    app:shimmer_animation_duration="1200">
 
                     <LinearLayout
                         android:id="@+id/skeletons_layout"
@@ -203,6 +205,7 @@
         </androidx.core.widget.NestedScrollView>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
     <include layout="@layout/bottom_menu" />
 

@@ -239,11 +239,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="5dp"
                         style="@style/Text"
-                        tools:text="2" />
+                        tools:text="10.10.10" />
 
                     <TextView
                         android:id="@+id/qr_link"
                         android:layout_width="wrap_content"
+                        android:layout_gravity="bottom"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="5dp"
                         style="@style/Text"

@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +28,9 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
+import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -45,7 +46,7 @@ public class Authorisation extends AppCompatActivity {
         public final EditText fieldForPassword;
         public final TextView gmailName;
         public final TextView linkForgotPassword;
-        public final TextView dontHaveAnAccount;
+        public final TextView notHaveAnAccount;
         public final TextView singInLink;
         public final CheckBox rememberMe;
         public final ImageView warning;
@@ -57,7 +58,7 @@ public class Authorisation extends AppCompatActivity {
             fieldForPassword = findViewById(R.id.auth_pass);
             gmailName = findViewById(R.id.email_name);
             linkForgotPassword = findViewById(R.id.auth_forgot_pass);
-            dontHaveAnAccount = findViewById(R.id.reg_question);
+            notHaveAnAccount = findViewById(R.id.reg_question);
             singInLink = findViewById(R.id.link_log_in);
             rememberMe = findViewById(R.id.remember_flag);
             logIn = findViewById(R.id.auth_log_in);
@@ -75,8 +76,12 @@ public class Authorisation extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authorisation);
 
+        //region initialise link
+        Services.BASE_URL = getString(R.string.link_tomcat);
+        Services.retrofit = MyRetrofit.initializeRetrofit(Services.BASE_URL);
+        //endregion
         views = new Views();
-        
+
         // TODO delete someday
         views.fieldForLogin.setText("Andry");
         views.fieldForPassword.setText("MyNewPass123!");
@@ -119,8 +124,8 @@ public class Authorisation extends AppCompatActivity {
 
         if (rememberMeFlag) {
             new DoCallBack().setValues(() -> {
-                Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), login);
-                Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), password);
+                Cache.saveSP(this, CacheScopes.USER_LOGIN.toString(), login);
+                Cache.saveSP(this, CacheScopes.USER_PASSWORD.toString(), password);
 
                 startActivity(Intents.getNewsList());
                 finish();
@@ -204,11 +209,11 @@ public class Authorisation extends AppCompatActivity {
                         Cache.saveSP(this, CacheScopes.REMEMBER_ME.toString(), views.rememberMe.isChecked());
                     }
 
-                    Cache.saveSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
+                    Cache.saveSP(this, CacheScopes.USER_LOGIN.toString(), views.fieldForLogin.getText().toString());
                     JSONObject jsonObject = User.getJSONToCheck(views.fieldForLogin.getText().toString(), views.fieldForPassword.getText().toString());
 
                     new DoCallBack().setValues(() -> {
-                        Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
+                        Cache.saveSP(this, CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
                         startActivity(Intents.getNewsList());
                         finish();
                     }, this, new Object[]{jsonObject}).sendToLogIn();

@@ -17,14 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterComments;
@@ -87,13 +86,13 @@ public class Comments extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.authorAva);
+                SetImagesGlide.setImageGlide(this, ava, views.authorAva);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
         }
 
-        pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+        pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this);
     }
 
     @Override
@@ -212,7 +211,7 @@ public class Comments extends AppCompatActivity {
         });
 
         views.authorAva.setOnClickListener(v -> {
-            String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
                 new DoCallBack().setValues(() -> startActivity(Intents.getSelfPage()), this, new Object[]{login}).sendToGetCurrentUser();

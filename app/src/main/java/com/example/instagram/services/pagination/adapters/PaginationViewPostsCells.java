@@ -3,7 +3,6 @@ package com.example.instagram.services.pagination.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Handler;
@@ -22,8 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
@@ -31,8 +28,9 @@ import com.example.instagram.main_process.UserPage;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
+import com.example.instagram.services.GetMediaLink;
 import com.example.instagram.services.PostInDialog;
-import com.example.instagram.services.Services;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
 import com.google.android.flexbox.FlexboxLayout;
@@ -41,10 +39,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationViewPostsCells.ViewHolderPostsCells> {
-    private final Context context;
+    private final Activity activity;
     private final PostsLibrary postsLibrary;
     private final Point size;
-    private final Activity activity;
     private final PagingAdapterPostsCells pagingView;
     private final PostInDialog postInDialog = new PostInDialog();
 
@@ -52,8 +49,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         return postsLibrary;
     }
 
-    public PaginationViewPostsCells(Context context, Activity activity, PostsLibrary postsLibrary, PagingAdapterPostsCells pagingView) {
-        this.context = context;
+    public PaginationViewPostsCells(Activity activity, PostsLibrary postsLibrary, PagingAdapterPostsCells pagingView) {
         this.postsLibrary = postsLibrary;
         this.pagingView = pagingView;
         this.activity = activity;
@@ -81,21 +77,21 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                 View content = null;
                 String mime = data.getMimeType();
 
-                LinearLayout layout = new LinearLayout(context);
-                CardView cardView = new CardView(context);
+                LinearLayout layout = new LinearLayout(activity);
+                CardView cardView = new CardView(activity);
 
                 // region set media content
-                if (mime.contains(context.getString(R.string.mime_image))) {
+                if (mime.contains(activity.getString(R.string.mime_image))) {
                     //set image
                     content = setImage(data);
                     cardView.setLayoutParams(holder.cellParams);
-                } else if (mime.contains(context.getString(R.string.mime_video))) {
+                } else if (mime.contains(activity.getString(R.string.mime_video))) {
                     // set image
                     content = setVideo(data);
                     layout.setLayoutParams(holder.cellParams);
                     layout.setGravity(Gravity.CENTER);
                     cardView.setLayoutParams(holder.mediaParams);
-                } else if (mime.contains(context.getString(R.string.mime_audio))) {
+                } else if (mime.contains(activity.getString(R.string.mime_audio))) {
                     // set audio
                     content = setImageForAudio();
                     cardView.setLayoutParams(holder.cellParams);
@@ -122,32 +118,31 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
             }
         }
 
-        holder.flexboxLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
+        holder.flexboxLayout.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging));
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private ImageView setImageForAudio() {
-        ImageView image = new ImageView(context);
+        ImageView image = new ImageView(activity);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image.setImageDrawable(context.getDrawable(R.drawable.play_cell));
+        image.setImageDrawable(activity.getDrawable(R.drawable.play_cell));
 
         return image;
     }
 
     private ImageView setImage(Post data) {
-        ImageView image = new ImageView(context);
+        ImageView image = new ImageView(activity);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        String imagePath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
-
-        Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(image);
+        String link = GetMediaLink.getMediaLink(activity, data.getResourceMedia());
+        SetImagesGlide.setImageGlide(activity, link, image);
 
         return image;
     }
 
     private VideoView setVideo(Post data) {
-        VideoView video = new VideoView(context);
-        String videoPath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
-        Uri videoUri = Uri.parse(videoPath);
+        VideoView video = new VideoView(activity);
+        String link = GetMediaLink.getMediaLink(activity, data.getResourceMedia());
+        Uri videoUri = Uri.parse(link);
         video.setVideoURI(videoUri);
 
         video.start();
@@ -160,8 +155,8 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
     @SuppressLint("SetTextI18n")
     private void postInDialog(Post post) throws JSONException {
         Dialog builder = postInDialog.getPostDialog(activity, post);
-        String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-        String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
+        String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+        String token = Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString());
 
         if (UserPage.userPage != null) {
             if (login.equals(UserPage.userPage.getLogin())) {
@@ -178,14 +173,14 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                                 try {
                                     JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
                                     // delete post
-                                    new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).sendToDeletePost();
+                                    new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, activity, new Object[]{jsonObject}).sendToDeletePost();
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
 
                                 handler.removeCallbacks(this);
                                 delete.setText(activity.getString(R.string.remove_post));
-                                if(postInDialog.getRunable() != null) postInDialog.getRunable().run();
+                                if(postInDialog.getRunnable() != null) postInDialog.getRunnable().run();
                             }
                             timer[0]--;
                             delete.setText(timer[0] + " " + activity.getString(R.string.remove_post));
@@ -200,7 +195,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                         try {
                             JSONObject jsonObject = Post.getJSONToDeletePost(post.getPostId(), token);
                             // delete post
-                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, context, new Object[]{jsonObject}).sendToDeletePost();
+                            new DoCallBack().setValues(pagingView::notifyAdapterToClearAll, activity, new Object[]{jsonObject}).sendToDeletePost();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -210,7 +205,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                     close.setOnClickListener(v12 -> {
                         handler.removeCallbacks(runnable);
                         delete.setText(activity.getString(R.string.remove_post));
-                        if(postInDialog.getRunable() != null) postInDialog.getRunable().run();
+                        if(postInDialog.getRunnable() != null) postInDialog.getRunnable().run();
                     });
                 });
             }

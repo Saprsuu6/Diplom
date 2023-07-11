@@ -20,8 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
@@ -32,6 +30,7 @@ import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.QRGenerator;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.Settings;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
@@ -163,8 +162,8 @@ public class UserPage extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
+                SetImagesGlide.setImageGlide(this, ava, views.avatar);
+                SetImagesGlide.setImageGlide(this, ava, views.selfPage);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
@@ -176,7 +175,7 @@ public class UserPage extends AppCompatActivity {
         }
 
         try {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, false);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, false);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -221,9 +220,7 @@ public class UserPage extends AppCompatActivity {
                 return true;
             case R.id.qr_link:
                 views.cardViewQr.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(() -> {
-                    views.cardViewQr.setVisibility(View.GONE);
-                }, 10000L);
+                new Handler().postDelayed(() -> views.cardViewQr.setVisibility(View.GONE), 10000L);
                 return true;
             case R.id.log_out:
                 DeleteApplicationCache.deleteCache(getApplicationContext());
@@ -280,7 +277,7 @@ public class UserPage extends AppCompatActivity {
         if (pagingView != null) {
             pagingView.notifyAdapterToClearAll();
         } else {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, UserPage.this, false);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, false);
         }
         views.swipeRefreshLayout.setRefreshing(false);
     }

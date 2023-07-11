@@ -2,12 +2,9 @@ package com.example.instagram.services.pagination.paging_views;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.main_process.NewsLine;
@@ -24,13 +21,13 @@ public class PagingAdapterComments extends PagingAdapter {
     private PaginationViewComments paginationAdapter;
     public static boolean isEnd = false;
 
-    public PagingAdapterComments(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
-        super(scrollView, recyclerView, shimmerLayout, context, activity);
+    public PagingAdapterComments(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Activity activity) {
+        super(scrollView, recyclerView, shimmerLayout, activity);
         isEnd = false;
         PaginationCurrentForAllComments.resetCurrent();
 
         // initialise adapter
-        paginationAdapter = new PaginationViewComments(activity, context, commentsLibrary);
+        paginationAdapter = new PaginationViewComments(activity, activity, commentsLibrary);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -55,11 +52,6 @@ public class PagingAdapterComments extends PagingAdapter {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void notifyAllLibrary() {
-        paginationAdapter.notifyDataSetChanged();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     public void notifyAdapterToClearAll() {
         paginationAdapter.getCommentsLibrary().getCommentList().clear();
         paginationAdapter.notifyDataSetChanged();
@@ -74,7 +66,7 @@ public class PagingAdapterComments extends PagingAdapter {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationViewComments(activity, context, commentsLibrary);
+        paginationAdapter = new PaginationViewComments(activity, activity, commentsLibrary);
         recyclerView.setAdapter(paginationAdapter);
     }
 
@@ -87,7 +79,7 @@ public class PagingAdapterComments extends PagingAdapter {
                 isBusy = false;
                 PaginationCurrentForAllComments.nextCurrent();
                 setPaginationAdapter();
-            }, context, new Object[]{PaginationCurrentForAllComments.current, PaginationCurrentForAllComments.amountOfPagination, NewsLine.mapPost.second.getPostId(), commentsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetAllComments();
+            }, activity, new Object[]{PaginationCurrentForAllComments.current, PaginationCurrentForAllComments.amountOfPagination, NewsLine.mapPost.second.getPostId(), commentsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetAllComments();
         }
     }
 }

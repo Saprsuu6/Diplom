@@ -2,15 +2,21 @@ package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,6 +36,7 @@ public class TagPeople {
     private final Context context;
     private final Resources resources;
     private final Activity activity;
+    private int amountTags = 0;
 
     public TagPeople(Context context, Resources resources, Activity activity) {
         this.context = context;
@@ -38,71 +45,76 @@ public class TagPeople {
     }
 
     @SuppressLint({"InflateParams", "SetTextI18n"})
-    public AlertDialog.Builder getToTagPeople() {
+    public Dialog getToTagPeople() {
         TextView taggedPeople = activity.findViewById(R.id.tag_people);
 
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(context)
-                .inflate(R.layout.tag_people, null, true);
-        ThemesBackgrounds.loadBackground(activity, ((LinearLayout) view));
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.tag_people, null, true);
+        ThemesBackgrounds.loadBackground(activity, (view));
 
+        Button close = view.findViewById(R.id.close);
         LinearLayout general = view.findViewById(R.id.tag_people);
         ImageView add = view.findViewById(R.id.add_to_tag);
 
         setListeners(general, add);
 
         // region set first item
-        View itemToTag = LayoutInflater.from(context)
-                .inflate(R.layout.tage_people_item, null, true);
+        View itemToTag = LayoutInflater.from(context).inflate(R.layout.tage_people_item, null, true);
         addItem(general, itemToTag);
         // endregion
 
-        return new AlertDialog.Builder(context)
-                .setCancelable(false)
-                .setNegativeButton(resources.getString(R.string.close), null)
-                .setView(view)
-                .setPositiveButton(resources.getString(R.string.permission_ok), (dialog, which) -> {
-                    LinearLayout tagPeople = view.findViewById(R.id.tag_people);
-                    int childCount = tagPeople.getChildCount();
-                    List<String> tagPeopleArray = new ArrayList<>();
+        Dialog dialog = new Dialog(activity);
+        dialog.setCancelable(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setGravity(Gravity.CENTER);
+        dialog.setContentView(view);
+        Window window = dialog.getWindow();
+        window.setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-                    for (int i = 0; i < childCount - 1; i++) {
-                        View view1 = tagPeople.getChildAt(i);
-                        EditText editText = view1.findViewById(R.id.nickname);
-                        String name = editText.getText().toString().trim();
+        close.setOnClickListener(v -> {
+            LinearLayout tagPeople = view.findViewById(R.id.tag_people);
+            List<String> tagPeopleArray = new ArrayList<>();
 
-                        if (!name.equals("")) {
-                            tagPeopleArray.add(name);
-                        }
-                    }
+            for (int i = 0; i < amountTags + 1; i++) {
+                View view1 = tagPeople.getChildAt(i);
+                EditText editText = view1.findViewById(R.id.nickname);
+                String name = editText.getText().toString().trim();
 
-                    String names = tagPeopleArray.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(","));
+                if (!name.equals("")) {
+                    tagPeopleArray.add(name);
+                }
+            }
 
-                    String[] namesArray = names.split(",");
+            String names = tagPeopleArray.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-                    // region removing duplicates
-                    int duplicates = 0;
-                    for (int i = 0; i < namesArray.length - 1; i++) {
-                        if (namesArray[i].equals(namesArray[i + 1])) {
-                            namesArray[i] = null;
-                            duplicates++;
-                        }
-                    }
+            String[] namesArray = names.split(",");
 
-                    String[] namesWithoutDuplicatesArray = new String[namesArray.length - duplicates];
-                    for (int i = 0; i < namesArray.length; i++) {
-                        if (namesArray[i] != null) {
-                            namesWithoutDuplicatesArray[i] = namesArray[i];
-                        }
-                    }
-                    // endregion
+            // region removing duplicates
+            int duplicates = 0;
+            for (int i = 0; i < namesArray.length - 1; i++) {
+                if (namesArray[i].equals(namesArray[i + 1])) {
+                    namesArray[i] = null;
+                    duplicates++;
+                }
+            }
 
-                    String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
-                    taggedPeople.setText(resources.getString(R.string.tag_people) + ": " + namesWithoutDuplicates);
+            String[] namesWithoutDuplicatesArray = new String[namesArray.length - duplicates];
+            for (int i = 0; i < namesArray.length; i++) {
+                if (namesArray[i] != null) {
+                    namesWithoutDuplicatesArray[i] = namesArray[i];
+                }
+            }
+            // endregion
 
-                    CreatePost.PostToAdd.taggedPeople = namesWithoutDuplicates;
-                });
+            String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
+            taggedPeople.setText(resources.getString(R.string.tag_people) + ": " + namesWithoutDuplicates);
+
+            CreatePost.PostToAdd.taggedPeople = namesWithoutDuplicates;
+            dialog.dismiss();
+        });
+
+        return dialog;
     }
 
     private void setListeners(LinearLayout general, ImageView add) {
@@ -111,6 +123,7 @@ public class TagPeople {
                     .inflate(R.layout.tage_people_item, null, true);
 
             addItem(general, itemToTag);
+            amountTags++;
         });
     }
 
@@ -135,7 +148,7 @@ public class TagPeople {
 
         setValidators(login, ava, error, animationDrawable);
 
-        general.addView(itemToTag, general.getChildCount() - 1);
+        general.addView(itemToTag, 0);
     }
 
     private void setValidators(EditText login, ImageView ava, ImageView error, AnimationDrawable animationDrawable) {
@@ -153,7 +166,7 @@ public class TagPeople {
             @Override
             public void afterTextChanged(Editable s) {
                 try {
-                    new DoCallBack().setValues(animationDrawable::start, context.getApplicationContext(), new Object[]{s, error, ava}).sendToGetAvaInTagPeople();
+                    new DoCallBack().setValues(animationDrawable::start, activity, new Object[]{s, error, ava}).sendToGetAvaInTagPeople();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

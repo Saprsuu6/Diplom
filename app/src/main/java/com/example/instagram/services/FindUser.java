@@ -73,7 +73,7 @@ public class FindUser {
             pagingViewUsers.notifyAdapterToClearAll();
         } else {
             JSONObject bodyJSON = getJSONToFind();
-            pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity.getApplicationContext(), activity, bodyJSON, isSubscribers);
+            pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity, bodyJSON, isSubscribers);
         }
         swipeRefreshLayout.setRefreshing(false);
     }
@@ -121,7 +121,7 @@ public class FindUser {
                 public void afterTextChanged(Editable s) {
                     try {
                         JSONObject bodyJSON = getJSONToFind();
-                        pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity.getApplicationContext(), activity, bodyJSON, isSubscribers);
+                        pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity, bodyJSON, isSubscribers);
                     } catch (JSONException e) {
                         Log.d("JSONException: ", e.getMessage());
                     }
@@ -133,7 +133,7 @@ public class FindUser {
             try {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("login", UserPage.userPage.getLogin());
-                pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity.getApplicationContext(), activity, jsonObject, isSubscribers);
+                pagingViewUsers = new PagingAdapterUsers(view.findViewById(R.id.scroll_view), view.findViewById(R.id.recycler_view), view.findViewById(R.id.skeleton), activity, jsonObject, isSubscribers);
             } catch (JSONException e) {
                 Log.d("JSONException: ", e.getMessage());
             }

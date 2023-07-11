@@ -89,7 +89,7 @@ public class Errors {
 
     public static Toast emailCodes(Context context, String responseStr) {
         if (responseStr.contains("0"))
-            return Toast.makeText(context, R.string.successfull_uesr_update, Toast.LENGTH_SHORT);
+            return Toast.makeText(context, R.string.successful_user_update, Toast.LENGTH_SHORT);
         else if (responseStr.contains("1"))
             return Toast.makeText(context, R.string.incorrect_code_1, Toast.LENGTH_SHORT);
         else if (responseStr.contains("2"))
@@ -103,7 +103,7 @@ public class Errors {
 
     public static Toast editProfile(Context context, String responseStr) {
         if (responseStr.contains("0"))
-            return Toast.makeText(context, R.string.successfull_uesr_update, Toast.LENGTH_SHORT);
+            return Toast.makeText(context, R.string.successful_user_update, Toast.LENGTH_SHORT);
         else if (responseStr.contains("3"))
             return Toast.makeText(context, R.string.email_are_not_valid, Toast.LENGTH_SHORT);
         else

@@ -55,7 +55,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
 
         // region send request to get avatar
         try {
-            new DoCallBack().setValues(null, context, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
+            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -151,7 +151,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             ava.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -160,7 +160,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             author.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -169,7 +169,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             answerToAuthor.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

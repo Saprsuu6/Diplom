@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -25,8 +23,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetBirthday;
@@ -39,6 +35,7 @@ import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -118,7 +115,7 @@ public class EditProfile extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) views.avatar);
+                SetImagesGlide.setImageGlide(this, ava, views.avatar);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
@@ -198,7 +195,7 @@ public class EditProfile extends AppCompatActivity {
         views.avatar.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
         views.close.setOnClickListener(v -> {
-            String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
                 new DoCallBack().setValues(this::finish, this, new Object[]{login}).sendToGetCurrentUser();

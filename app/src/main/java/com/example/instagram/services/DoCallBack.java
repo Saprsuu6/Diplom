@@ -1,7 +1,7 @@
 package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -56,12 +56,12 @@ import retrofit2.Response;
 public class DoCallBack implements CallBack {
     @Nullable
     private Runnable runnable;
-    private Context context;
+    private Activity activity;
     private Object[] params;
 
-    public DoCallBack setValues(Runnable runnable, Context context, Object[] params) {
+    public DoCallBack setValues(Runnable runnable, Activity activity, Object[] params) {
         this.runnable = runnable;
-        this.context = context;
+        this.activity = activity;
         this.params = params;
         return this;
     }
@@ -74,7 +74,7 @@ public class DoCallBack implements CallBack {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String responseStr = response.body();
-                        Errors.delete(context, responseStr).show();
+                        Errors.delete(activity, responseStr).show();
                         if (runnable != null) runnable.run();
                     }
                 }
@@ -122,12 +122,12 @@ public class DoCallBack implements CallBack {
                         int indexFrom = responseStr.indexOf(":");
                         String token = responseStr.substring(indexFrom + 1).trim();
                         // save auth sated user info in cache
-                        Cache.saveSP(context, CacheScopes.USER_TOKEN.toString(), token);
+                        Cache.saveSP(activity, CacheScopes.USER_TOKEN.toString(), token);
 
                         if (response.body().contains("0") && runnable != null) {
                             runnable.run();
                         } else {
-                            Toast.makeText(context, "User are not authorized", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(activity, "User are not authorized", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -156,8 +156,8 @@ public class DoCallBack implements CallBack {
                         if (runnable != null) runnable.run();
 
                         // save token
-                        Cache.saveSP(context, CacheScopes.USER_TOKEN.toString(), token.trim());
-                        Errors.registrationUser(context, response.body()).show();
+                        Cache.saveSP(activity, CacheScopes.USER_TOKEN.toString(), token.trim());
+                        Errors.registrationUser(activity, response.body()).show();
                     }
 
 
@@ -178,7 +178,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Errors.forgotPasswordCode(context, response.body()).show();
+                        Errors.forgotPasswordCode(activity, response.body()).show();
                     }
 
 
@@ -203,7 +203,7 @@ public class DoCallBack implements CallBack {
                             int index = response.body().indexOf(":");
                             String code = response.body().substring(index + 1);
                             // save user repair password email
-                            Cache.saveSP(context, CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
+                            Cache.saveSP(activity, CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
                             if (runnable != null) runnable.run();
                         } else {
                             ((Handler) params[1]).postDelayed((Runnable) params[2], 5000L);
@@ -257,14 +257,14 @@ public class DoCallBack implements CallBack {
                     assert strResponse != null;
                     assert response.body() != null;
 
-                    Errors.enterCode(context, response.body()).show();
+                    Errors.enterCode(activity, response.body()).show();
 
                     if (strResponse.contains("1")) {
                         char symbol = strResponse.charAt(strResponse.length() - 1);
                         int attempts = Integer.parseInt(String.valueOf(symbol));
 
                         if (attempts > 0) {
-                            Toast.makeText(context, attempts, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(activity, attempts, Toast.LENGTH_SHORT).show();
                         } else {
                             if (params[2] != null) ((Runnable) params[2]).run();
                         }
@@ -274,7 +274,7 @@ public class DoCallBack implements CallBack {
                     String code = response.body().substring(index + 1);
 
                     // save user repair password email
-                    Cache.saveSP(context, CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
+                    Cache.saveSP(activity, CacheScopes.USER_EMAIL_CODE.toString(), code.trim());
 
                     if (runnable != null) runnable.run();
 
@@ -296,11 +296,11 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     assert response.body() != null;
-                    Errors.afterRestorePassword(context, response.body()).show();
+                    Errors.afterRestorePassword(activity, response.body()).show();
 
                     if (response.body().contains("0")) {
                         // delete unnecessary
-                        Cache.deleteSP(context, CacheScopes.USER_EMAIL_CODE.toString());
+                        Cache.deleteSP(activity, CacheScopes.USER_EMAIL_CODE.toString());
                         if (runnable != null) runnable.run();
                     }
 
@@ -322,7 +322,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NotNull Call<String> call, @NotNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(context, R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -342,7 +342,7 @@ public class DoCallBack implements CallBack {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String responseStr = response.body();
-                        Errors.sendAvatar(context, responseStr).show();
+                        Errors.sendAvatar(activity, responseStr).show();
                     }
                 }
 
@@ -362,14 +362,13 @@ public class DoCallBack implements CallBack {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
-                        String imagePath = Services.BASE_URL + context.getResources().getString(R.string.root_folder) + avaLink;
-
-                         Cache.saveSP(context, CacheScopes.USER_AVA.toString(), imagePath);
+                        String link = GetMediaLink.getMediaLink(activity, avaLink);
+                        Cache.saveSP(activity, CacheScopes.USER_AVA.toString(), link);
 
                         // if imageViews more then one
                         try {
-                            Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) params[1]);
-                            Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) params[2]);
+                            Glide.with(activity.getApplicationContext()).load(link).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) params[1]);
+                            Glide.with(activity.getApplicationContext()).load(link).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) params[2]);
                         } catch (Exception e) {
                             Log.d("DoCallBack: ", e.getMessage());
                         }
@@ -398,12 +397,11 @@ public class DoCallBack implements CallBack {
                             ((ImageView) params[2]).setVisibility(View.GONE);
                             if (runnable != null) runnable.run();
 
-                            TooltipCompat.setTooltipText(((ImageView) params[1]), context.getResources().getString(R.string.user_are_not_exists));
+                            TooltipCompat.setTooltipText(((ImageView) params[1]), activity.getResources().getString(R.string.user_are_not_exists));
                         } else {
-                            String imagePath = Services.BASE_URL + context.getResources().getString(R.string.root_folder) + avaLink;
-
                             // set ava
-                            Glide.with(context).load(imagePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(((ImageView) params[2]));
+                            String link = GetMediaLink.getMediaLink(activity, avaLink);
+                            Glide.with(activity.getApplicationContext()).load(link).diskCacheStrategy(DiskCacheStrategy.ALL).into(((ImageView) params[2]));
 
                             ((ImageView) params[1]).setVisibility(View.GONE);
                             ((ImageView) params[2]).setVisibility(View.VISIBLE);
@@ -464,14 +462,14 @@ public class DoCallBack implements CallBack {
 
                             for (int i = 0; i < logins.length(); i++) {
                                 String login = logins.getString(Integer.toString(i));
-                                TextView taggedPerson = new TextView(context);
+                                TextView taggedPerson = new TextView(activity);
                                 taggedPerson.setTextAppearance(R.style.Text);
                                 taggedPerson.setText(login);
 
                                 // set user page
                                 taggedPerson.setOnClickListener(v1 -> {
                                     try {
-                                        new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{login}).sendToGetCurrentUser();
+                                        new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{login}).sendToGetCurrentUser();
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
@@ -508,7 +506,7 @@ public class DoCallBack implements CallBack {
 
                             // set liked
                             boolean isLiked = object.getBoolean("isLiked");
-                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, context.getTheme()));
+                            ((ImageView) params[2]).setImageDrawable(activity.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()));
                             ((Post) params[4]).setLiked(isLiked);
 
                             // set amount likes
@@ -561,7 +559,7 @@ public class DoCallBack implements CallBack {
 
                             // set saved
                             boolean isSaved = object.getBoolean("isSaved");
-                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
+                            ((ImageView) params[2]).setImageDrawable(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()));
                             ((Post) params[3]).setSaved(isSaved);
                         } catch (JSONException e) {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
@@ -667,7 +665,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(context, R.string.successful_delete, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, R.string.successful_delete, Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -745,7 +743,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Errors.editProfile(context, response.body()).show();
+                        Errors.editProfile(activity, response.body()).show();
                     }
                 }
 
@@ -764,7 +762,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Errors.forgotPasswordCode(context, response.body()).show();
+                        Errors.forgotPasswordCode(activity, response.body()).show();
                     }
                 }
 
@@ -783,7 +781,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Errors.emailCodes(context, response.body()).show();
+                        Errors.emailCodes(activity, response.body()).show();
                     }
                 }
 
@@ -833,7 +831,7 @@ public class DoCallBack implements CallBack {
     }
 
     @Override
-    public void sendToFindPost() {
+    public void  sendToFindPost() {
         if (params != null) {
             Services.sendToFindPost(new Callback<>() {
                 @Override
@@ -877,13 +875,13 @@ public class DoCallBack implements CallBack {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         boolean isSubscribed = Boolean.parseBoolean(response.body());
-                        Cache.saveSP(context, CacheScopes.IS_SUBSCRIBED.toString(), isSubscribed);
+                        Cache.saveSP(activity, CacheScopes.IS_SUBSCRIBED.toString(), isSubscribed);
 
                         if (params[1].getClass() == AppCompatButton.class)
-                            ((AppCompatButton) params[1]).setText(!isSubscribed ? context.getResources().getString(R.string.subscribe_btn) : context.getResources().getString(R.string.unsubscribe_btn));
+                            ((AppCompatButton) params[1]).setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn));
                         else if (params[1].getClass() == AppCompatCheckBox.class) {
                             ((AppCompatCheckBox) params[1]).setChecked(isSubscribed);
-                            ((AppCompatCheckBox) params[1]).setText(!isSubscribed ? context.getResources().getString(R.string.subscribe_btn) : context.getResources().getString(R.string.unsubscribe_btn));
+                            ((AppCompatCheckBox) params[1]).setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn));
                         }
                     }
 
