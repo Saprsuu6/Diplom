@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface GetComments {
-    @GET("/Clickshot/comments")
+    @GET("comments")
     Call<String> STRING_CALL(
             @Query("postId") int postId,
             @Query("amount") int amount

@@ -11,11 +11,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.DAOs.User;
@@ -48,7 +50,7 @@ public class Authorisation extends AppCompatActivity {
         public final CheckBox rememberMe;
         public final ImageView warning;
         public final Button logIn;
-        public final Button showPassword;
+        public final ImageView showPassword;
 
         public Views() {
             fieldForLogin = findViewById(R.id.auth_login);
@@ -69,14 +71,15 @@ public class Authorisation extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authorisation);
 
         views = new Views();
         
         // TODO delete someday
-        views.fieldForLogin.setText("Andry");
-        views.fieldForPassword.setText("MyNewPass123!");
+        views.fieldForLogin.setText("Suslik");
+        views.fieldForPassword.setText("SusAdmin2929!");
 
         setIntents();
 
@@ -141,16 +144,17 @@ public class Authorisation extends AppCompatActivity {
         DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void setListeners() {
         views.showPassword.setOnClickListener(v -> {
             passwordEyeState = !passwordEyeState;
 
             if (passwordEyeState) {
                 views.fieldForPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showPassword.setText(getResources().getString(R.string.hide_password));
+                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
             } else {
                 views.fieldForPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showPassword.setText(getResources().getString(R.string.show_password));
+                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
             }
         });
 
@@ -205,7 +209,6 @@ public class Authorisation extends AppCompatActivity {
 
                     new DoCallBack().setValues(() -> {
                         Cache.saveSP(getApplicationContext(), CacheScopes.USER_PASSWORD.toString(), views.fieldForPassword.getText().toString());
-
                         startActivity(Intents.getNewsList());
                         finish();
                     }, this, new Object[]{jsonObject}).sendToLogIn();

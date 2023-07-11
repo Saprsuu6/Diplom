@@ -107,7 +107,7 @@
     <EditText
         android:id="@+id/to_find_post_text"
         android:visibility="gone"
-        style="@style/Authentication_EditText"
+        style="@style/EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autofillHints="Nickname"
@@ -124,7 +124,7 @@
 
         <EditText
             android:id="@+id/to_find_post_date_from"
-            style="@style/Authentication_EditText"
+            style="@style/EditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -135,7 +135,7 @@
 
         <EditText
             android:id="@+id/to_find_post_date_to"
-            style="@style/Authentication_EditText"
+            style="@style/EditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

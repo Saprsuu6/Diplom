@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
@@ -53,6 +54,7 @@ public class SetBirthday extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_birthday);
 
@@ -127,6 +129,7 @@ public class SetBirthday extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
 
+                    Cache.deleteAppSP(SetBirthday.this);
                     startActivity(Intents.getSetAvatar());
                     RegistrationActivities.deleteActivities();
                 }

@@ -61,6 +61,8 @@ public class ForgotPassword extends AppCompatActivity {
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
+
+            handler.postDelayed(runnable, 5000L);
         };
     }
 

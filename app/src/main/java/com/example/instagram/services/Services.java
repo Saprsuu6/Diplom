@@ -41,11 +41,11 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 public class Services {
-    // TODO set link to tom cat
     // TODO add links to web
-    // link to server /Clickshot/some path/app/profile/Clickshot/getPublicUser/?login=LOGIN_OF_USER
-    // link to server /Clickshot/some path/app/components/Post/Clickshot/getPublicUser/?login=POST_ID
-    public final static String BASE_URL = "https://668d-2a09-bac5-597d-52d-00-84-66.ngrok-free.app/Clickshot/";
+    // link to server /Clickshot/some path/app/profile/getPublicUser/?login=LOGIN_OF_USER
+    // link to server /Clickshot/some path/app/components/Post/getPublicUser/?login=POST_ID
+    // https://tomcat.clickshot.com.ua/Clickshot/
+    public final static String BASE_URL = "https://a45d-2a09-bac1-7500-18-00-84-5a.ngrok-free.app/Clickshot/";
     private final static Retrofit retrofit = MyRetrofit.initializeRetrofit(BASE_URL);
 
     public static void addUser(Callback<String> callback, String body) {

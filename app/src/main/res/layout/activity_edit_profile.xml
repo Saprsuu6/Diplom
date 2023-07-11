@@ -71,7 +71,7 @@
 
                 <EditText
                     android:id="@+id/info_for_name"
-                    style="@style/Authentication_EditText"
+                    style="@style/EditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Login"
@@ -89,7 +89,7 @@
 
                 <EditText
                     android:id="@+id/info_for_surname"
-                    style="@style/Authentication_EditText"
+                    style="@style/EditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Login"
@@ -101,7 +101,7 @@
 
             <EditText
                 android:id="@+id/info_for_phone"
-                style="@style/Authentication_EditText"
+                style="@style/EditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autofillHints="Login"
@@ -127,7 +127,7 @@
 
                 <EditText
                     android:id="@+id/birth_date"
-                    style="@style/Authentication_EditText"
+                    style="@style/EditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Password"
@@ -138,7 +138,7 @@
 
             <EditText
                 android:id="@+id/info_for_bio"
-                style="@style/Authentication_EditText"
+                style="@style/EditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autofillHints="Login"
@@ -164,7 +164,7 @@
 
                 <EditText
                     android:id="@+id/info_for_email"
-                    style="@style/Authentication_EditText"
+                    style="@style/EditText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -191,7 +191,7 @@
 
                 <EditText
                     android:id="@+id/info_for_email_code"
-                    style="@style/Authentication_EditText"
+                    style="@style/EditText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

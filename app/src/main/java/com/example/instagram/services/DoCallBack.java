@@ -77,7 +77,6 @@ public class DoCallBack implements CallBack {
                         Errors.delete(context, responseStr).show();
                         if (runnable != null) runnable.run();
                     }
-
                 }
 
                 @Override
@@ -99,8 +98,6 @@ public class DoCallBack implements CallBack {
                         if (response.isSuccessful() && response.body() != null) {
                             Log.d("sendToLikeUnlikePost: (onResponse)", response.body());
                         }
-
-
                     }
 
                     @Override
@@ -115,6 +112,7 @@ public class DoCallBack implements CallBack {
     @Override
     public void sendToLogIn() {
         if (params != null) {
+            String jsonObject = params[0].toString();
             Services.authorizeUser(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -132,15 +130,13 @@ public class DoCallBack implements CallBack {
                             Toast.makeText(context, "User are not authorized", Toast.LENGTH_SHORT).show();
                         }
                     }
-
-
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                     System.out.println(t.getMessage());
                 }
-            }, params[0].toString());
+            }, jsonObject);
         }
     }
 
@@ -368,7 +364,7 @@ public class DoCallBack implements CallBack {
                         String avaLink = response.body();
                         String imagePath = Services.BASE_URL + context.getResources().getString(R.string.root_folder) + avaLink;
 
-                        Cache.saveSP(context, CacheScopes.USER_AVA.toString(), imagePath);
+                         Cache.saveSP(context, CacheScopes.USER_AVA.toString(), imagePath);
 
                         // if imageViews more then one
                         try {
@@ -514,7 +510,7 @@ public class DoCallBack implements CallBack {
 
                             // set liked
                             boolean isLiked = object.getBoolean("isLiked");
-                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isLiked ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
+                            ((ImageView) params[2]).setImageDrawable(context.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, context.getTheme()));
                             ((Post) params[4]).setLiked(isLiked);
 
                             // set amount likes

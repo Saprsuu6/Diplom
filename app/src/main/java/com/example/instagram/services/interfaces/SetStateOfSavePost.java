@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SetStateOfSavePost {
-    @POST("/Clickshot/save")
+    @POST("save")
     Call<String> STRING_CALL (
             @Body String info
     );

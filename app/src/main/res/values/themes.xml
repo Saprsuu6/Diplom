@@ -5,16 +5,4 @@
         <item name="android:textColorHint">@color/white</item>
         <item name="android:buttonTint">@color/white</item>
     </style>
-
-    <style name="Theme.Instagram.Theme1" parent="Theme.Instagram.System" />
-
-    <style name="Theme.Instagram.Theme2" parent="Theme.Instagram.System" />
-
-    <style name="Theme.Instagram.Theme3" parent="Theme.Instagram.System" />
-
-    <style name="Theme.Instagram.Theme4" parent="Theme.Instagram.System" />
-
-    <style name="Theme.Instagram.Theme5" parent="Theme.Instagram.System" />
-
-    <style name="Theme.Instagram.Theme6" parent="Theme.Instagram.System" />
 </resources>

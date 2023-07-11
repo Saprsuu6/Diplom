@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SetStateOfLikePost {
-    @POST("/Clickshot/like")
+    @POST("like")
     Call<String> STRING_CALL (
             @Body String info
     );

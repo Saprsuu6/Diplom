@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface ChangeEmailSendCode {
-    @GET("/Clickshot/changeEmail")
+    @GET("changeEmail")
     Call<String> STRING_CALL(
             @Query("token") String token,
             @Query("code") String code

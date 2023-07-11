@@ -1,15 +1,21 @@
 package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
@@ -17,11 +23,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import androidx.cardview.widget.CardView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
+import com.google.zxing.WriterException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,11 +38,13 @@ import org.json.JSONObject;
 import java.util.Calendar;
 
 public class PostInDialog {
-    private Context context;
+    private Activity activity;
     private ImageView postLike;
     private ImageView comments;
     private ImageView send;
     private ImageView save;
+    private TextView qrLink;
+    private ImageView qr;
     private ImageView imageContent;
     private VideoView videoContent;
     private TextView amountLikes;
@@ -44,25 +55,59 @@ public class PostInDialog {
     private TextView date;
     // audio
     private AudioController audioController;
+    private CardView audioCard;
     private LinearLayout audioControllerLayout;
     private TextView timeLine;
     private SeekBar seekBar;
     private ImageView playStop;
     private ImageView playPrev;
     private ImageView playNext;
+    private CardView cardViewQr;
+    private LinearLayout buttons;
+    private Button close;
+    private Button delete;
+    private Runnable runable;
 
-    public AlertDialog.Builder getPostDialog(Context context, Post post) throws JSONException {
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.post, null, false);
+    public Runnable getRunable() {
+        return runable;
+    }
 
-        this.context = context;
+    public Button getDelete() {
+        return delete;
+    }
+
+    public Button getClose() {
+        return close;
+    }
+
+    public Dialog getPostDialog(Activity activity, Post post) throws JSONException {
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(activity).inflate(R.layout.post, null, false);
+
+        this.activity = activity;
 
         setViews(view);
         setContent(post);
         setListeners(post);
 
-        return new AlertDialog.Builder(context).setCancelable(false).setView(view).setPositiveButton(context.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> {
+        Dialog dialog = new Dialog(activity);
+        dialog.setCancelable(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setGravity(Gravity.CENTER);
+        dialog.setContentView(view);
+        Window window = dialog.getWindow();
+        window.setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        runable = () -> {
             if (audioController != null) audioController.clearHandler();
+            dialog.dismiss();
+        };
+
+        close.setOnClickListener(v -> {
+            runable.run();
         });
+        return dialog;
     }
 
     private void setViews(View view) {
@@ -71,6 +116,9 @@ public class PostInDialog {
         send = view.findViewById(R.id.send_post);
         save = view.findViewById(R.id.bookmark);
 
+        cardViewQr = view.findViewById(R.id.card_qr);
+        qrLink = view.findViewById(R.id.qr_link);
+        qr = view.findViewById(R.id.qr);
         imageContent = view.findViewById(R.id.image_content);
         videoContent = view.findViewById(R.id.video_content);
         amountLikes = view.findViewById(R.id.amount_likes);
@@ -80,29 +128,35 @@ public class PostInDialog {
         taggedPeopleLayout = view.findViewById(R.id.tagged_people_layout);
         date = view.findViewById(R.id.hours);
 
+        audioCard = view.findViewById(R.id.audio_card);
         audioControllerLayout = view.findViewById(R.id.audio_controller);
         timeLine = view.findViewById(R.id.time_line);
         seekBar = view.findViewById(R.id.seek_bar);
         playStop = view.findViewById(R.id.play_stop);
         playPrev = view.findViewById(R.id.play_prev);
         playNext = view.findViewById(R.id.play_next);
+        buttons = view.findViewById(R.id.buttons_dialog);
+        close = view.findViewById(R.id.close);
+        delete = view.findViewById(R.id.remove);
     }
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     private void setContent(Post post) throws JSONException {
         String mime = post.getMimeType();
-        String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + post.getResourceMedia();
+        String mediaPath = Services.BASE_URL + activity.getString(R.string.root_folder) + post.getResourceMedia();
+
+        buttons.setVisibility(View.VISIBLE);
 
         // region set media content
-        if (mime.contains(context.getString(R.string.mime_image))) {
+        if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
-            Glide.with(context).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
+            Glide.with(activity.getApplicationContext()).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
             imageContent.setVisibility(View.VISIBLE);
-        } else if (mime.contains(context.getString(R.string.mime_video))) {
+        } else if (mime.contains(activity.getString(R.string.mime_video))) {
             // set video
             Uri videoUri = Uri.parse(mediaPath);
 
-            MediaController mediaController = new MediaController(context);
+            MediaController mediaController = new MediaController(activity);
 
             videoContent.setVideoURI(videoUri);
             mediaController.setAnchorView(videoContent);
@@ -112,11 +166,12 @@ public class PostInDialog {
             videoContent.requestFocus();
             videoContent.setOnPreparedListener(mp -> mp.setLooping(true));
             videoContent.setVisibility(View.VISIBLE);
-        } else if (mime.contains(context.getString(R.string.mime_audio))) {
+        } else if (mime.contains(activity.getString(R.string.mime_audio))) {
             // set audio
             Uri audioUri = Uri.parse(mediaPath);
+            audioCard.setVisibility(View.VISIBLE);
             audioControllerLayout.setVisibility(View.VISIBLE);
-            audioController = new AudioController(timeLine, seekBar, playStop, playPrev, playNext, context, audioUri);
+            audioController = new AudioController(timeLine, seekBar, playStop, playPrev, playNext, activity, audioUri);
             audioController.initHandler(new Handler());
         }
 
@@ -134,20 +189,33 @@ public class PostInDialog {
 
         // region set like, save
         if (post.isLiked() == null) {
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+            new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
         } else {
-            postLike.setImageDrawable(context.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
+            postLike.setImageDrawable(activity.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()));
             amountLikes.setText(Integer.toString(post.getLikes()));
         }
 
         if (post.isSaved() == null) {
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
-            new DoCallBack().setValues(null, context, new Object[]{post.getPostId(), login, save, post}).sendToGetIsSaved();
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+            new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, save, post}).sendToGetIsSaved();
         } else {
-            save.setImageDrawable(context.getResources().getDrawable(post.isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
+            save.setImageDrawable(activity.getResources().getDrawable(post.isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()));
         }
         // endregion
+
+        try {
+            qr.setImageBitmap(QRGenerator.generateQR(post.getAuthor()));
+        } catch (WriterException e) {
+            throw new RuntimeException(e);
+        }
+
+        qrLink.setOnClickListener(v -> {
+            cardViewQr.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(() -> {
+                cardViewQr.setVisibility(View.GONE);
+            }, 10000L);
+        });
     }
 
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
@@ -167,7 +235,7 @@ public class PostInDialog {
                 String id = post.getPostId();
                 // region get tagged people
                 try {
-                    new DoCallBack().setValues(null, context, new Object[]{id, taggedPeopleLayout}).sendToGetTaggedPeople();
+                    new DoCallBack().setValues(null, activity, new Object[]{id, taggedPeopleLayout}).sendToGetTaggedPeople();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -182,22 +250,22 @@ public class PostInDialog {
         save.setOnClickListener(v -> {
             if (!post.isSaved()) {
                 post.setSaved(true);
-                save.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
+                save.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()));
             } else {
                 post.setSaved(false);
-                save.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark, context.getTheme()));
+                save.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()));
             }
 
             TransitPost.postsToChangeFromOtherPage.removeIf(toRemove -> toRemove.getPostId().equals(post.getPostId()));
             TransitPost.postsToChangeFromOtherPage.add(post);
 
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
             // region send save
             try {
                 JSONObject jsonObject = Post.getSavedUnsaved(post.getPostId(), login, post.isSaved());
-                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSaveUnsavedPost();
+                jsonObject.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
+                new DoCallBack().setValues(null, activity, new Object[]{jsonObject}).sendToSaveUnsavedPost();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -208,7 +276,7 @@ public class PostInDialog {
             NewsLine.mapPost = new Pair<>(null, post);
             Intent intent = Intents.getComments();
             if (intent != null) {
-                context.startActivity(intent);
+                activity.startActivity(intent);
             }
         });
 
@@ -222,11 +290,11 @@ public class PostInDialog {
         if (!post.isLiked()) {
             post.setLiked(true);
             post.setLikes(post.getLikes() + 1);
-            postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
+            postLike.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()));
         } else {
             post.setLiked(false);
             post.setLikes(post.getLikes() - 1);
-            postLike.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
+            postLike.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()));
         }
 
         TransitPost.postsToChangeFromOtherPage.forEach(postToFind -> {
@@ -236,14 +304,14 @@ public class PostInDialog {
 
         amountLikes.setText(Integer.toString(post.getLikes()));
 
-        String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+        String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
         // region send unlike
         try {
             JSONObject jsonObject = Post.getLikedUnliked(post.getPostId(), login, post.isLiked());
-            jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+            jsonObject.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
             // like unlike post
-            new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToLikeUnlikePost();
+            new DoCallBack().setValues(null, activity, new Object[]{jsonObject}).sendToLikeUnlikePost();
         } catch (JSONException e) {
             Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
         }

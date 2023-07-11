@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface GetIsLiked {
-    @GET("/Clickshot/like")
+    @GET("like")
     Call<String> STRING_CALL (
             @Query("postId") String postId,
             @Query("login") String login

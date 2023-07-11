@@ -42,7 +42,7 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:contentDescription="@string/add_post"
-        android:src="@drawable/like_empty" />
+        android:src="@drawable/heart_for_bottom" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/self_page"

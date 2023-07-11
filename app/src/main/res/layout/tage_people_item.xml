@@ -35,7 +35,7 @@
 
         <EditText
             android:id="@+id/nickname"
-            style="@style/Authentication_EditText"
+            style="@style/EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="Nickname"

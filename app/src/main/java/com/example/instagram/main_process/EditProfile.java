@@ -273,11 +273,14 @@ public class EditProfile extends AppCompatActivity {
             String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
+                handler.removeCallbacks(runnable);
                 // check used link when change email
                 new DoCallBack().setValues(null, this, new Object[]{login, views.confirmCode, handler, runnable}).sendToCheckUsedLickInMailEmail();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
+
+            handler.postDelayed(runnable, 5000L);
         };
     }
 

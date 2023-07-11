@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface DeletePost {
-    @POST("/Clickshot/deletePost")
+    @POST("deletePost")
     Call<String> STRING_CALL (
             @Body String postId
     );

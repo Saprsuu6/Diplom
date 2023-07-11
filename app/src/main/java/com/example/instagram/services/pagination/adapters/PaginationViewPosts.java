@@ -40,6 +40,7 @@ import com.example.instagram.services.OnSwipeListener;
 import com.example.instagram.services.QRGenerator;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
+import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import com.google.zxing.WriterException;
 
 import org.json.JSONException;
@@ -97,6 +98,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             Uri audioUri = Uri.parse(mediaPath);
             holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, context, audioUri);
             holder.audioController.initHandler(new Handler());
+            holder.audioCard.setVisibility(View.VISIBLE);
             holder.audioControllerLayout.setVisibility(View.VISIBLE);
         }
         // endregion
@@ -127,7 +129,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 throw new RuntimeException(e);
             }
         } else {
-            holder.like.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill_gradient : R.drawable.like_empty_gradient, context.getTheme()));
+            holder.like.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, context.getTheme()));
             holder.amountLikes.setText(Integer.toString(data.getLikes()));
         }
 
@@ -177,6 +179,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
         private final LinearLayout postLayout;
+        private final LinearLayout underPostLayout;
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
         private final RelativeLayout mediaContentLayout;
@@ -198,6 +201,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private final ImageView qr;
         // audio
         private AudioController audioController;
+        private final CardView audioCard;
         private final LinearLayout audioControllerLayout;
         private final TextView timeLine;
         private final SeekBar seekBar;
@@ -209,6 +213,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         public ViewHolderPosts(@NonNull View itemView) {
             super(itemView);
 
+            audioCard = itemView.findViewById(R.id.audio_card);
             audioControllerLayout = itemView.findViewById(R.id.audio_controller);
             mediaContentLayout = itemView.findViewById(R.id.media_content_layout);
             timeLine = itemView.findViewById(R.id.time_line);
@@ -220,6 +225,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             cardViewQr = itemView.findViewById(R.id.card_qr);
             qr = itemView.findViewById(R.id.qr);
 
+            underPostLayout = itemView.findViewById(R.id.under_post_layout);
             postLayout = itemView.findViewById(R.id.post_layout);
 
             avaView = itemView.findViewById(R.id.post_author_page);
@@ -323,11 +329,11 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             if (!post.isLiked()) {
                 post.setLiked(true);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() + 1);
-                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill_gradient, context.getTheme()));
+                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill, context.getTheme()));
             } else {
                 post.setLiked(false);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() - 1);
-                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty_gradient, context.getTheme()));
+                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty, context.getTheme()));
             }
 
             postsLibrary.getDataArrayList().get(position).setLiked(post.isLiked());

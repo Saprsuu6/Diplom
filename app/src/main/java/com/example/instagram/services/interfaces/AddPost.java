@@ -10,6 +10,6 @@ import retrofit2.http.Part;
 
 public interface AddPost {
     @Multipart
-    @POST("/Clickshot/addPost")
+    @POST("addPost")
     Call<String> STRING_CALL(@Part("media") RequestBody file, @Nullable @Part("otherInfo") String body);
 }

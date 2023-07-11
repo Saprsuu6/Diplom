@@ -7,6 +7,6 @@ import retrofit2.http.Part;
 
 public interface NewAva {
     @retrofit2.http.Multipart
-    @POST("/Clickshot/ava")
+    @POST("ava")
     Call<String> STRING_CALL(@Part("ava") RequestBody file, @Part("login") String login);
 }

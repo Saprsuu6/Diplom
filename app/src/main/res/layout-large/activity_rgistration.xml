@@ -68,7 +68,7 @@
 
             <EditText
                 android:id="@+id/field_email"
-                style="@style/Authentication_EditText"
+                style="@style/EditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

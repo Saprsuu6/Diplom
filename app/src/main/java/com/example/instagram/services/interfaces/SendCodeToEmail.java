@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface SendCodeToEmail {
-    @POST("/Clickshot/confirm")
+    @POST("confirm")
     Call<String> STRING_CALL(
             @Body String user
     );
