@@ -42,7 +42,6 @@ import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Resources;
 import com.example.instagram.services.Services;
-import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
@@ -107,7 +106,7 @@ public class NewsLine extends AppCompatActivity {
     private Calendar dateFrom;
     private Calendar dateTo;
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint({"UseCompatLoadingForDrawables", "WrongConstant"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,6 +128,11 @@ public class NewsLine extends AppCompatActivity {
         setListeners();
         setIntents();
         UiVisibility.setUiVisibility(NewsLine.this);
+        DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
+
+        AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
+        ThemesBackgrounds.setThemeContent(getResources(), views.changeMainTheme, NewsLine.this);
+        ThemesBackgrounds.loadBackground(NewsLine.this, views.newsLineLayout);
 
         Animation mAnimationDrawable = AnimationUtils.loadAnimation(this, R.anim.rotate);
         views.end.startAnimation(mAnimationDrawable);
@@ -146,25 +150,14 @@ public class NewsLine extends AppCompatActivity {
         new DoCallBack().setValues(null, NewsLine.this, new Object[]{login, views.selfPage}).sendToGetAvaImage();
     }
 
-    @SuppressLint("WrongConstant")
     @Override
     protected void onResume() {
         super.onResume();
 
-        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
-
-        if (ava.equals("")) {
-            try {
-                LoadAvatar();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                SetImagesGlide.setImageGlide(this, ava, views.selfPage);
-            } catch (Exception e) {
-                Log.d("DoCallBack: ", e.getMessage());
-            }
+        try {
+            LoadAvatar();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
@@ -176,12 +169,6 @@ public class NewsLine extends AppCompatActivity {
             pagingView.notifyAdapterToReplacePosts();
             TransitPost.postsToChangeFromOtherPage.clear();
         }
-
-        AppCompatDelegate.setDefaultNightMode(ThemesBackgrounds.theme.getValue());
-        ThemesBackgrounds.setThemeContent(getResources(), views.changeMainTheme, NewsLine.this);
-        ThemesBackgrounds.loadBackground(NewsLine.this, views.newsLineLayout);
-
-        DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
     }
 
     @SuppressLint("NonConstantResourceId")

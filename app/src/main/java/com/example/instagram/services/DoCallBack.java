@@ -362,7 +362,12 @@ public class DoCallBack implements CallBack {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
                         String link = GetMediaLink.getMediaLink(activity, avaLink);
-                        Cache.saveSP(activity, CacheScopes.USER_AVA.toString(), link);
+
+                        try {
+                            Cache.saveSP(activity, params[2].toString() + "." + "authorAvatar", link);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
 
                         // if imageViews more then one
                         try {
@@ -505,14 +510,16 @@ public class DoCallBack implements CallBack {
 
                             // set liked
                             boolean isLiked = object.getBoolean("isLiked");
-                            ((ImageView) params[2]).setImageDrawable(activity.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()));
+                            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), ((ImageView) params[2]));
                             ((Post) params[4]).setLiked(isLiked);
 
                             // set amount likes
                             int likes = object.getInt("amountLikes");
-                            ((TextView) params[3]).setText(Integer.toString(likes));
+                            Resources.setText(Integer.toString(likes), ((TextView) params[3]));
                             ((Post) params[4]).setLikes(likes);
 
+                            Cache.saveSP(activity, params[0].toString() + "." + "isLiked", isLiked);
+                            Cache.saveSP(activity, params[0].toString() + "." + "likes", likes);
                             if (runnable != null) runnable.run();
                         } catch (JSONException e) {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
@@ -558,8 +565,10 @@ public class DoCallBack implements CallBack {
 
                             // set saved
                             boolean isSaved = object.getBoolean("isSaved");
-                            ((ImageView) params[2]).setImageDrawable(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()));
+                            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), ((ImageView) params[2]));
                             ((Post) params[3]).setSaved(isSaved);
+
+                            Cache.saveSP(activity, params[0].toString() + "." + "isSaved", isSaved);
                         } catch (JSONException e) {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
                         }

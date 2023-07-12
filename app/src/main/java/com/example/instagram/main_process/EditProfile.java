@@ -32,6 +32,7 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
+import com.example.instagram.services.GetFileInfo;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
@@ -106,20 +107,10 @@ public class EditProfile extends AppCompatActivity {
         views = new Views();
         views.birthday.setInputType(InputType.TYPE_NULL);
 
-        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
-
-        if (ava.equals("")) {
-            try {
-                LoadAvatar();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                SetImagesGlide.setImageGlide(this, ava, views.avatar);
-            } catch (Exception e) {
-                Log.d("DoCallBack: ", e.getMessage());
-            }
+        try {
+            LoadAvatar();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         setListeners();
@@ -304,15 +295,10 @@ public class EditProfile extends AppCompatActivity {
                 Uri selectedImageUri = data.getData();
 
                 extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+                long fileSizeInBytes = GetFileInfo.getSize(this, selectedImageUri);
 
                 try {
-                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri);
-                    Cache.saveSP(this, CacheScopes.USER_AVA.toString(), selectedImageUri.toString());
-
-                    if (imageBytes == null) {
-                        Resources.getToast(this, getString(R.string.tiramisu_or_better)).show();
-                    }
-
+                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri, fileSizeInBytes);
                     views.avatar.setImageURI(selectedImageUri);
                 } catch (IOException e) {
                     Log.d("IOException: ", e.getMessage());

@@ -23,7 +23,7 @@ public class OpenMedia {
 
 
         if (permission) {
-            Intent intent = null;
+            Intent intent;
 
             if (type == MediaTypes.IMAGE) {
                 intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

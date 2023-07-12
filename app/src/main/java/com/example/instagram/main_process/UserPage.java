@@ -4,11 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,7 +32,6 @@ import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.QRGenerator;
 import com.example.instagram.services.Resources;
-import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.Settings;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
@@ -72,7 +72,7 @@ public class UserPage extends AppCompatActivity {
         public final Button subscribe;
         public final Button editProfile;
         public final CardView cardViewQr;
-
+        public final ImageView end;
         public Views() {
             swipeRefreshLayout = findViewById(R.id.swipe_refresh);
             flexboxForCellsLayout = findViewById(R.id.layout);
@@ -102,6 +102,7 @@ public class UserPage extends AppCompatActivity {
             subscribe = findViewById(R.id.subscribe);
             editProfile = findViewById(R.id.edit_profile);
             qr = findViewById(R.id.qr);
+            end = findViewById(R.id.end);
         }
     }
 
@@ -137,6 +138,9 @@ public class UserPage extends AppCompatActivity {
         } catch (WriterException e) {
             throw new RuntimeException(e);
         }
+
+        Animation mAnimationDrawable = AnimationUtils.loadAnimation(this, R.anim.rotate);
+        views.end.startAnimation(mAnimationDrawable);
     }
 
     @Override
@@ -153,21 +157,10 @@ public class UserPage extends AppCompatActivity {
             }
         }
 
-        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
-
-        if (ava.equals("")) {
-            try {
-                LoadAvatar();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                SetImagesGlide.setImageGlide(this, ava, views.avatar);
-                SetImagesGlide.setImageGlide(this, ava, views.selfPage);
-            } catch (Exception e) {
-                Log.d("DoCallBack: ", e.getMessage());
-            }
+        try {
+            LoadAvatar();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         if (views != null) {

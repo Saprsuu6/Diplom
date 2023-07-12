@@ -75,6 +75,10 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         String mime = data.getMimeType();
         String link = GetMediaLink.getMediaLink(activity, data.getResourceMedia());
 
+        // cache
+        String postId = Cache.loadStringSP(activity, data.getPostId());
+        Cache.saveSP(activity, data.getPostId(), data.getPostId());
+
         // region set media content
         if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
@@ -98,15 +102,30 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         }
         // endregion
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        if (!postId.equals("")) {
+            String authorAvatarFromCache = Cache.loadStringSP(activity, data.getPostId() + "." + "authorAvatar");
+            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.avaView);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView, data.getPostId()}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            Cache.saveSP(activity, data.getPostId() + "." + "authorAvatar", link);
         }
         // endregion
         // region set like, save
-        if (postsLibrary.getDataArrayList().get(position).isLiked() == null) {
-            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+        String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+
+        if (!postId.equals("")) {
+            boolean isLiked = Cache.loadBoolSP(activity, data.getPostId() + "." + "isLiked");
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), holder.like);
+            holder.post.setLiked(isLiked);
+
+            int likes = Cache.loadIntSP(activity, data.getPostId() + "." + "likes");
+            Resources.setText(Integer.toString(likes), holder.amountLikes);
+            holder.post.setLikes(likes);
+        } else {
             try {
                 new DoCallBack().setValues(() -> {
                     String token = Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString());
@@ -123,20 +142,19 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), holder.like);
-            Resources.setText(Integer.toString(data.getLikes()), holder.amountLikes);
         }
 
-        if (postsLibrary.getDataArrayList().get(position).isSaved() == null) {
-            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+
+        if (!postId.equals("")) {
+            boolean isSaved = Cache.loadBoolSP(activity, data.getPostId() + "." + "isSaved");
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), holder.bookmark);
+            holder.post.setSaved(isSaved);
+        } else {
             try {
                 new DoCallBack().setValues(null, activity, new Object[]{data.getPostId(), login, holder.bookmark, holder.post}).sendToGetIsSaved();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), holder.bookmark);
         }
         // endregion
         // region set other text info

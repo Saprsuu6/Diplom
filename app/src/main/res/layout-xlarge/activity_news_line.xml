@@ -166,8 +166,6 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <include layout="@layout/end" />
-
                 <io.supercharge.shimmerlayout.ShimmerLayout
                     android:id="@+id/skeleton"
                     app:shimmer_animation_duration="1200"
@@ -189,6 +187,8 @@
                     </LinearLayout>
 
                 </io.supercharge.shimmerlayout.ShimmerLayout>
+
+                <include layout="@layout/end" />
 
             </LinearLayout>
 

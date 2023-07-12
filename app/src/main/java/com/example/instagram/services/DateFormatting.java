@@ -12,16 +12,12 @@ import java.util.Date;
 public class DateFormatting {
     @SuppressLint("SimpleDateFormat")
     public static void setSimpleDateFormat(String locale) {
-        switch (locale) {
-            case "EN":
-            case "US":
-                simpleDateFormatWithoutTime = new SimpleDateFormat("dd MMMM yyyy");
-                simpleDateFormatWithTime = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
-                break;
-            case "UK":
-                simpleDateFormatWithoutTime = new SimpleDateFormat("dd.MM.yyyy");
-                simpleDateFormatWithTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                break;
+        if ("UK".equals(locale)) {
+            simpleDateFormatWithoutTime = new SimpleDateFormat("dd.MM.yyyy");
+            simpleDateFormatWithTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        } else { // EN, US
+            simpleDateFormatWithoutTime = new SimpleDateFormat("dd MMMM yyyy");
+            simpleDateFormatWithTime = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
         }
     }
 

@@ -77,12 +77,12 @@
 
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/avatar"
-                        android:layout_width="0dp"
+                        android:layout_width="150dp"
+                        android:layout_margin="10dp"
                         android:layout_height="150dp"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/avatar"
                         android:scaleType="centerCrop"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/avatar"
                         android:src="@color/for_skeleton" />
 
                     <include layout="@layout/qr" />
@@ -294,8 +294,6 @@
                             tools:itemCount="0"
                             tools:listitem="@layout/list_item_post_self_page_cell" />
 
-                        <include layout="@layout/end" />
-
                         <io.supercharge.shimmerlayout.ShimmerLayout
                             android:id="@+id/skeleton"
                             android:layout_width="match_parent"
@@ -318,6 +316,8 @@
                             </LinearLayout>
 
                         </io.supercharge.shimmerlayout.ShimmerLayout>
+
+                        <include layout="@layout/end" />
 
                     </LinearLayout>
                 </LinearLayout>

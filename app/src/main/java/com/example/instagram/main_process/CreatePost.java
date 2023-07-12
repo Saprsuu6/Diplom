@@ -135,7 +135,6 @@ public class CreatePost extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setStringResources();
         ThemesBackgrounds.loadBackground(this, views.createPostLayout);
     }
 
@@ -146,7 +145,7 @@ public class CreatePost extends AppCompatActivity {
     }
 
     private void setToTagPeople() {
-        Dialog permissionsDialog = tagPeople.getToTagPeople();
+        Dialog permissionsDialog = tagPeople.getToTagPeople(() -> Resources.setText(getResources().getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople, views.tagPeople));
         permissionsDialog.show();
     }
 
@@ -172,11 +171,7 @@ public class CreatePost extends AppCompatActivity {
                 Bitmap selectedImage;
 
                 try {
-                    mediaBytes = ReadBytesForMedia.readBytes(this, selectedUri);
-
-                    if (mediaBytes == null) {
-                        Resources.getToast(this, getString(R.string.tiramisu_or_better)).show();
-                    }
+                    mediaBytes = ReadBytesForMedia.readBytes(this, selectedUri, fileSizeInBytes);
 
                     JSONObject metadata = new JSONObject();
                     metadata.put("Extension", extension);
@@ -310,23 +305,6 @@ public class CreatePost extends AppCompatActivity {
             finish();
         });
 
-        views.photoView.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
-        views.videoView.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.VIDEO, someActivityResultLauncher));
-        views.audioControllerLinearLayout.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.AUDIO, someActivityResultLauncher));
-
         views.tagPeople.setOnClickListener(v -> setToTagPeople());
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void setStringResources() {
-        if (PostToAdd.taggedPeople != null) {
-            Resources.setText(getResources().getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople, views.tagPeople);
-        }
-
-        if (selectedDate != null) {
-            Resources.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate), views.postponePublication);
-        } else {
-            Resources.setText(getResources().getString(R.string.postpone_publication), views.postponePublication);
-        }
     }
 }

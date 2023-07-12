@@ -75,22 +75,12 @@ public class Comments extends AppCompatActivity {
         views = new Views();
 
         setListeners();
-
-        String ava = Cache.loadStringSP(this, CacheScopes.USER_AVA.toString());
         UiVisibility.setUiVisibility(this);
 
-        if (ava.equals("")) {
-            try {
-                LoadAvatar();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                SetImagesGlide.setImageGlide(this, ava, views.authorAva);
-            } catch (Exception e) {
-                Log.d("DoCallBack: ", e.getMessage());
-            }
+        try {
+            LoadAvatar();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this);

@@ -176,8 +176,6 @@
                     tools:itemCount="1"
                     tools:listitem="@layout/list_item_post" />
 
-                <include layout="@layout/end" />
-
                 <io.supercharge.shimmerlayout.ShimmerLayout
                     android:id="@+id/skeleton"
                     android:layout_width="match_parent"
@@ -199,6 +197,8 @@
                     </LinearLayout>
 
                 </io.supercharge.shimmerlayout.ShimmerLayout>
+
+                <include layout="@layout/end" />
 
             </LinearLayout>
 

@@ -79,7 +79,6 @@
     <string name="video_btn">Відео</string>
     <string name="image_btn">Зображення</string>
     <string name="audio_btn">Аудіо</string>
-    <string name="tiramisu_or_better">Має бути версія "Тірамісу" або новіша</string>
     <string name="find_post">Почніть вводити, щоб знайти публікацію</string>
     <string name="successful_user_update">Вдачне оновлення</string>
     <string name="confirmed">Підтвержен</string>

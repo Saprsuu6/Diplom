@@ -40,7 +40,7 @@ public class TagPeople {
     }
 
     @SuppressLint({"InflateParams", "SetTextI18n"})
-    public Dialog getToTagPeople() {
+    public Dialog getToTagPeople(Runnable runnable) {
         TextView taggedPeople = activity.findViewById(R.id.tag_people);
 
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.tag_people, null, true);
@@ -97,6 +97,7 @@ public class TagPeople {
             String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
             com.example.instagram.services.Resources.setText(resources.getString(R.string.tag_people), taggedPeople);
             CreatePost.PostToAdd.taggedPeople = namesWithoutDuplicates;
+            if (runnable != null) runnable.run();
             dialog.dismiss();
         });
 

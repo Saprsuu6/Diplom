@@ -85,8 +85,8 @@ public class Authorisation extends AppCompatActivity {
         views = new Views();
 
         // TODO delete someday
-        views.fieldForLogin.setText("Andry");
-        views.fieldForPassword.setText("MyNewPass123!");
+        views.fieldForLogin.setText("Suslik");
+        views.fieldForPassword.setText("SusAdmin2929!");
 
         setIntents();
 

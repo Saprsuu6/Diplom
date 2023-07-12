@@ -144,7 +144,6 @@
     <string name="video_btn">video</string>
     <string name="image_btn">image</string>
     <string name="audio_btn">audio</string>
-    <string name="tiramisu_or_better">You should have version equals or better then Android 13 (Tiramisu)</string>
     <string name="settings">Settings</string>
     <string name="languages_title">Choose language:</string>
     <string name="news_line_end_title">Guess this is the end…</string>

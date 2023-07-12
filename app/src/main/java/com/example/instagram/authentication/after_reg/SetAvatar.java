@@ -21,6 +21,7 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindExtension;
+import com.example.instagram.services.GetFileInfo;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
@@ -81,7 +82,6 @@ public class SetAvatar extends AppCompatActivity {
         });
 
         views.skip.setOnClickListener(v -> {
-            Cache.saveSP(this, CacheScopes.USER_AVA.toString(), "");
             startActivity(Intents.getNewsList());
             finish();
         });
@@ -95,14 +95,10 @@ public class SetAvatar extends AppCompatActivity {
                 Uri selectedImageUri = data.getData();
 
                 extension = FindExtension.getExtension(selectedImageUri, getApplicationContext());
+                long fileSizeInBytes = GetFileInfo.getSize(this, selectedImageUri);
 
                 try {
-                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri);
-
-                    if (imageBytes == null) {
-                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
-                    }
-
+                    imageBytes = ReadBytesForMedia.readBytes(this, selectedImageUri, fileSizeInBytes);
                     sendAvaToBackEnd();
                 } catch (IOException | JSONException e) {
                     throw new RuntimeException(e);

@@ -1,57 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottom_menu"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/main_theme_bottom"
     android:elevation="0dp"
+    android:columnCount="5"
     android:orientation="horizontal"
     android:padding="5dp">
 
     <ImageView
         android:id="@+id/home"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
+        android:layout_columnWeight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:contentDescription="@string/home"
         android:src="@drawable/home" />
 
     <ImageView
         android:id="@+id/search"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
+        android:layout_columnWeight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:contentDescription="@string/search"
         android:src="@drawable/search" />
 
     <ImageView
         android:id="@+id/add_post"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
+        android:layout_columnWeight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:contentDescription="@string/notifications"
         android:src="@drawable/add_post" />
 
     <ImageView
         android:id="@+id/notifications"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
+        android:layout_columnWeight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:contentDescription="@string/add_post"
         android:src="@drawable/heart_for_bottom" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/self_page"
-        android:layout_width="0dp"
+        android:layout_width="40dp"
+        android:layout_columnWeight="1"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:contentDescription="@string/avatar"
         android:scaleType="centerCrop"
         android:src="@color/for_skeleton" />
 
-</LinearLayout>
+</GridLayout>
