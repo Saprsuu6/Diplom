@@ -880,16 +880,15 @@ public class DoCallBack implements CallBack {
                     if (response.isSuccessful() && response.body() != null) {
                         boolean isSubscribed = Boolean.parseBoolean(response.body());
                         Cache.saveSP(activity, CacheScopes.IS_SUBSCRIBED.toString(), isSubscribed);
+                        Cache.saveSP(activity, params[2].toString() + "." + "isSubscribed", isSubscribed);
 
                         if (params[1].getClass() == AppCompatButton.class)
-                            ((AppCompatButton) params[1]).setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn));
+                            Resources.setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn), ((AppCompatButton) params[1]));
                         else if (params[1].getClass() == AppCompatCheckBox.class) {
                             ((AppCompatCheckBox) params[1]).setChecked(isSubscribed);
-                            ((AppCompatCheckBox) params[1]).setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn));
+                            Resources.setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn), ((AppCompatCheckBox) params[1]));
                         }
                     }
-
-
                 }
 
                 @Override

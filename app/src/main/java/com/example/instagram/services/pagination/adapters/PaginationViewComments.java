@@ -18,10 +18,12 @@ import com.example.instagram.DAOs.Comment;
 import com.example.instagram.DAOs.CommentsLibrary;
 import com.example.instagram.R;
 import com.example.instagram.main_process.Comments;
+import com.example.instagram.services.Cache;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 
 import org.json.JSONException;
 
@@ -50,14 +52,22 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
     public void onBindViewHolder(@NonNull PaginationViewComments.ViewHolderComments holder, int position) {
         Comment data = commentsLibrary.getCommentList().get(position);
 
+        // cache
+        String commentId = Cache.loadStringSP(activity, data.getCommentId());
+        Cache.saveSP(activity, data.getPostId(), data.getCommentId());
+
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        if (!commentId.equals("")) {
+            String authorAvatarFromCache = Cache.loadStringSP(activity, data.getPostId() + "." + "authorAvatar");
+            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.ava);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
-
 
         // region set content of comment
         Resources.setText(DateFormatting.formatDate(data.getDateOfAdd()), holder.date);

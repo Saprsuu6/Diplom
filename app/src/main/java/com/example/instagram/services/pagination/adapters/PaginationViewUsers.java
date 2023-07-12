@@ -20,6 +20,7 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,11 +49,26 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
     public void onBindViewHolder(@NonNull PaginationViewUsers.ViewHolderUser holder, int position) {
         User data = usersLibrary.getDataArrayList().get(position);
 
+        // cache
+        String userLogin = Cache.loadStringSP(activity, data.getLogin());
+        Cache.saveSP(activity, data.getLogin(), data.getLogin());
+
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        if (!userLogin.equals("")) {
+            String authorAvatarFromCache = null;
+            try {
+                authorAvatarFromCache = Cache.loadStringSP(activity, data.getLogin() + "." + "authorAvatar");
+            }
+            catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.avaView);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView, data.getLogin()}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
 
@@ -62,11 +78,17 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
 
         String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
         if (!data.getLogin().equals(login)) {
-            try {
-                JSONObject jsonObject = User.getJSONToKnowIsMeSubscribed(login, data.getLogin());
-                new DoCallBack().setValues(null, activity, new Object[]{jsonObject, holder.subscribe}).sendToGetIsMeSubscribed();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+            if (!userLogin.equals("")) {
+                boolean isSubscribed = Cache.loadBoolSP(activity, data.getLogin() + "." + "isSubscribed");
+                holder.subscribe.setChecked(isSubscribed);
+                Resources.setText(!isSubscribed ? activity.getResources().getString(R.string.subscribe_btn) : activity.getResources().getString(R.string.unsubscribe_btn), holder.subscribe);
+            } else {
+                try {
+                    JSONObject jsonObject = User.getJSONToKnowIsMeSubscribed(login, data.getLogin());
+                    new DoCallBack().setValues(null, activity, new Object[]{jsonObject, holder.subscribe, data.getLogin()}).sendToGetIsMeSubscribed();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
             Resources.setVisibility(View.GONE, holder.subscribe);
@@ -96,6 +118,7 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
                 subscribe.setChecked(subscribe.isChecked());
                 Resources.setText(!subscribe.isChecked() ? activity.getString(R.string.subscribe_btn) : activity.getString(R.string.unsubscribe_btn), subscribe);
                 String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
+                Cache.saveSP(activity, loginView.getText() + "." + "isSubscribed", subscribe.isChecked());
 
                 try {
                     JSONObject jsonObject = User.getJSONToSubscribe(login, loginView.getText().toString(), subscribe.isChecked());
