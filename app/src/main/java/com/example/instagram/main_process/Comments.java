@@ -23,6 +23,7 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
@@ -132,7 +133,7 @@ public class Comments extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
             case R.id.change_comment:
-                views.message.setText(Comments.mapComment.second.getContent());
+                Resources.setText(Comments.mapComment.second.getContent(), views.message);
                 Comments.mapComment.second.setToChange(true);
                 break;
         }
@@ -183,7 +184,7 @@ public class Comments extends AppCompatActivity {
             } else {
                 CommentToAdd.postId = NewsLine.mapPost.second.getPostId();
                 CommentToAdd.content = views.message.getText().toString().trim();
-                Toast.makeText(this, getString(R.string.comment_has_been_sent), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.comment_has_been_sent)).show();
                 JSONObject jsonObject;
 
                 try {
@@ -205,7 +206,7 @@ public class Comments extends AppCompatActivity {
             views.message.getText().clear();
 
             if (views.replyLayout.getVisibility() == View.VISIBLE) {
-                views.replyLayout.setVisibility(View.GONE);
+                Resources.setVisibility(View.GONE, views.replyLayout);
                 Comments.toReply = null;
             }
         });
@@ -222,7 +223,7 @@ public class Comments extends AppCompatActivity {
 
         // gone reply
         views.closeReply.setOnClickListener(v -> {
-            views.replyLayout.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.replyLayout);
             Comments.toReply = null;
         });
         // back

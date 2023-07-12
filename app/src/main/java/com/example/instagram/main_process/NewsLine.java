@@ -40,6 +40,7 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.TransitPost;
@@ -114,7 +115,7 @@ public class NewsLine extends AppCompatActivity {
 
         // region find users
         try {
-            findUser = new FindUser(NewsLine.this, NewsLine.this);
+            findUser = new FindUser(NewsLine.this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -234,7 +235,7 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void chooseTheme() {
-        Dialog permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, getResources(), NewsLine.this, views.newsLineLayout);
+        Dialog permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, views.newsLineLayout);
         permissionsDialog.show();
     }
 
@@ -325,7 +326,7 @@ public class NewsLine extends AppCompatActivity {
                 dateFrom = Calendar.getInstance();
                 dateFrom.set(year1, month1, dayOfMonth);
                 DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-                views.toFindPostFrom.setText(DateFormatting.formatDate(dateFrom));
+                Resources.setText(DateFormatting.formatDate(dateFrom), views.toFindPostFrom);
 
                 try {
                     showAgain();
@@ -343,7 +344,7 @@ public class NewsLine extends AppCompatActivity {
                 dateTo = Calendar.getInstance();
                 dateTo.set(year12, month12, dayOfMonth);
                 DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-                views.toFindPostTo.setText(DateFormatting.formatDate(dateTo));
+                Resources.setText(DateFormatting.formatDate(dateTo), views.toFindPostTo);
 
                 try {
                     showAgain();
@@ -362,12 +363,12 @@ public class NewsLine extends AppCompatActivity {
                 switch (position) {
                     case 0:
                     case 1:
-                        views.toFindPostText.setVisibility(View.VISIBLE);
-                        views.findPostDateLayout.setVisibility(View.GONE);
+                        Resources.setVisibility(View.VISIBLE, views.toFindPostText);
+                        Resources.setVisibility(View.GONE, views.findPostDateLayout);
                         break;
                     case 2:
-                        views.findPostDateLayout.setVisibility(View.VISIBLE);
-                        views.toFindPostText.setVisibility(View.GONE);
+                        Resources.setVisibility(View.GONE, views.toFindPostText);
+                        Resources.setVisibility(View.VISIBLE, views.findPostDateLayout);
                         break;
 
                 }

@@ -16,6 +16,7 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.RegistrationActivities;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.UiVisibility;
 
 public class SetName extends AppCompatActivity {
@@ -62,7 +63,7 @@ public class SetName extends AppCompatActivity {
                 RegistrationActivities.activityList.add(this);
                 startActivity(Intents.getSetPassword());
             } else {
-                Toast.makeText(this, getResources().getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getResources().getString(R.string.error_send_password1)).show();
             }
         });
 

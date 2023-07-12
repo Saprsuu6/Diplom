@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -43,6 +42,7 @@ import com.example.instagram.services.Intents;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.TagPeople;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
@@ -165,7 +165,7 @@ public class CreatePost extends AppCompatActivity {
                 String mime = Post.getMimeTypeFromExtension(extension);
 
                 if (mime.contains(getString(R.string.mime_video)) && fileSizeInMB > 1) {
-                    Toast.makeText(CreatePost.this, getString(R.string.size_restriction), Toast.LENGTH_SHORT).show();
+                    Resources.getToast(this, getString(R.string.size_restriction)).show();
                     return;
                 }
 
@@ -175,7 +175,7 @@ public class CreatePost extends AppCompatActivity {
                     mediaBytes = ReadBytesForMedia.readBytes(this, selectedUri);
 
                     if (mediaBytes == null) {
-                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
+                        Resources.getToast(this, getString(R.string.tiramisu_or_better)).show();
                     }
 
                     JSONObject metadata = new JSONObject();
@@ -183,7 +183,7 @@ public class CreatePost extends AppCompatActivity {
 
                     if (mime.contains(getString(R.string.mime_image))) {
                         //set image
-                        views.imageCard.setVisibility(View.VISIBLE);
+                        Resources.setVisibility(View.VISIBLE, views.imageCard);
                         selectedImage = BitmapFactory.decodeByteArray(mediaBytes, 0, mediaBytes.length);
 
                         if (selectedImage != null) {
@@ -192,7 +192,7 @@ public class CreatePost extends AppCompatActivity {
                         }
                     } else if (mime.contains(getString(R.string.mime_video))) {
                         // set video
-                        views.videoCard.setVisibility(View.VISIBLE);
+                        Resources.setVisibility(View.VISIBLE, views.videoCard);
                         views.videoView.setVideoURI(selectedUri);
                         views.videoView.requestFocus();
                         views.videoView.start();
@@ -200,8 +200,8 @@ public class CreatePost extends AppCompatActivity {
                         metadata.put("Duration", GFG.convert(views.videoView.getDuration()));
                     } else if (mime.contains(getString(R.string.mime_audio))) {
                         // set audio
-                        views.audioControllerLinearLayout.setVisibility(View.VISIBLE);
-                        views.audioCard.setVisibility(View.VISIBLE);
+                        Resources.setVisibility(View.VISIBLE, views.audioControllerLinearLayout);
+                        Resources.setVisibility(View.VISIBLE, views.audioCard);
                         audioController = new AudioController(views.timeLine, views.seekBar, views.playStop, views.playPrev, views.playNext, getApplicationContext(), selectedUri);
                         audioController.initHandler(new Handler());
                         metadata.put("Duration", GFG.convert(audioController.getDuration()));
@@ -258,9 +258,9 @@ public class CreatePost extends AppCompatActivity {
             selectedDate.set(year1, month1, dayOfMonth);
 
             if (year >= year1 && month >= month1 && dayOfMonth >= day) {
-                views.postponePublication.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDateWithTime(selectedDate));
+                Resources.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDateWithTime(selectedDate), views.postponePublication);
             } else {
-                Toast.makeText(this, R.string.birthday_error_date, Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.birthday_error_date)).show();
             }
         };
 
@@ -278,7 +278,7 @@ public class CreatePost extends AppCompatActivity {
 
         views.done.setOnClickListener(v -> {
             if (mediaBytes == null || mediaBytes.length == 0) {
-                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.error_no_photo));
                 audioController.clearHandler();
                 finish();
                 return;
@@ -320,13 +320,13 @@ public class CreatePost extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
         if (PostToAdd.taggedPeople != null) {
-            views.tagPeople.setText(getResources().getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople);
+            Resources.setText(getResources().getString(R.string.tag_people) + ": " + PostToAdd.taggedPeople, views.tagPeople);
         }
 
         if (selectedDate != null) {
-            views.postponePublication.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate));
+            Resources.setText(getResources().getString(R.string.postpone_publication) + ": " + DateFormatting.formatDate(selectedDate), views.postponePublication);
         } else {
-            views.postponePublication.setText(getResources().getString(R.string.postpone_publication));
+            Resources.setText(getResources().getString(R.string.postpone_publication), views.postponePublication);
         }
     }
 }

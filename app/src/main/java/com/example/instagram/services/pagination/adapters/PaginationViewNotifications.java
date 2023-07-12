@@ -31,6 +31,7 @@ import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.GetMediaLink;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.PostInDialog;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterNotifications;
 
@@ -83,8 +84,8 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
             throw new RuntimeException(e);
         }
 
-        holder.date.setText(DateFormatting.formatDate(data.getDate()));
-        holder.notificationLayout.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging));
+        Resources.setText(DateFormatting.formatDate(data.getDate()), holder.date);
+        Resources.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging), holder.notificationLayout);
     }
 
     private void setResources(@NonNull ViewHolderNotification holder, Notification data) throws JSONException, ParseException {
@@ -124,8 +125,8 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                 break;
         }
 
-        holder.message.setText(message);
-        holder.comment.setEllipsize(TextUtils.TruncateAt.END);
+        Resources.setText(message, holder.message);
+        Resources.setEllipsize(TextUtils.TruncateAt.END, holder.comment);
         holder.comment.setOnClickListener(v -> {
             holder.comment.setMaxLines(holder.comment.getMaxLines() == 1 ? 100 : 1);
         });
@@ -149,7 +150,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                 // region set media content
                 if (mime.contains(activity.getString(R.string.mime_image))) {
                     //set image
-                    holder.image.setVisibility(View.VISIBLE);
+                    Resources.setVisibility(View.VISIBLE, holder.image);
                     SetImagesGlide.setImageGlide(activity, link, holder.image);
                     holder.image.setOnClickListener(v -> {
                         try {
@@ -160,7 +161,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                     });
                 } else if (mime.contains(activity.getString(R.string.mime_video))) {
                     // set video
-                    holder.video.setVisibility(View.VISIBLE);
+                    Resources.setVisibility(View.VISIBLE, holder.video);
                     Uri videoUri = Uri.parse(link);
                     holder.video.setVideoURI(videoUri);
                     holder.video.setOnPreparedListener(mp -> mp.setLooping(true));
@@ -176,9 +177,9 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                     });
                 } else if (mime.contains(activity.getString(R.string.mime_audio))) {
                     // set audio
-                    holder.audio.setVisibility(View.VISIBLE);
+                    Resources.setVisibility(View.VISIBLE, holder.audio);
+                    Resources.setDrawableIntoImageView(activity.getDrawable(R.drawable.play_cell), holder.audio);
                     holder.audio.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    holder.audio.setImageDrawable(activity.getDrawable(R.drawable.play_cell));
 
                     holder.audio.setOnClickListener(v -> {
                         try {
@@ -192,11 +193,11 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
         }
     }
 
-    private void setCommentContent(@NonNull ViewHolderNotification holder, Notification data) throws JSONException {
+    private void setCommentContent(@NonNull ViewHolderNotification holder, Notification data) {
         if (data.getCommentId() != null) {
             new DoCallBack().setValues(() -> {
-                holder.comment.setVisibility(View.VISIBLE);
-                holder.comment.setText(PaginationViewNotifications.publicComment.getContent());
+                Resources.setVisibility(View.VISIBLE, holder.comment);
+                Resources.setText(PaginationViewNotifications.publicComment.getContent(), holder.comment);
             }, activity, new Object[]{data.getCommentId()}).sendToGetCommentById();
         }
     }
@@ -227,12 +228,12 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
                             }
 
                             handler.removeCallbacks(this);
-                            delete.setText(activity.getString(R.string.remove_post));
+                            Resources.setText(activity.getString(R.string.remove_post), delete);
                             if (postInDialog.getRunnable() != null)
                                 postInDialog.getRunnable().run();
                         }
                         timer[0]--;
-                        delete.setText(timer[0] + " " + activity.getString(R.string.remove_post));
+                        Resources.setText(timer[0] + " " + activity.getString(R.string.remove_post), delete);
                         handler.postDelayed(this, 1000L);
                     }
                 };
@@ -253,7 +254,7 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
 
                     close.setOnClickListener(v12 -> {
                         handler.removeCallbacks(runnable);
-                        delete.setText(activity.getString(R.string.remove_post));
+                        Resources.setText(activity.getString(R.string.remove_post), delete);
                         if (postInDialog.getRunnable() != null) postInDialog.getRunnable().run();
                     });
                 });

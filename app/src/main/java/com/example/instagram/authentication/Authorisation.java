@@ -21,6 +21,7 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
+import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.Animation;
 import com.example.instagram.services.Cache;
@@ -30,6 +31,7 @@ import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.MyRetrofit;
 import com.example.instagram.services.Permissions;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.Services;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
@@ -156,10 +158,10 @@ public class Authorisation extends AppCompatActivity {
 
             if (passwordEyeState) {
                 views.fieldForPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.hide, getTheme()),  views.showPassword);
             } else {
                 views.fieldForPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.show, getTheme()),  views.showPassword);
             }
         });
 
@@ -167,15 +169,15 @@ public class Authorisation extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validateUserName(text, getResources());
                     setValidationError(false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -184,15 +186,15 @@ public class Authorisation extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validatePassword(text, getResources());
                     setValidationError(false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, Authorisation.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, Authorisation.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -221,7 +223,7 @@ public class Authorisation extends AppCompatActivity {
                     setValidationError(true, exception.getMessage());
                 }
             } else {
-                Toast.makeText(this, getResources().getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getResources().getString(R.string.error_send_password1)).show();
             }
         });
 
@@ -247,10 +249,10 @@ public class Authorisation extends AppCompatActivity {
 
     private void setValidationError(boolean temp, String message) {
         if (temp) {
-            views.warning.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, views.warning);
             Animation.getAnimations(views.warning).start();
         } else {
-            views.warning.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.warning);
             Animation.getAnimations(views.warning).stop();
         }
 

@@ -27,7 +27,7 @@ public class PagingAdapterComments extends PagingAdapter {
         PaginationCurrentForAllComments.resetCurrent();
 
         // initialise adapter
-        paginationAdapter = new PaginationViewComments(activity, activity, commentsLibrary);
+        paginationAdapter = new PaginationViewComments(activity, commentsLibrary);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -66,7 +66,7 @@ public class PagingAdapterComments extends PagingAdapter {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationViewComments(activity, activity, commentsLibrary);
+        paginationAdapter = new PaginationViewComments(activity, commentsLibrary);
         recyclerView.setAdapter(paginationAdapter);
     }
 

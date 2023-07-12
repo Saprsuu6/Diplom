@@ -23,6 +23,7 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -80,10 +81,10 @@ public class CreateNewPassword extends AppCompatActivity {
 
             if (passwordEyeState) {
                 views.fieldPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.hide, getTheme()), views.showPassword);
             } else {
                 views.fieldPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.show, getTheme()), views.showPassword);
             }
         });
 
@@ -92,10 +93,10 @@ public class CreateNewPassword extends AppCompatActivity {
 
             if (passwordEyeStateRepeat) {
                 views.fieldRepeatPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                views.showRepeatPassword.setImageDrawable(getResources().getDrawable(R.drawable.hide, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.hide, getTheme()), views.showRepeatPassword);
             } else {
                 views.fieldRepeatPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                views.showRepeatPassword.setImageDrawable(getResources().getDrawable(R.drawable.show, getTheme()));
+                Resources.setDrawableIntoImageView(getResources().getDrawable(R.drawable.show, getTheme()), views.showRepeatPassword);
             }
         });
 
@@ -103,23 +104,23 @@ public class CreateNewPassword extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validatePassword(text, getResources());
                     setValidationError(false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
 
                 if (views.fieldRepeatPassword.getText().toString().equals(editText.getText().toString())) {
                     setValidationError(false, "");
-                    views.fieldRepeatPassword.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), views.fieldRepeatPassword);
                 } else {
                     setValidationError(true, getResources().getString(R.string.password_repeat_error));
-                    views.fieldRepeatPassword.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), views.fieldRepeatPassword);
                 }
             }
         });
@@ -128,14 +129,14 @@ public class CreateNewPassword extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 if (editText.getText().toString().equals(views.fieldPassword.getText().toString())) {
                     setValidationError(false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } else {
                     setValidationError(true, getResources().getString(R.string.password_repeat_error));
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, CreateNewPassword.this.getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -167,7 +168,7 @@ public class CreateNewPassword extends AppCompatActivity {
                     setValidationError(true, exception.getMessage());
                 }
             } else {
-                Toast.makeText(this, getResources().getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getResources().getString(R.string.error_send_password1)).show();
             }
         });
 
@@ -179,10 +180,10 @@ public class CreateNewPassword extends AppCompatActivity {
 
     private void setValidationError(boolean temp, String message) {
         if (temp) {
-            views.warning.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, views.warning);
             Animation.getAnimations(views.warning).start();
         } else {
-            views.warning.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.warning);
             Animation.getAnimations(views.warning).stop();
         }
 

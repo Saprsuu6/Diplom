@@ -19,6 +19,7 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,8 +57,8 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
         // endregion
 
         // set name nickname
-        holder.loginView.setText(data.getLogin());
-        holder.nameView.setText(data.getNickName());
+        Resources.setText(data.getLogin(), holder.loginView);
+        Resources.setText(data.getNickName(), holder.nameView);
 
         String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
         if (!data.getLogin().equals(login)) {
@@ -68,7 +69,7 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
                 throw new RuntimeException(e);
             }
         } else {
-            holder.subscribe.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, holder.subscribe);
         }
     }
 
@@ -93,7 +94,7 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
 
             subscribe.setOnClickListener(v -> {
                 subscribe.setChecked(subscribe.isChecked());
-                subscribe.setText(!subscribe.isChecked() ? activity.getString(R.string.subscribe_btn) : activity.getString(R.string.unsubscribe_btn));
+                Resources.setText(!subscribe.isChecked() ? activity.getString(R.string.subscribe_btn) : activity.getString(R.string.unsubscribe_btn), subscribe);
                 String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
                 try {

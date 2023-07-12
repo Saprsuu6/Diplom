@@ -35,6 +35,7 @@ import com.example.instagram.services.GetMediaLink;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.OnSwipeListener;
 import com.example.instagram.services.QRGenerator;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
 import com.google.zxing.WriterException;
@@ -77,23 +78,23 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         // region set media content
         if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
+            Resources.setVisibility(View.VISIBLE, holder.contentImg);
             SetImagesGlide.setImageGlide(activity, link, holder.contentImg);
-            holder.contentImg.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_video))) {
             // set video
             Uri videoUri = Uri.parse(link);
+            Resources.setVisibility(View.VISIBLE, holder.contentVideo);
             holder.contentVideo.setVideoURI(videoUri);
             holder.contentVideo.setOnPreparedListener(mp -> mp.setLooping(true));
             holder.contentVideo.start();
             holder.contentVideo.requestFocus();
-            holder.contentVideo.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_audio))) {
             // set audio
             Uri audioUri = Uri.parse(link);
+            Resources.setVisibility(View.VISIBLE, holder.audioCard);
+            Resources.setVisibility(View.VISIBLE, holder.audioControllerLayout);
             holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, activity, audioUri);
             holder.audioController.initHandler(new Handler());
-            holder.audioCard.setVisibility(View.VISIBLE);
-            holder.audioControllerLayout.setVisibility(View.VISIBLE);
         }
         // endregion
         // region send request to get avatar
@@ -123,8 +124,8 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 throw new RuntimeException(e);
             }
         } else {
-            holder.like.setImageDrawable(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()));
-            holder.amountLikes.setText(Integer.toString(data.getLikes()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), holder.like);
+            Resources.setText(Integer.toString(data.getLikes()), holder.amountLikes);
         }
 
         if (postsLibrary.getDataArrayList().get(position).isSaved() == null) {
@@ -135,13 +136,13 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 throw new RuntimeException(e);
             }
         } else {
-            holder.bookmark.setImageDrawable(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), holder.bookmark);
         }
         // endregion
         // region set other text info
-        holder.login.setText(data.getAuthor());
-        holder.authorNickname.setText(data.getAuthor());
-        holder.description.setText(data.getDescription());
+        Resources.setText(data.getAuthor(), holder.login);
+        Resources.setText(data.getAuthor(), holder.authorNickname);
+        Resources.setText(data.getDescription(), holder.description);
 
         try {
             holder.qr.setImageBitmap(QRGenerator.generateQR(data.getAuthor()));
@@ -150,16 +151,17 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         }
 
         holder.qrLink.setOnClickListener(v -> {
-            holder.cardViewQr.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, holder.cardViewQr);
             new Handler().postDelayed(() -> holder.cardViewQr.setVisibility(View.GONE), 10000L);
         });
 
         holder.description.setOnClickListener(v -> holder.description.setMaxLines(holder.description.getMaxLines() == 1 ? 100 : 1));
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
-        holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
+        Resources.setText(DateFormatting.formatDate(calendar.getTime()), holder.hours);
         // endregion
-        holder.postLayout.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging));
+
+        Resources.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging), holder.postLayout);
     }
 
     @Override
@@ -316,11 +318,11 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             if (!post.isLiked()) {
                 post.setLiked(true);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() + 1);
-                like.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()), like);
             } else {
                 post.setLiked(false);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() - 1);
-                like.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()), like);
             }
 
             postsLibrary.getDataArrayList().get(position).setLiked(post.isLiked());
@@ -346,10 +348,10 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             int position = getAdapterPosition();
             if (!post.isSaved()) {
                 post.setSaved(true);
-                bookmark.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()), bookmark);
             } else {
                 post.setSaved(false);
-                bookmark.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()), bookmark);
             }
 
             postsLibrary.getDataArrayList().get(position).setSaved(post.isSaved());

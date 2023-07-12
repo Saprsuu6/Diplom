@@ -30,6 +30,7 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.GetMediaLink;
 import com.example.instagram.services.PostInDialog;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
@@ -118,15 +119,14 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
             }
         }
 
-        holder.flexboxLayout.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging));
+        Resources.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging), holder.flexboxLayout);
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private ImageView setImageForAudio() {
         ImageView image = new ImageView(activity);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image.setImageDrawable(activity.getDrawable(R.drawable.play_cell));
-
+        Resources.setDrawableIntoImageView(activity.getDrawable(R.drawable.play_cell), image);
         return image;
     }
 
@@ -135,7 +135,6 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
         String link = GetMediaLink.getMediaLink(activity, data.getResourceMedia());
         SetImagesGlide.setImageGlide(activity, link, image);
-
         return image;
     }
 
@@ -179,11 +178,11 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                                 }
 
                                 handler.removeCallbacks(this);
-                                delete.setText(activity.getString(R.string.remove_post));
+                                Resources.setText(activity.getString(R.string.remove_post), delete);
                                 if(postInDialog.getRunnable() != null) postInDialog.getRunnable().run();
                             }
                             timer[0]--;
-                            delete.setText(timer[0] + " " + activity.getString(R.string.remove_post));
+                            Resources.setText(timer[0] + " " + activity.getString(R.string.remove_post), delete);
                             handler.postDelayed(this, 1000L);
                         }
                     };
@@ -204,7 +203,7 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
 
                     close.setOnClickListener(v12 -> {
                         handler.removeCallbacks(runnable);
-                        delete.setText(activity.getString(R.string.remove_post));
+                        Resources.setText(activity.getString(R.string.remove_post), delete);
                         if(postInDialog.getRunnable() != null) postInDialog.getRunnable().run();
                     });
                 });

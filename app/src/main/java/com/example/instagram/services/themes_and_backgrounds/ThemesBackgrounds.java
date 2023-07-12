@@ -6,14 +6,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.drawable.ColorDrawable;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,6 +17,7 @@ import android.widget.RadioButton;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
+import com.example.instagram.services.GetDialog;
 
 public class ThemesBackgrounds {
 
@@ -33,8 +29,8 @@ public class ThemesBackgrounds {
         return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
-    public static Dialog getThemeDialog(Context context, Resources resources, Activity activity, LinearLayout setBackground) {
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.choose_theme, null, true);
+    public static Dialog getThemeDialog(Activity activity, LinearLayout setBackground) {
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(activity).inflate(R.layout.choose_theme, null, true);
         setListeners(activity, view, setBackground);
 
         Button close = view.findViewById(R.id.close);
@@ -42,19 +38,9 @@ public class ThemesBackgrounds {
         Point point = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(point);
 
-        Dialog dialog = new Dialog(activity);
-        dialog.setCancelable(false);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.getWindow().setGravity(Gravity.CENTER);
-        dialog.setContentView(view);
-        Window window = dialog.getWindow();
-        window.setLayout(point.x / 2, LinearLayout.LayoutParams.WRAP_CONTENT);
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Dialog dialog = GetDialog.getDialog(activity, view);
 
-        close.setOnClickListener(v -> {
-            dialog.dismiss();
-        });
+        close.setOnClickListener(v -> dialog.dismiss());
 
         return dialog;
     }
@@ -174,9 +160,9 @@ public class ThemesBackgrounds {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    public static void setThemeContent(Resources resources, ImageView imageView, Context context) {
+    public static void setThemeContent(Resources resources, ImageView imageView, Context activity) {
         imageView.setImageDrawable(ThemesBackgrounds.isNight(resources)
-                ? resources.getDrawable(R.drawable.sun, context.getTheme())
-                : resources.getDrawable(R.drawable.moon, context.getTheme()));
+                ? resources.getDrawable(R.drawable.sun, activity.getTheme())
+                : resources.getDrawable(R.drawable.moon, activity.getTheme()));
     }
 }

@@ -22,6 +22,7 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.GetEthernetInfo;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.RegistrationActivities;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -83,15 +84,15 @@ public class Registration extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validateEmail(text, views.emailName.getText().toString(), getResources());
                     setValidationError(false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(true, exception.getMessage());
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -123,10 +124,10 @@ public class Registration extends AppCompatActivity {
 
     private void setValidationError(boolean temp, String message) {
         if (temp) {
-            views.warning.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, views.warning);
             Animation.getAnimations(views.warning).start();
         } else {
-            views.warning.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.warning);
             Animation.getAnimations(views.warning).stop();
         }
 

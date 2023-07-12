@@ -35,6 +35,7 @@ import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
@@ -151,15 +152,15 @@ public class EditProfile extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validateEmail(text, "", getResources());
                     setValidationError(views.warningEmail, false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(views.warningEmail, true, getResources().getString(R.string.error_send_password1));
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -285,10 +286,10 @@ public class EditProfile extends AppCompatActivity {
 
     private void setValidationError(View view, boolean temp, String message) {
         if (temp) {
-            view.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, view);
             Animation.getAnimations(view).start();
         } else {
-            view.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, view);
             Animation.getAnimations(view).stop();
         }
 
@@ -309,7 +310,7 @@ public class EditProfile extends AppCompatActivity {
                     Cache.saveSP(this, CacheScopes.USER_AVA.toString(), selectedImageUri.toString());
 
                     if (imageBytes == null) {
-                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
+                        Resources.getToast(this, getString(R.string.tiramisu_or_better)).show();
                     }
 
                     views.avatar.setImageURI(selectedImageUri);
@@ -323,7 +324,7 @@ public class EditProfile extends AppCompatActivity {
     private void sendAvaToBackEnd() throws JSONException {
         if (imageBytes != null) {
             if (imageBytes.length == 0) {
-                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.error_no_photo)).show();
                 return;
             }
         } else {

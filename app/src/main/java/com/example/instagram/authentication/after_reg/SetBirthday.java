@@ -24,6 +24,7 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.RegistrationActivities;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.UiVisibility;
 
 import org.json.JSONException;
@@ -134,7 +135,7 @@ public class SetBirthday extends AppCompatActivity {
                     RegistrationActivities.deleteActivities();
                 }
             } else {
-                Toast.makeText(this, getResources().getString(R.string.error_send_password1), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, this.getResources().getString(R.string.error_send_password1)).show();
             }
         });
 
@@ -149,7 +150,7 @@ public class SetBirthday extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
         if (selectedDate != null) {
-            views.setBirthdayField.setText(views.setBirthdayField.getText() + ": " + DateFormatting.formatDate(selectedDate));
+            Resources.setText(views.setBirthdayField.getText() + ": " + DateFormatting.formatDate(selectedDate), views.setBirthdayField);
         }
     }
     // endregion

@@ -5,17 +5,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -62,15 +57,7 @@ public class TagPeople {
         addItem(general, itemToTag);
         // endregion
 
-        Dialog dialog = new Dialog(activity);
-        dialog.setCancelable(false);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.getWindow().setGravity(Gravity.CENTER);
-        dialog.setContentView(view);
-        Window window = dialog.getWindow();
-        window.setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Dialog dialog = GetDialog.getDialog(activity, view);
 
         close.setOnClickListener(v -> {
             LinearLayout tagPeople = view.findViewById(R.id.tag_people);
@@ -108,8 +95,7 @@ public class TagPeople {
             // endregion
 
             String namesWithoutDuplicates = String.join(" ", namesWithoutDuplicatesArray);
-            taggedPeople.setText(resources.getString(R.string.tag_people) + ": " + namesWithoutDuplicates);
-
+            com.example.instagram.services.Resources.setText(resources.getString(R.string.tag_people), taggedPeople);
             CreatePost.PostToAdd.taggedPeople = namesWithoutDuplicates;
             dialog.dismiss();
         });
@@ -144,8 +130,7 @@ public class TagPeople {
         AnimationDrawable animationDrawable = (AnimationDrawable) error.getBackground();
         animationDrawable.setExitFadeDuration(4000);
 
-        login.setHint(resources.getString(R.string.tag_people_item));
-
+        com.example.instagram.services.Resources.setHintIntoEditText(resources.getString(R.string.tag_people_item), login);
         setValidators(login, ava, error, animationDrawable);
 
         general.addView(itemToTag, 0);

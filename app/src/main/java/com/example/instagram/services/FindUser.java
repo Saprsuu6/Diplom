@@ -2,17 +2,15 @@ package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.app.Dialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -26,7 +24,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class FindUser {
-    private final Context context;
     private final Activity activity;
     private final View view;
     private EditText search;
@@ -35,37 +32,35 @@ public class FindUser {
     private Boolean isSubscribers;
 
     @SuppressLint("InflateParams")
-    public FindUser(Context context, Activity activity) throws JSONException {
-        this.context = context;
+    public FindUser(Activity activity) throws JSONException {
         this.activity = activity;
-
-        view = LayoutInflater.from(context).inflate(R.layout.search_users, null, true);
+        view = LayoutInflater.from(activity).inflate(R.layout.search_users, null, true);
     }
 
     @SuppressLint("InflateParams")
-    public AlertDialog.Builder getToFindUser(@Nullable Boolean isSubscribers) throws JSONException {
+    public Dialog getToFindUser(@Nullable Boolean isSubscribers) throws JSONException {
         this.isSubscribers = isSubscribers;
 
-        ThemesBackgrounds.loadBackground(activity, ((LinearLayout) view));
+        ThemesBackgrounds.loadBackground(activity, view);
         search = view.findViewById(R.id.nickname);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
-        search.setHint(context.getString(R.string.find_user));
+        Resources.setHintIntoEditText(activity.getString(R.string.find_user), search);
 
+        Dialog dialog = GetDialog.getDialog(activity, view);
+
+        Button close = view.findViewById(R.id.close);
+        close.setOnClickListener(v -> {
+            ViewGroup vGroup = (ViewGroup) view.getParent();
+            vGroup.removeView(view);
+            dialog.dismiss();
+        });
         setListeners();
 
-        if (isSubscribers == null){
+        if (isSubscribers == null) {
             showAgain();
         }
 
-        return new AlertDialog.Builder(context).setCancelable(false).setNegativeButton(context.getString(R.string.close), (dialog, which) -> closeDialog(dialog)).setView(view);
-    }
-
-    private void closeDialog(DialogInterface dialog) {
-        ViewGroup vGroup = (ViewGroup) view.getParent();
-        vGroup.removeView(view);
-
-        dialog.cancel();
-        dialog.dismiss();
+        return dialog;
     }
 
     private void showAgain() throws JSONException {
@@ -85,7 +80,6 @@ public class FindUser {
         // TODO send unnecessary param selfPageUserLogin
 
         paramsJSON = new JSONObject();
-
         paramsJSON.put("login", search.getText());
 
         bodyJSON = new JSONObject();
@@ -128,7 +122,7 @@ public class FindUser {
                 }
             });
         } else {
-            search.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, search);
 
             try {
                 JSONObject jsonObject = new JSONObject();

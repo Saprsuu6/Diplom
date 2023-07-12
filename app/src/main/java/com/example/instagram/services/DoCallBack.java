@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -127,7 +126,7 @@ public class DoCallBack implements CallBack {
                         if (response.body().contains("0") && runnable != null) {
                             runnable.run();
                         } else {
-                            Toast.makeText(activity, "User are not authorized", Toast.LENGTH_SHORT).show();
+                            Resources.getToast(activity, activity.getString(R.string.user_not_authorised)).show();
                         }
                     }
                 }
@@ -264,7 +263,7 @@ public class DoCallBack implements CallBack {
                         int attempts = Integer.parseInt(String.valueOf(symbol));
 
                         if (attempts > 0) {
-                            Toast.makeText(activity, attempts, Toast.LENGTH_SHORT).show();
+                            Resources.getToast(activity, String.valueOf(attempts)).show();
                         } else {
                             if (params[2] != null) ((Runnable) params[2]).run();
                         }
@@ -322,7 +321,7 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NotNull Call<String> call, @NotNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(activity, R.string.successfully_loaded_0, Toast.LENGTH_SHORT).show();
+                        Resources.getToast(activity, activity.getString(R.string.successfully_loaded_0)).show();
                     }
                 }
 
@@ -665,10 +664,8 @@ public class DoCallBack implements CallBack {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(activity, R.string.successful_delete, Toast.LENGTH_SHORT).show();
+                        Resources.getToast(activity, activity.getString(R.string.successful_delete)).show();
                     }
-
-
                 }
 
                 @Override
