@@ -125,6 +125,17 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             int likes = Cache.loadIntSP(activity, data.getPostId() + "." + "likes");
             Resources.setText(Integer.toString(likes), holder.amountLikes);
             holder.post.setLikes(likes);
+
+            String token = Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString());
+            try {
+                JSONObject jsonObjectDelete = Post.getJSONToDeletePost(data.getPostId(), token);
+                JSONObject jsonObjectLU = Post.getJSONToLikeUnlikePost(data.getPostId(), data.getAuthor(), holder.post.isLiked());
+                jsonObjectLU.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
+                // set swipe or double touch
+                holder.mediaContentLayout.setOnTouchListener(new OnSwipeListener(activity, holder.mediaContentLayout, new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(position), activity, new Object[]{jsonObjectDelete}), new DoCallBack().setValues(holder::likeUnlike, activity, new Object[]{jsonObjectLU}), data.getAuthor()));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             try {
                 new DoCallBack().setValues(() -> {
