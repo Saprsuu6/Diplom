@@ -1,7 +1,7 @@
 <resources>
     <!--    https://tomcat.clickshot.com.ua/Clickshot/-->
-    <string name="root_media_folder" translatable="false">https://4682-2a09-bac1-7560-18-00-84-5c.ngrok-free.app/Clickshot/media/</string>
-    <string name="link_tomcat" translatable="false">https://4682-2a09-bac1-7560-18-00-84-5c.ngrok-free.app/Clickshot/</string>
+    <string name="root_media_folder" translatable="false">https://tomcat.clickshot.com.ua/Clickshot/media/</string>
+    <string name="link_tomcat" translatable="false">https://tomcat.clickshot.com.ua/Clickshot/</string>
 
     <string name="empty_news" translatable="false">emptyNews</string>
     <string name="add_to_tag_people" translatable="false">addToTagPeople</string>
