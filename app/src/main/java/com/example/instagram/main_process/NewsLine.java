@@ -169,6 +169,12 @@ public class NewsLine extends AppCompatActivity {
             pagingView.notifyAdapterToReplacePosts();
             TransitPost.postsToChangeFromOtherPage.clear();
         }
+
+        try {
+            showAgain();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -360,10 +366,14 @@ public class NewsLine extends AppCompatActivity {
 
                 }
 
-                try {
-                    showAgain();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                if (view != null) {
+                    if (view.isPressed()) {
+                        try {
+                            showAgain();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
 

@@ -573,8 +573,6 @@ public class DoCallBack implements CallBack {
                             Log.d("sendToGetIsLiked: (onResponse)", e.getMessage());
                         }
                     }
-
-
                 }
 
                 @Override

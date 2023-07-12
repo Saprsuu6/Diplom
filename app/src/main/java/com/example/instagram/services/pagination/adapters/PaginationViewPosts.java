@@ -144,7 +144,6 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             }
         }
 
-
         if (!postId.equals("")) {
             boolean isSaved = Cache.loadBoolSP(activity, data.getPostId() + "." + "isSaved");
             Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), holder.bookmark);
@@ -343,6 +342,8 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()), like);
             }
 
+            Cache.saveSP(activity, post.getPostId() + "." + "likes", post.getLikes());
+            Cache.saveSP(activity, post.getPostId() + "." + "isLiked", post.isLiked());
             postsLibrary.getDataArrayList().get(position).setLiked(post.isLiked());
             notifyItemChanged(position);
 
@@ -372,6 +373,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()), bookmark);
             }
 
+            Cache.saveSP(activity, post.getPostId() + "." + "isSaved", post.isSaved());
             postsLibrary.getDataArrayList().get(position).setSaved(post.isSaved());
             notifyItemChanged(position);
 

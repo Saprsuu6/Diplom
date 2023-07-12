@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
@@ -123,11 +124,13 @@ public class PostInDialog {
         delete = view.findViewById(R.id.remove);
     }
 
-    @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
+    @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n", "ClickableViewAccessibility"})
     private void setContent(Post post) throws JSONException {
         String mime = post.getMimeType();
         String link = GetMediaLink.getMediaLink(activity, post.getResourceMedia());
         buttons.setVisibility(View.VISIBLE);
+
+        String postId = Cache.loadStringSP(activity, post.getPostId());
 
         // region set media content
         if (mime.contains(activity.getString(R.string.mime_image))) {
@@ -168,19 +171,26 @@ public class PostInDialog {
         // endregion
 
         // region set like, save
-        if (post.isLiked() == null) {
+        if (!postId.equals("")) {
+            boolean isLiked = Cache.loadBoolSP(activity, post.getPostId() + "." + "isLiked");
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isLiked ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), postLike);
+            post.setLiked(isLiked);
+
+            int likes = Cache.loadIntSP(activity, post.getPostId() + "." + "likes");
+            Resources.setText(Integer.toString(likes), amountLikes);
+            post.setLikes(likes);
+        } else {
             String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
-        } else {
-            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), postLike);
-            Resources.setText(Integer.toString(post.getLikes()), amountLikes);
         }
 
-        if (post.isSaved() == null) {
+        if (!postId.equals("")) {
+            boolean isSaved = Cache.loadBoolSP(activity, post.getPostId() + "." + "isSaved");
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(isSaved ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), save);
+            post.setSaved(isSaved);
+        } else {
             String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, save, post}).sendToGetIsSaved();
-        } else {
-            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(post.isLiked() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), save);
         }
         // endregion
 
@@ -232,6 +242,8 @@ public class PostInDialog {
                 Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()), save);
             }
 
+            Cache.saveSP(activity, post.getPostId() + "." + "isSaved", post.isSaved());
+
             TransitPost.postsToChangeFromOtherPage.removeIf(toRemove -> toRemove.getPostId().equals(post.getPostId()));
             TransitPost.postsToChangeFromOtherPage.add(post);
 
@@ -272,6 +284,9 @@ public class PostInDialog {
             post.setLikes(post.getLikes() - 1);
             Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()), postLike);
         }
+
+        Cache.saveSP(activity, post.getPostId() + "." + "likes", post.getLikes());
+        Cache.saveSP(activity, post.getPostId() + "." + "isLiked", post.isLiked());
 
         TransitPost.postsToChangeFromOtherPage.forEach(postToFind -> {
             if (postToFind.getPostId().equals(post.getPostId()))
