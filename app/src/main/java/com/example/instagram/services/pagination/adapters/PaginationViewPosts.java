@@ -2,7 +2,6 @@ package com.example.instagram.services.pagination.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -20,12 +19,9 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
@@ -35,12 +31,13 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
+import com.example.instagram.services.GetMediaLink;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.OnSwipeListener;
 import com.example.instagram.services.QRGenerator;
-import com.example.instagram.services.Services;
+import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
-import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 import com.google.zxing.WriterException;
 
 import org.json.JSONException;
@@ -49,7 +46,6 @@ import org.json.JSONObject;
 import java.util.Calendar;
 
 public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPosts.ViewHolderPosts> {
-    private final Context context;
     private final Activity activity;
     private final PostsLibrary postsLibrary;
     private final PagingAdapterPosts pagingView;
@@ -58,9 +54,8 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         return postsLibrary;
     }
 
-    public PaginationViewPosts(@Nullable Activity activity, Context context, PostsLibrary postsLibrary, PagingAdapterPosts pagingView) {
+    public PaginationViewPosts(Activity activity, PostsLibrary postsLibrary, PagingAdapterPosts pagingView) {
         this.activity = activity;
-        this.context = context;
         this.postsLibrary = postsLibrary;
         this.pagingView = pagingView;
     }
@@ -78,76 +73,76 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         Post data = postsLibrary.getDataArrayList().get(position);
         holder.post = data;
         String mime = data.getMimeType();
-        String mediaPath = Services.BASE_URL + context.getString(R.string.root_folder) + data.getResourceMedia();
+        String link = GetMediaLink.getMediaLink(activity, data.getResourceMedia());
 
         // region set media content
-        if (mime.contains(context.getString(R.string.mime_image))) {
+        if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
-            Glide.with(context).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.contentImg);
-            holder.contentImg.setVisibility(View.VISIBLE);
-        } else if (mime.contains(context.getString(R.string.mime_video))) {
+            Resources.setVisibility(View.VISIBLE, holder.contentImg);
+            SetImagesGlide.setImageGlide(activity, link, holder.contentImg);
+        } else if (mime.contains(activity.getString(R.string.mime_video))) {
             // set video
-            Uri videoUri = Uri.parse(mediaPath);
+            Uri videoUri = Uri.parse(link);
+            Resources.setVisibility(View.VISIBLE, holder.contentVideo);
             holder.contentVideo.setVideoURI(videoUri);
             holder.contentVideo.setOnPreparedListener(mp -> mp.setLooping(true));
             holder.contentVideo.start();
             holder.contentVideo.requestFocus();
-            holder.contentVideo.setVisibility(View.VISIBLE);
-        } else if (mime.contains(context.getString(R.string.mime_audio))) {
+        } else if (mime.contains(activity.getString(R.string.mime_audio))) {
             // set audio
-            Uri audioUri = Uri.parse(mediaPath);
-            holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, context, audioUri);
+            Uri audioUri = Uri.parse(link);
+            Resources.setVisibility(View.VISIBLE, holder.audioCard);
+            Resources.setVisibility(View.VISIBLE, holder.audioControllerLayout);
+            holder.audioController = new AudioController(holder.timeLine, holder.seekBar, holder.playStop, holder.playPrev, holder.playNext, activity, audioUri);
             holder.audioController.initHandler(new Handler());
-            holder.audioCard.setVisibility(View.VISIBLE);
-            holder.audioControllerLayout.setVisibility(View.VISIBLE);
         }
         // endregion
         // region send request to get avatar
         try {
-            new DoCallBack().setValues(null, context, new Object[]{data.getAuthor(), holder.avaView}).sendToGetAvaImage();
+            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView}).sendToGetAvaImage();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
         // endregion
         // region set like, save
         if (postsLibrary.getDataArrayList().get(position).isLiked() == null) {
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             try {
                 new DoCallBack().setValues(() -> {
-                    String token = Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString());
+                    String token = Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString());
                     try {
                         JSONObject jsonObjectDelete = Post.getJSONToDeletePost(data.getPostId(), token);
                         JSONObject jsonObjectLU = Post.getJSONToLikeUnlikePost(data.getPostId(), data.getAuthor(), holder.post.isLiked());
-                        jsonObjectLU.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+                        jsonObjectLU.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
                         // set swipe or double touch
-                        holder.mediaContentLayout.setOnTouchListener(new OnSwipeListener(context, holder.mediaContentLayout, new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(position), context, new Object[]{jsonObjectDelete}), new DoCallBack().setValues(holder::likeUnlike, context, new Object[]{jsonObjectLU}), data.getAuthor()));
+                        holder.mediaContentLayout.setOnTouchListener(new OnSwipeListener(activity, holder.mediaContentLayout, new DoCallBack().setValues(() -> pagingView.notifyAdapterToClearByPosition(position), activity, new Object[]{jsonObjectDelete}), new DoCallBack().setValues(holder::likeUnlike, activity, new Object[]{jsonObjectLU}), data.getAuthor()));
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
-                }, context, new Object[]{data.getPostId(), login, holder.like, holder.amountLikes, holder.post}).sendToGetIsLikedForDialogPost();
+                }, activity, new Object[]{data.getPostId(), login, holder.like, holder.amountLikes, holder.post}).sendToGetIsLikedForDialogPost();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            holder.like.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, context.getTheme()));
-            holder.amountLikes.setText(Integer.toString(data.getLikes()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), holder.like);
+            Resources.setText(Integer.toString(data.getLikes()), holder.amountLikes);
         }
 
         if (postsLibrary.getDataArrayList().get(position).isSaved() == null) {
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             try {
-                new DoCallBack().setValues(null, context, new Object[]{data.getPostId(), login, holder.bookmark, holder.post}).sendToGetIsSaved();
+                new DoCallBack().setValues(null, activity, new Object[]{data.getPostId(), login, holder.bookmark, holder.post}).sendToGetIsSaved();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            holder.bookmark.setImageDrawable(context.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, context.getTheme()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(postsLibrary.getDataArrayList().get(position).isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), holder.bookmark);
         }
         // endregion
         // region set other text info
-        holder.login.setText(data.getAuthor());
-        holder.authorNickname.setText(data.getAuthor());
-        holder.description.setText(data.getDescription());
+        Resources.setText(data.getAuthor(), holder.login);
+        Resources.setText(data.getAuthor(), holder.authorNickname);
+        Resources.setText(data.getDescription(), holder.description);
 
         try {
             holder.qr.setImageBitmap(QRGenerator.generateQR(data.getAuthor()));
@@ -156,20 +151,17 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         }
 
         holder.qrLink.setOnClickListener(v -> {
-            holder.cardViewQr.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> {
-                holder.cardViewQr.setVisibility(View.GONE);
-            }, 10000L);
+            Resources.setVisibility(View.VISIBLE, holder.cardViewQr);
+            new Handler().postDelayed(() -> holder.cardViewQr.setVisibility(View.GONE), 10000L);
         });
 
-        holder.description.setOnClickListener(v -> {
-            holder.description.setMaxLines(holder.description.getMaxLines() == 1 ? 100 : 1);
-        });
+        holder.description.setOnClickListener(v -> holder.description.setMaxLines(holder.description.getMaxLines() == 1 ? 100 : 1));
 
         Calendar calendar = DateFormatting.getCalendar(data.getDateOfAdd());
-        holder.hours.setText(DateFormatting.formatDate(calendar.getTime()));
+        Resources.setText(DateFormatting.formatDate(calendar.getTime()), holder.hours);
         // endregion
-        holder.postLayout.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
+
+        Resources.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging), holder.postLayout);
     }
 
     @Override
@@ -179,7 +171,6 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
 
     public class ViewHolderPosts extends RecyclerView.ViewHolder {
         private final LinearLayout postLayout;
-        private final LinearLayout underPostLayout;
         private final ImageView avaView;
         private final LinearLayout taggedPeopleLayout;
         private final RelativeLayout mediaContentLayout;
@@ -224,15 +215,13 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             qrLink = itemView.findViewById(R.id.qr_link);
             cardViewQr = itemView.findViewById(R.id.card_qr);
             qr = itemView.findViewById(R.id.qr);
-
-            underPostLayout = itemView.findViewById(R.id.under_post_layout);
             postLayout = itemView.findViewById(R.id.post_layout);
 
             avaView = itemView.findViewById(R.id.post_author_page);
             login = itemView.findViewById(R.id.nick_view);
 
             postContext = itemView.findViewById(R.id.post_context);
-            activity.registerForContextMenu(postContext); // post context registration
+            activity.registerForContextMenu(postContext); // post activity registration
 
             contentImg = itemView.findViewById(R.id.image_content);
             contentVideo = itemView.findViewById(R.id.video_content);
@@ -275,7 +264,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
                 if (taggedPeopleLayout.getChildCount() > 0) taggedPeopleLayout.removeAllViews();
                 // region get tagged people
                 try {
-                    new DoCallBack().setValues(null, context, new Object[]{id, taggedPeopleLayout}).sendToGetTaggedPeople();
+                    new DoCallBack().setValues(null, activity, new Object[]{id, taggedPeopleLayout}).sendToGetTaggedPeople();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -289,7 +278,7 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             comment.setOnClickListener(v -> {
                 NewsLine.mapPost = new Pair<>(getAdapterPosition(), postsLibrary.getDataArrayList().get(getAdapterPosition()));
                 Intent intent = Intents.getComments();
-                context.startActivity(intent);
+                activity.startActivity(intent);
             });
 
             send.setOnClickListener(v -> {
@@ -302,21 +291,21 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         private void setSelfPages() {
             avaView.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
             login.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
             authorNickname.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{login.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -329,25 +318,25 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             if (!post.isLiked()) {
                 post.setLiked(true);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() + 1);
-                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_fill, context.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()), like);
             } else {
                 post.setLiked(false);
                 postsLibrary.getDataArrayList().get(position).setLikes(postsLibrary.getDataArrayList().get(position).getLikes() - 1);
-                like.setImageDrawable(context.getResources().getDrawable(R.drawable.like_empty, context.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()), like);
             }
 
             postsLibrary.getDataArrayList().get(position).setLiked(post.isLiked());
             notifyItemChanged(position);
 
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
             // region send unlike
             try {
                 String postId = postsLibrary.getDataArrayList().get(position).getPostId();
                 JSONObject jsonObject = Post.getJSONToLikeUnlikePost(postId, login, post.isLiked());
-                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
+                jsonObject.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
                 // like unlike post
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToLikeUnlikePost();
+                new DoCallBack().setValues(null, activity, new Object[]{jsonObject}).sendToLikeUnlikePost();
             } catch (JSONException e) {
                 Log.d("sendToLikeUnlikePost: (JSONException)", e.getMessage());
             }
@@ -359,23 +348,23 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
             int position = getAdapterPosition();
             if (!post.isSaved()) {
                 post.setSaved(true);
-                bookmark.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark_saved, context.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()), bookmark);
             } else {
                 post.setSaved(false);
-                bookmark.setImageDrawable(context.getResources().getDrawable(R.drawable.bookmark, context.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()), bookmark);
             }
 
             postsLibrary.getDataArrayList().get(position).setSaved(post.isSaved());
             notifyItemChanged(position);
 
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             String postId = postsLibrary.getDataArrayList().get(position).getPostId();
 
             // region send save
             try {
                 JSONObject jsonObject = Post.getJSONToSaveUnsavedPost(postId, login, post.isSaved());
-                jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSaveUnsavedPost();
+                jsonObject.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
+                new DoCallBack().setValues(null, activity, new Object[]{jsonObject}).sendToSaveUnsavedPost();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }

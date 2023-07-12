@@ -2,7 +2,6 @@ package com.example.instagram.services.pagination.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.Comment;
@@ -23,11 +21,11 @@ import com.example.instagram.main_process.Comments;
 import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 
 import org.json.JSONException;
 
 public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewComments.ViewHolderComments> {
-    private final Context context;
     private final Activity activity;
     private final CommentsLibrary commentsLibrary;
 
@@ -35,9 +33,8 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
         return commentsLibrary;
     }
 
-    public PaginationViewComments(@Nullable Activity activity, Context context, CommentsLibrary commentsLibrary) {
+    public PaginationViewComments(Activity activity, CommentsLibrary commentsLibrary) {
         this.activity = activity;
-        this.context = context;
         this.commentsLibrary = commentsLibrary;
     }
 
@@ -55,7 +52,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
 
         // region send request to get avatar
         try {
-            new DoCallBack().setValues(null, context, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
+            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -63,29 +60,28 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
 
 
         // region set content of comment
-        holder.date.setText(DateFormatting.formatDate(data.getDateOfAdd()));
-        holder.authorTitle.setText(context.getResources().getString(R.string.author) + ": ");
-        holder.author.setText(data.getAuthor());
-        holder.content.setText(data.getContent());
-        holder.reply.setText(R.string.reply);
+        Resources.setText(DateFormatting.formatDate(data.getDateOfAdd()), holder.date);
+        Resources.setText(data.getAuthor(), holder.author);
+        Resources.setText(data.getContent(), holder.content);
         // endregion
 
         // region answer to
         if (data.getReplayedCommentId() != null) {
-            holder.answerToLayout.setVisibility(View.VISIBLE);
-            holder.answerToHeader.setText(R.string.answer_to);
+            Resources.setVisibility(View.VISIBLE, holder.answerToLayout);
+            Resources.setText(activity.getString(R.string.answer_to), holder.answerToHeader);
 
             Comment comment = commentsLibrary.getCommentList().stream().filter(item -> item.getCommentId().equals(data.getReplayedCommentId())).findAny().orElse(null);
 
             if (comment != null) {
-                holder.answerToAuthor.setText(comment.getAuthor());
-                holder.answerToContent.setText(comment.getContent());
+                Resources.setText(comment.getAuthor(), holder.answerToAuthor);
+                Resources.setText(comment.getContent(), holder.answerToContent);
+                Resources.setText(DateFormatting.formatDate(comment.getDateOfAdd()), holder.answerToDate);
                 holder.answerToDate.setText(DateFormatting.formatDate(comment.getDateOfAdd()));
             }
         }
         // endregion
 
-        holder.commentObj.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_paging));
+        Resources.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.anim_paging), holder.commentObj);
     }
 
     @Override
@@ -97,7 +93,6 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
         private final LinearLayout commentObj;
         private final LinearLayout comment;
         private final ImageView ava;
-        private final TextView authorTitle;
         private final TextView author;
         private final TextView date;
         private final TextView content;
@@ -116,7 +111,6 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             activity.registerForContextMenu(comment);
 
             ava = itemView.findViewById(R.id.ava);
-            authorTitle = itemView.findViewById(R.id.author_title);
             author = itemView.findViewById(R.id.author);
             date = itemView.findViewById(R.id.date);
             content = itemView.findViewById(R.id.content);
@@ -140,10 +134,10 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
 
             reply.setOnClickListener(v -> {
                 LinearLayout reply = activity.findViewById(R.id.reply_layout);
-                reply.setVisibility(View.VISIBLE);
+                Resources.setVisibility(View.VISIBLE, reply);
 
                 TextView replayed = activity.findViewById(R.id.replayed);
-                replayed.setText(commentsLibrary.getCommentList().get(getAdapterPosition()).getAuthor() + ": " + commentsLibrary.getCommentList().get(getAdapterPosition()).getContent());
+                Resources.setText(commentsLibrary.getCommentList().get(getAdapterPosition()).getAuthor() + ": " + commentsLibrary.getCommentList().get(getAdapterPosition()).getContent(), replayed);
 
                 Comments.toReply = commentsLibrary.getCommentList().get(getAdapterPosition());
             });
@@ -151,7 +145,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             ava.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -160,7 +154,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             author.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -169,7 +163,7 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
             // set user page
             answerToAuthor.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{author.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

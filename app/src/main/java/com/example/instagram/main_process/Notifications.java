@@ -40,7 +40,7 @@ public class Notifications extends AppCompatActivity {
         UiVisibility.setUiVisibility(this);
         setListeners();
 
-        pagingView = new PagingAdapterNotifications(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+        pagingView = new PagingAdapterNotifications(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this);
     }
 
     @Override

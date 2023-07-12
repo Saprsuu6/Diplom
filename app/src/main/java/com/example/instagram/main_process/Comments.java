@@ -17,14 +17,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.PaginationCurrentForAllComments;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterComments;
@@ -87,13 +87,13 @@ public class Comments extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.authorAva);
+                SetImagesGlide.setImageGlide(this, ava, views.authorAva);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
         }
 
-        pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this);
+        pagingView = new PagingAdapterComments(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class Comments extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
             case R.id.change_comment:
-                views.message.setText(Comments.mapComment.second.getContent());
+                Resources.setText(Comments.mapComment.second.getContent(), views.message);
                 Comments.mapComment.second.setToChange(true);
                 break;
         }
@@ -184,7 +184,7 @@ public class Comments extends AppCompatActivity {
             } else {
                 CommentToAdd.postId = NewsLine.mapPost.second.getPostId();
                 CommentToAdd.content = views.message.getText().toString().trim();
-                Toast.makeText(this, getString(R.string.comment_has_been_sent), Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.comment_has_been_sent)).show();
                 JSONObject jsonObject;
 
                 try {
@@ -206,13 +206,13 @@ public class Comments extends AppCompatActivity {
             views.message.getText().clear();
 
             if (views.replyLayout.getVisibility() == View.VISIBLE) {
-                views.replyLayout.setVisibility(View.GONE);
+                Resources.setVisibility(View.GONE, views.replyLayout);
                 Comments.toReply = null;
             }
         });
 
         views.authorAva.setOnClickListener(v -> {
-            String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
                 new DoCallBack().setValues(() -> startActivity(Intents.getSelfPage()), this, new Object[]{login}).sendToGetCurrentUser();
@@ -223,7 +223,7 @@ public class Comments extends AppCompatActivity {
 
         // gone reply
         views.closeReply.setOnClickListener(v -> {
-            views.replyLayout.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.replyLayout);
             Comments.toReply = null;
         });
         // back

@@ -1,8 +1,8 @@
 package com.example.instagram.main_process;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +17,8 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -29,8 +31,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.services.AndroidDownloader;
@@ -40,7 +40,9 @@ import com.example.instagram.services.DateFormatting;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 import com.example.instagram.services.Services;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPosts;
@@ -70,6 +72,7 @@ public class NewsLine extends AppCompatActivity {
         public final ImageView changeTheme;
         public final ImageView home;
         public final ImageView searchUsers;
+        private final ImageView end;
         public final ImageView addNewPost;
         public final ImageView notifications;
         public final ImageView selfPage;
@@ -93,6 +96,7 @@ public class NewsLine extends AppCompatActivity {
             images = findViewById(R.id.only_image);
             videos = findViewById(R.id.only_video);
             audios = findViewById(R.id.only_audio);
+            end = findViewById(R.id.end);
         }
     }
 
@@ -103,6 +107,7 @@ public class NewsLine extends AppCompatActivity {
     private Calendar dateFrom;
     private Calendar dateTo;
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +115,7 @@ public class NewsLine extends AppCompatActivity {
 
         // region find users
         try {
-            findUser = new FindUser(NewsLine.this, NewsLine.this);
+            findUser = new FindUser(NewsLine.this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -124,6 +129,9 @@ public class NewsLine extends AppCompatActivity {
         setListeners();
         setIntents();
         UiVisibility.setUiVisibility(NewsLine.this);
+
+        Animation mAnimationDrawable = AnimationUtils.loadAnimation(this, R.anim.rotate);
+        views.end.startAnimation(mAnimationDrawable);
     }
 
     private void setIntents() {
@@ -143,27 +151,21 @@ public class NewsLine extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        try {
-            LoadAvatar();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
 
-//        String ava = Cache.loadStringSP(NewsLine.this, CacheScopes.USER_AVA.toString());
-//
-//        if (ava.equals("")) {
-//            try {
-//                LoadAvatar();
-//            } catch (JSONException e) {
-//                throw new RuntimeException(e);
-//            }
-//        } else {
-//            try {
-//                Glide.with(NewsLine.this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
-//            } catch (Exception e) {
-//                Log.d("DoCallBack: ", e.getMessage());
-//            }
-//        }
+        if (ava.equals("")) {
+            try {
+                LoadAvatar();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                SetImagesGlide.setImageGlide(this, ava, views.selfPage);
+            } catch (Exception e) {
+                Log.d("DoCallBack: ", e.getMessage());
+            }
+        }
 
         if (TransitPost.postsToDeleteFromOtherPage.size() > 0) {
             pagingView.notifyAdapterToClearPosts();
@@ -233,9 +235,8 @@ public class NewsLine extends AppCompatActivity {
     }
 
     private void chooseTheme() {
-        @SuppressLint("ResourceType") AlertDialog.Builder permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, getResources(), NewsLine.this, views.newsLineLayout);
-        permissionsDialog.setNegativeButton("Cancel", null);
-        permissionsDialog.create().show();
+        Dialog permissionsDialog = ThemesBackgrounds.getThemeDialog(NewsLine.this, views.newsLineLayout);
+        permissionsDialog.show();
     }
 
     private void showAgain() throws JSONException {
@@ -325,7 +326,7 @@ public class NewsLine extends AppCompatActivity {
                 dateFrom = Calendar.getInstance();
                 dateFrom.set(year1, month1, dayOfMonth);
                 DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-                views.toFindPostFrom.setText(DateFormatting.formatDate(dateFrom));
+                Resources.setText(DateFormatting.formatDate(dateFrom), views.toFindPostFrom);
 
                 try {
                     showAgain();
@@ -343,7 +344,7 @@ public class NewsLine extends AppCompatActivity {
                 dateTo = Calendar.getInstance();
                 dateTo.set(year12, month12, dayOfMonth);
                 DateFormatting.setSimpleDateFormat(Locale.getDefault().getCountry());
-                views.toFindPostTo.setText(DateFormatting.formatDate(dateTo));
+                Resources.setText(DateFormatting.formatDate(dateTo), views.toFindPostTo);
 
                 try {
                     showAgain();
@@ -362,12 +363,12 @@ public class NewsLine extends AppCompatActivity {
                 switch (position) {
                     case 0:
                     case 1:
-                        views.toFindPostText.setVisibility(View.VISIBLE);
-                        views.findPostDateLayout.setVisibility(View.GONE);
+                        Resources.setVisibility(View.VISIBLE, views.toFindPostText);
+                        Resources.setVisibility(View.GONE, views.findPostDateLayout);
                         break;
                     case 2:
-                        views.findPostDateLayout.setVisibility(View.VISIBLE);
-                        views.toFindPostText.setVisibility(View.GONE);
+                        Resources.setVisibility(View.GONE, views.toFindPostText);
+                        Resources.setVisibility(View.VISIBLE, views.findPostDateLayout);
                         break;
 
                 }
@@ -446,8 +447,6 @@ public class NewsLine extends AppCompatActivity {
         });
 
         // choose background
-        views.changeTheme.setOnClickListener(v -> {
-            chooseTheme();
-        });
+        views.changeTheme.setOnClickListener(v -> chooseTheme());
     }
 }

@@ -292,6 +292,8 @@
                             tools:itemCount="0"
                             tools:listitem="@layout/list_item_post_self_page_cell" />
 
+                        <include layout="@layout/end" />
+
                         <io.supercharge.shimmerlayout.ShimmerLayout
                             android:id="@+id/skeleton"
                             android:layout_width="match_parent"

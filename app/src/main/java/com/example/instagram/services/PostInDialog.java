@@ -4,17 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,8 +20,6 @@ import android.widget.VideoView;
 
 import androidx.cardview.widget.CardView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.R;
 import com.example.instagram.main_process.NewsLine;
@@ -66,10 +59,10 @@ public class PostInDialog {
     private LinearLayout buttons;
     private Button close;
     private Button delete;
-    private Runnable runable;
+    private Runnable runnable;
 
-    public Runnable getRunable() {
-        return runable;
+    public Runnable getRunnable() {
+        return runnable;
     }
 
     public Button getDelete() {
@@ -89,24 +82,14 @@ public class PostInDialog {
         setContent(post);
         setListeners(post);
 
-        Dialog dialog = new Dialog(activity);
-        dialog.setCancelable(false);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.getWindow().setGravity(Gravity.CENTER);
-        dialog.setContentView(view);
-        Window window = dialog.getWindow();
-        window.setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Dialog dialog = GetDialog.getDialog(activity, view);
 
-        runable = () -> {
+        runnable = () -> {
             if (audioController != null) audioController.clearHandler();
             dialog.dismiss();
         };
 
-        close.setOnClickListener(v -> {
-            runable.run();
-        });
+        close.setOnClickListener(v -> runnable.run());
         return dialog;
     }
 
@@ -143,18 +126,17 @@ public class PostInDialog {
     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
     private void setContent(Post post) throws JSONException {
         String mime = post.getMimeType();
-        String mediaPath = Services.BASE_URL + activity.getString(R.string.root_folder) + post.getResourceMedia();
-
+        String link = GetMediaLink.getMediaLink(activity, post.getResourceMedia());
         buttons.setVisibility(View.VISIBLE);
 
         // region set media content
         if (mime.contains(activity.getString(R.string.mime_image))) {
             // set image
-            Glide.with(activity.getApplicationContext()).load(mediaPath).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageContent);
+            SetImagesGlide.setImageGlide(activity, link, imageContent);
             imageContent.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_video))) {
             // set video
-            Uri videoUri = Uri.parse(mediaPath);
+            Uri videoUri = Uri.parse(link);
 
             MediaController mediaController = new MediaController(activity);
 
@@ -168,7 +150,7 @@ public class PostInDialog {
             videoContent.setVisibility(View.VISIBLE);
         } else if (mime.contains(activity.getString(R.string.mime_audio))) {
             // set audio
-            Uri audioUri = Uri.parse(mediaPath);
+            Uri audioUri = Uri.parse(link);
             audioCard.setVisibility(View.VISIBLE);
             audioControllerLayout.setVisibility(View.VISIBLE);
             audioController = new AudioController(timeLine, seekBar, playStop, playPrev, playNext, activity, audioUri);
@@ -176,15 +158,13 @@ public class PostInDialog {
         }
 
         // region set other text info
-        authorLogin.setText(post.getAuthor());
-        description.setText(post.getDescription());
+        Resources.setText(post.getAuthor(), authorLogin);
+        Resources.setText(post.getDescription(), description);
 
-        description.setOnClickListener(v -> {
-            description.setMaxLines(description.getMaxLines() == 1 ? 100 : 1);
-        });
+        description.setOnClickListener(v -> description.setMaxLines(description.getMaxLines() == 1 ? 100 : 1));
 
         Calendar calendar = DateFormatting.getCalendar(post.getDateOfAdd());
-        date.setText(DateFormatting.formatDate(calendar.getTime()));
+        Resources.setText(DateFormatting.formatDate(calendar.getTime()), date);
         // endregion
 
         // region set like, save
@@ -192,15 +172,15 @@ public class PostInDialog {
             String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, postLike, amountLikes, post}).sendToGetIsLikedForDialogPost();
         } else {
-            postLike.setImageDrawable(activity.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()));
-            amountLikes.setText(Integer.toString(post.getLikes()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(post.isLiked() ? R.drawable.like_fill : R.drawable.like_empty, activity.getTheme()), postLike);
+            Resources.setText(Integer.toString(post.getLikes()), amountLikes);
         }
 
         if (post.isSaved() == null) {
             String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             new DoCallBack().setValues(null, activity, new Object[]{post.getPostId(), login, save, post}).sendToGetIsSaved();
         } else {
-            save.setImageDrawable(activity.getResources().getDrawable(post.isSaved() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(post.isLiked() ? R.drawable.bookmark_saved : R.drawable.bookmark, activity.getTheme()), save);
         }
         // endregion
 
@@ -212,9 +192,7 @@ public class PostInDialog {
 
         qrLink.setOnClickListener(v -> {
             cardViewQr.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> {
-                cardViewQr.setVisibility(View.GONE);
-            }, 10000L);
+            new Handler().postDelayed(() -> Resources.setVisibility(View.GONE, cardViewQr), 10000L);
         });
     }
 
@@ -243,17 +221,15 @@ public class PostInDialog {
             }
         });
 
-        postLike.setOnClickListener(v -> {
-            postSetStateLike(post);
-        });
+        postLike.setOnClickListener(v -> postSetStateLike(post));
 
         save.setOnClickListener(v -> {
             if (!post.isSaved()) {
                 post.setSaved(true);
-                save.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark_saved, activity.getTheme()), save);
             } else {
                 post.setSaved(false);
-                save.setImageDrawable(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()));
+                Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.bookmark, activity.getTheme()), save);
             }
 
             TransitPost.postsToChangeFromOtherPage.removeIf(toRemove -> toRemove.getPostId().equals(post.getPostId()));
@@ -290,11 +266,11 @@ public class PostInDialog {
         if (!post.isLiked()) {
             post.setLiked(true);
             post.setLikes(post.getLikes() + 1);
-            postLike.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_fill, activity.getTheme()), postLike);
         } else {
             post.setLiked(false);
             post.setLikes(post.getLikes() - 1);
-            postLike.setImageDrawable(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()));
+            Resources.setDrawableIntoImageView(activity.getResources().getDrawable(R.drawable.like_empty, activity.getTheme()), postLike);
         }
 
         TransitPost.postsToChangeFromOtherPage.forEach(postToFind -> {
@@ -302,8 +278,7 @@ public class PostInDialog {
                 postToFind.setLikes(post.getLikes());
         });
 
-        amountLikes.setText(Integer.toString(post.getLikes()));
-
+        Resources.setText(Integer.toString(post.getLikes()), amountLikes);
         String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
         // region send unlike

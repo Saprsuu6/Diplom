@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/search_user"
     android:layout_width="match_parent"
@@ -27,60 +26,77 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="true"
-                    tools:ignore="RtlSymmetry"
-                    tools:itemCount="1"
-                    tools:listitem="@layout/users_list" />
-
-                <io.supercharge.shimmerlayout.ShimmerLayout
-                    android:id="@+id/skeleton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:visibility="gone"
-                    app:shimmer_animation_duration="1200">
-
-                    <LinearLayout
-                        android:id="@+id/skeletons_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                        <include layout="@layout/skeleton_user_layout" />
-
-                    </LinearLayout>
-
-                </io.supercharge.shimmerlayout.ShimmerLayout>
-
-            </LinearLayout>
-
-        </androidx.core.widget.NestedScrollView>
+        <include layout="@layout/users_list" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <Button
+        android:id="@+id/close"
+        style="@style/Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/close" />
+
+<!--        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+<!--            android:id="@+id/swipe_refresh"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="1">-->
+
+<!--            <androidx.core.widget.NestedScrollView-->
+<!--                android:id="@+id/scroll_view"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:layout_weight="1">-->
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:orientation="vertical">-->
+
+<!--                    <androidx.recyclerview.widget.RecyclerView-->
+<!--                        android:id="@+id/recycler_view"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:nestedScrollingEnabled="true"-->
+<!--                        tools:ignore="RtlSymmetry"-->
+<!--                        tools:itemCount="1"-->
+<!--                        tools:listitem="@layout/users_list" />-->
+
+<!--                    <io.supercharge.shimmerlayout.ShimmerLayout-->
+<!--                        android:id="@+id/skeleton"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_gravity="center_horizontal"-->
+<!--                        android:visibility="gone"-->
+<!--                        app:shimmer_animation_duration="1200">-->
+
+<!--                        <LinearLayout-->
+<!--                            android:id="@+id/skeletons_layout"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical">-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                            <include layout="@layout/skeleton_user_layout" />-->
+
+<!--                        </LinearLayout>-->
+
+<!--                    </io.supercharge.shimmerlayout.ShimmerLayout>-->
+
+<!--                </LinearLayout>-->
+
+<!--            </androidx.core.widget.NestedScrollView>-->
+
+<!--        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
 
 </LinearLayout>

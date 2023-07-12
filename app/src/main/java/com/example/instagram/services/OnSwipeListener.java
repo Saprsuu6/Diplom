@@ -1,7 +1,7 @@
 package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -18,16 +18,16 @@ public class OnSwipeListener implements View.OnTouchListener {
     private final GestureDetector gestureDetector;
     private final CallBack callBackDelete;
     private final CallBack callBackLike;
-    private final Context context;
+    private final Activity activity;
     private final View view;
     private final String author;
     private static float firstX;
 
-    public OnSwipeListener(Context context, View view, CallBack callBackDelete, CallBack callBackLike, String author) {
-        gestureDetector = new GestureDetector(context, new GestureListener());
+    public OnSwipeListener(Activity activity, View view, CallBack callBackDelete, CallBack callBackLike, String author) {
+        gestureDetector = new GestureDetector(activity, new GestureListener());
         this.callBackLike = callBackLike;
         this.callBackDelete = callBackDelete;
-        this.context = context;
+        this.activity = activity;
         this.author = author;
         this.view = view;
     }
@@ -35,14 +35,14 @@ public class OnSwipeListener implements View.OnTouchListener {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (author.equals(Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString()))) {
+        if (author.equals(Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString()))) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_UP:
                     view.setX(OnSwipeListener.firstX);
                     OnSwipeListener.firstX = 0;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+                    DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
                     int cardWidth = view.getWidth();
                     int cardStart = (displayMetrics.widthPixels / 2) - (cardWidth / 2);
 
@@ -84,7 +84,7 @@ public class OnSwipeListener implements View.OnTouchListener {
 
         @Override
         public boolean onFling(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-            if (author.equals(Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString()))) {
+            if (author.equals(Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString()))) {
                 super.onFling(e1, e2, velocityX, velocityY);
                 try {
                     float dx = e2.getX() - e1.getX();

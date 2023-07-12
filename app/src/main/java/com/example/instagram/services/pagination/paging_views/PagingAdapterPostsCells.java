@@ -23,18 +23,21 @@ import org.json.JSONException;
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
 public class PagingAdapterPostsCells extends PagingAdapter {
+    private final Activity activity;
     private PaginationViewPostsCells paginationAdapter;
     public static boolean isEnd = false;
     private final Boolean isSaved;
 
-    public PagingAdapterPostsCells(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity, Boolean isSaved) throws JSONException {
-        super(scrollView, recyclerView, shimmerLayout, context, activity);
+    public PagingAdapterPostsCells(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Activity activity, Boolean isSaved) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, activity);
         this.isSaved = isSaved;
+        this.activity = activity;
+
         isEnd = false;
         PaginationCurrentForAllPostsInCellsPosts.resetCurrent();
 
         // initialise adapter
-        paginationAdapter = new PaginationViewPostsCells(context, activity, postsLibrary, this);
+        paginationAdapter = new PaginationViewPostsCells(activity, postsLibrary, this);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -65,7 +68,7 @@ public class PagingAdapterPostsCells extends PagingAdapter {
     @Override
     protected void setPaginationAdapter() {
         assert activity != null;
-        paginationAdapter = new PaginationViewPostsCells(context, activity, postsLibrary, this);
+        paginationAdapter = new PaginationViewPostsCells(activity, postsLibrary, this);
         recyclerView.setAdapter(paginationAdapter);
     }
 
@@ -79,14 +82,14 @@ public class PagingAdapterPostsCells extends PagingAdapter {
                     isBusy = false;
                     PaginationCurrentForAllPostsInCellsPosts.nextCurrent();
                     setPaginationAdapter();
-                }, context, new Object[]{PaginationCurrentForAllPostsInCellsPosts.current, PaginationCurrentForAllPostsInCellsPosts.amountOfPagination, UserPage.userPage.getLogin(), postsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetPostsOfUserInCells();
+                }, activity, new Object[]{PaginationCurrentForAllPostsInCellsPosts.current, PaginationCurrentForAllPostsInCellsPosts.amountOfPagination, UserPage.userPage.getLogin(), postsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetPostsOfUserInCells();
             } else {
-                String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+                String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
                 new DoCallBack().setValues(() -> {
                     isBusy = false;
                     PaginationCurrentForAllPostsInCellsPosts.nextCurrent();
                     setPaginationAdapter();
-                }, context, new Object[]{PaginationCurrentForAllPostsInCellsSaved.current, PaginationCurrentForAllPostsInCellsSaved.amountOfPagination, login, postsLibrary, (Runnable) this::stopSkeletonAnim}).getSavedPosts();
+                }, activity, new Object[]{PaginationCurrentForAllPostsInCellsSaved.current, PaginationCurrentForAllPostsInCellsSaved.amountOfPagination, login, postsLibrary, (Runnable) this::stopSkeletonAnim}).getSavedPosts();
             }
         }
     }

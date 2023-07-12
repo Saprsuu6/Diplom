@@ -1,6 +1,6 @@
 package com.example.instagram.services.pagination.adapters;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,20 +19,21 @@ import com.example.instagram.services.Cache;
 import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
+import com.example.instagram.services.Resources;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUsers.ViewHolderUser> {
-    private final Context context;
+    private final Activity activity;
     private final UsersLibrary usersLibrary;
 
     public UsersLibrary getUsersLibrary() {
         return usersLibrary;
     }
 
-    public PaginationViewUsers(Context context, UsersLibrary usersLibrary) {
-        this.context = context;
+    public PaginationViewUsers(Activity activity, UsersLibrary usersLibrary) {
+        this.activity = activity;
         this.usersLibrary = usersLibrary;
     }
 
@@ -49,26 +50,26 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
 
         // region send request to get avatar
         try {
-            new DoCallBack().setValues(null, context, new Object[]{data.getLogin(), holder.avaView}).sendToGetAvaImage();
+            new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView}).sendToGetAvaImage();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
         // endregion
 
         // set name nickname
-        holder.loginView.setText(data.getLogin());
-        holder.nameView.setText(data.getNickName());
+        Resources.setText(data.getLogin(), holder.loginView);
+        Resources.setText(data.getNickName(), holder.nameView);
 
-        String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+        String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
         if (!data.getLogin().equals(login)) {
             try {
                 JSONObject jsonObject = User.getJSONToKnowIsMeSubscribed(login, data.getLogin());
-                new DoCallBack().setValues(null, context, new Object[]{jsonObject, holder.subscribe}).sendToGetIsMeSubscribed();
+                new DoCallBack().setValues(null, activity, new Object[]{jsonObject, holder.subscribe}).sendToGetIsMeSubscribed();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            holder.subscribe.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, holder.subscribe);
         }
     }
 
@@ -93,13 +94,13 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
 
             subscribe.setOnClickListener(v -> {
                 subscribe.setChecked(subscribe.isChecked());
-                subscribe.setText(!subscribe.isChecked() ? context.getString(R.string.subscribe_btn) : context.getString(R.string.unsubscribe_btn));
-                String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+                Resources.setText(!subscribe.isChecked() ? activity.getString(R.string.subscribe_btn) : activity.getString(R.string.unsubscribe_btn), subscribe);
+                String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
 
                 try {
                     JSONObject jsonObject = User.getJSONToSubscribe(login, loginView.getText().toString(), subscribe.isChecked());
-                    jsonObject.put("token", Cache.loadStringSP(context, CacheScopes.USER_TOKEN.toString()));
-                    new DoCallBack().setValues(null, context, new Object[]{jsonObject}).sendToSetStateSubscribe();
+                    jsonObject.put("token", Cache.loadStringSP(activity, CacheScopes.USER_TOKEN.toString()));
+                    new DoCallBack().setValues(null, activity, new Object[]{jsonObject}).sendToSetStateSubscribe();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -113,22 +114,22 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
                 try {
                     new DoCallBack().setValues(() -> {
                         Intents.getSelfPage().setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(Intents.getSelfPage());
-                    }, context, new Object[]{loginView.getText().toString()}).sendToGetCurrentUser();
+                        activity.startActivity(Intents.getSelfPage());
+                    }, activity, new Object[]{loginView.getText().toString()}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
             loginView.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{loginView}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{loginView}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
             nameView.setOnClickListener(v -> {
                 try {
-                    new DoCallBack().setValues(() -> context.startActivity(Intents.getSelfPage()), context, new Object[]{loginView}).sendToGetCurrentUser();
+                    new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{loginView}).sendToGetCurrentUser();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

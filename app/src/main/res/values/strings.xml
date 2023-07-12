@@ -1,4 +1,9 @@
 <resources>
+    <!--    https://tomcat.clickshot.com.ua/Clickshot/-->
+    <string name="root_media_folder" translatable="false">https://4682-2a09-bac1-7560-18-00-84-5c.ngrok-free.app/Clickshot/media/</string>
+    <string name="link_tomcat" translatable="false">https://4682-2a09-bac1-7560-18-00-84-5c.ngrok-free.app/Clickshot/</string>
+
+    <string name="empty_news" translatable="false">emptyNews</string>
     <string name="add_to_tag_people" translatable="false">addToTagPeople</string>
     <string name="logo" translatable="false">logo</string>
     <string name="changeTheme" translatable="false">changeTheme</string>
@@ -19,12 +24,12 @@
     <string name="mime_audio" translatable="false">mpeg</string>
     <string name="mime_text_plain" translatable="false">text/plain</string>
     <string name="description" translatable="false">description</string>
-    <string name="root_folder" translatable="false">media/</string>
     <string name="prev" translatable="false">Prev</string>
     <string name="play_stop" translatable="false">PlayStop</string>
     <string name="next" translatable="false">Next</string>
     <string name="notifications_title">Notifications</string>
     <string name="size_restriction">Content size should be less then 60mb</string>
+    <string name="user_not_authorised">User are not authorised</string>
 
     <!--    notification-->
     <string name="user_notification">User</string>
@@ -45,7 +50,7 @@
     <string name="author">Author</string>
     <string name="comment_has_been_sent">Comment has been sent</string>
     <string name="find_post">Start type to find post</string>
-    <string name="successfull_uesr_update">Successfully update</string>
+    <string name="successful_user_update">Successfully update</string>
     <string name="confirmed">Confirmed</string>
     <string name="not_confirmed">Not confirmed</string>
 
@@ -139,9 +144,11 @@
     <string name="video_btn">video</string>
     <string name="image_btn">image</string>
     <string name="audio_btn">audio</string>
-    <string name="tiramisu_or_better">image</string>
+    <string name="tiramisu_or_better">You should have version equals or better then Android 13 (Tiramisu)</string>
     <string name="settings">Settings</string>
     <string name="languages_title">Choose language:</string>
+    <string name="news_line_end_title">Guess this is the end…</string>
+    <string name="news_line_end">Add post or wait for someone to do it 🌚</string>
 
     <!--    User page-->
     <string name="posts">Posts</string>

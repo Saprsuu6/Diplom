@@ -166,14 +166,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="true"
-                    tools:ignore="RtlSymmetry"
-                    tools:itemCount="1"
-                    tools:listitem="@layout/list_item_post" />
+                <include layout="@layout/end" />
 
                 <io.supercharge.shimmerlayout.ShimmerLayout
                     android:id="@+id/skeleton"

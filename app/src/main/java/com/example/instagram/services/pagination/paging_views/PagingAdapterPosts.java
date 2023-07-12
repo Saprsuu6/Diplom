@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.DAOs.Post;
+import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.TransitPost;
 import com.example.instagram.services.pagination.PaginationCurrentForAllPosts;
@@ -23,14 +25,17 @@ import org.json.JSONObject;
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
 public class PagingAdapterPosts extends PagingAdapter {
+    private final Activity activity;
     private PaginationViewPosts paginationAdapter;
     private final JSONObject jsonObject;
     private boolean isStart = true;
     public static boolean isEnd = false;
 
-    public PagingAdapterPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity, JSONObject jsonObject) throws JSONException {
-        super(scrollView, recyclerView, shimmerLayout, context, activity);
+    public PagingAdapterPosts(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, Activity activity, JSONObject jsonObject) throws JSONException {
+        super(scrollView, recyclerView, shimmerLayout, activity);
         this.jsonObject = jsonObject;
+        this.activity = activity;
+
         isEnd = false;
         PaginationCurrentForAllPosts.resetCurrent();
 
@@ -38,7 +43,7 @@ public class PagingAdapterPosts extends PagingAdapter {
         jsonObject.put("amount", Integer.toString(PaginationCurrentForAllPosts.amountOfPagination));
 
         // initialise adapter
-        paginationAdapter = new PaginationViewPosts(activity, context, postsLibrary, this);
+        paginationAdapter = new PaginationViewPosts(activity, postsLibrary, this);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -90,7 +95,7 @@ public class PagingAdapterPosts extends PagingAdapter {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationViewPosts(activity, context, postsLibrary, this);
+        paginationAdapter = new PaginationViewPosts(activity, postsLibrary, this);
         recyclerView.setAdapter(paginationAdapter);
     }
 
@@ -111,7 +116,7 @@ public class PagingAdapterPosts extends PagingAdapter {
                 isBusy = false;
                 PaginationCurrentForAllPosts.nextCurrent();
                 setPaginationAdapter();
-            }, context, new Object[]{jsonObject, postsLibrary, (Runnable) this::stopSkeletonAnim}).sendToFindPost();
+            }, activity, new Object[]{jsonObject, postsLibrary, (Runnable) this::stopSkeletonAnim}).sendToFindPost();
         }
     }
 }

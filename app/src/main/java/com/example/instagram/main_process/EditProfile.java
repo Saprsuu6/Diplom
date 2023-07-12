@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -25,8 +23,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.authentication.after_reg.SetBirthday;
@@ -39,6 +35,8 @@ import com.example.instagram.services.FindExtension;
 import com.example.instagram.services.MediaTypes;
 import com.example.instagram.services.OpenMedia;
 import com.example.instagram.services.ReadBytesForMedia;
+import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.Validations;
 import com.example.instagram.services.Validator;
@@ -118,7 +116,7 @@ public class EditProfile extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) views.avatar);
+                SetImagesGlide.setImageGlide(this, ava, views.avatar);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
@@ -154,15 +152,15 @@ public class EditProfile extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void validate(EditText editText, String text) {
-                editText.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                Resources.setTextColor(getResources().getColor(R.color.white, getTheme()), editText);
 
                 try {
                     Validations.validateEmail(text, "", getResources());
                     setValidationError(views.warningEmail, false, "");
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_success, getTheme()), editText);
                 } catch (Exception exception) {
                     setValidationError(views.warningEmail, true, getResources().getString(R.string.error_send_password1));
-                    editText.setBackground(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()));
+                    Resources.setBackgroundForEditText(getResources().getDrawable(R.drawable.edit_text_auto_reg_error, getTheme()), editText);
                 }
             }
         });
@@ -198,7 +196,7 @@ public class EditProfile extends AppCompatActivity {
         views.avatar.setOnClickListener(v -> OpenMedia.openGallery(this, MediaTypes.IMAGE, someActivityResultLauncher));
 
         views.close.setOnClickListener(v -> {
-            String login = Cache.loadStringSP(getApplicationContext(), CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
 
             try {
                 new DoCallBack().setValues(this::finish, this, new Object[]{login}).sendToGetCurrentUser();
@@ -288,10 +286,10 @@ public class EditProfile extends AppCompatActivity {
 
     private void setValidationError(View view, boolean temp, String message) {
         if (temp) {
-            view.setVisibility(View.VISIBLE);
+            Resources.setVisibility(View.VISIBLE, view);
             Animation.getAnimations(view).start();
         } else {
-            view.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, view);
             Animation.getAnimations(view).stop();
         }
 
@@ -312,7 +310,7 @@ public class EditProfile extends AppCompatActivity {
                     Cache.saveSP(this, CacheScopes.USER_AVA.toString(), selectedImageUri.toString());
 
                     if (imageBytes == null) {
-                        Toast.makeText(this, getString(R.string.tiramisu_or_better), Toast.LENGTH_SHORT).show();
+                        Resources.getToast(this, getString(R.string.tiramisu_or_better)).show();
                     }
 
                     views.avatar.setImageURI(selectedImageUri);
@@ -326,7 +324,7 @@ public class EditProfile extends AppCompatActivity {
     private void sendAvaToBackEnd() throws JSONException {
         if (imageBytes != null) {
             if (imageBytes.length == 0) {
-                Toast.makeText(getApplicationContext(), R.string.error_no_photo, Toast.LENGTH_SHORT).show();
+                Resources.getToast(this, getString(R.string.error_no_photo)).show();
                 return;
             }
         } else {

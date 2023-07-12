@@ -2,10 +2,8 @@ package com.example.instagram.services.pagination.paging_views;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,17 +20,19 @@ import org.json.JSONException;
 import io.supercharge.shimmerlayout.ShimmerLayout;
 
 public class PagingAdapterNotifications extends PagingAdapter {
+    private final Activity activity;
     private PaginationViewNotifications paginationAdapter;
     public static boolean isEnd = false;
 
-    public PagingAdapterNotifications(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Context context, @Nullable Activity activity) {
-        super(scrollView, recyclerView, shimmerLayout, context, activity);
+    public PagingAdapterNotifications(NestedScrollView scrollView, RecyclerView recyclerView, ShimmerLayout shimmerLayout, Activity activity) {
+        super(scrollView, recyclerView, shimmerLayout, activity);
+        this.activity = activity;
 
         isEnd = false;
         PaginationCurrentForAllNotifications.resetCurrent();
 
         // initialise adapter
-        paginationAdapter = new PaginationViewNotifications(activity, context, notificationsLibrary, this);
+        paginationAdapter = new PaginationViewNotifications(activity, notificationsLibrary, this);
         // set adapter
         recyclerView.setAdapter(paginationAdapter);
 
@@ -60,7 +60,7 @@ public class PagingAdapterNotifications extends PagingAdapter {
 
     @Override
     protected void setPaginationAdapter() {
-        paginationAdapter = new PaginationViewNotifications(activity, context, notificationsLibrary, this);
+        paginationAdapter = new PaginationViewNotifications(activity, notificationsLibrary, this);
         recyclerView.setAdapter(paginationAdapter);
     }
 
@@ -69,12 +69,12 @@ public class PagingAdapterNotifications extends PagingAdapter {
         if (!PagingAdapterNotifications.isEnd) {
             startSkeletonAnim();
 
-            String login = Cache.loadStringSP(context, CacheScopes.USER_LOGIN.toString());
+            String login = Cache.loadStringSP(activity, CacheScopes.USER_LOGIN.toString());
             new DoCallBack().setValues(() -> {
                 isBusy = false;
                 PaginationCurrentForAllNotifications.nextCurrent();
                 setPaginationAdapter();
-            }, context, new Object[]{login, PaginationCurrentForAllComments.current, PaginationCurrentForAllComments.amountOfPagination, notificationsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetNotifications();
+            }, activity, new Object[]{login, PaginationCurrentForAllComments.current, PaginationCurrentForAllComments.amountOfPagination, notificationsLibrary, (Runnable) this::stopSkeletonAnim}).sendToGetNotifications();
         }
     }
 }

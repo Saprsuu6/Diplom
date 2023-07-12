@@ -2,11 +2,12 @@ package com.example.instagram.services;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.res.Configuration;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -18,14 +19,21 @@ import com.google.zxing.WriterException;
 import java.util.Locale;
 
 public class Settings {
-    public static AlertDialog.Builder getSettingsMenu(Activity activity) throws WriterException {
+    public static Dialog getSettingsMenu(Activity activity) throws WriterException {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(activity).inflate(R.layout.settings, null, false);
         LinearLayout layout = view.findViewById(R.id.settings);
         ThemesBackgrounds.loadBackground(activity, layout);
 
         setLanguages(view, activity);
+        Dialog dialog = GetDialog.getDialog(activity, view);
 
-        return new AlertDialog.Builder(activity).setCancelable(false).setView(view).setPositiveButton(activity.getApplicationContext().getString(R.string.permission_ok), (dialog, which) -> activity.recreate());
+        Button ok = view.findViewById(R.id.ok);
+        ok.setOnClickListener(v -> {
+            activity.recreate();
+            dialog.dismiss();
+        });
+
+        return dialog;
     }
 
     private static void setLanguages(View view, Activity activity) {

@@ -20,8 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
 import com.example.instagram.services.Cache;
@@ -32,6 +30,8 @@ import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.FindUser;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.QRGenerator;
+import com.example.instagram.services.Resources;
+import com.example.instagram.services.SetImagesGlide;
 import com.example.instagram.services.Settings;
 import com.example.instagram.services.UiVisibility;
 import com.example.instagram.services.pagination.paging_views.PagingAdapterPostsCells;
@@ -117,7 +117,7 @@ public class UserPage extends AppCompatActivity {
 
         // region find users
         try {
-            findUser = new FindUser(this, this);
+            findUser = new FindUser(this);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -163,8 +163,8 @@ public class UserPage extends AppCompatActivity {
             }
         } else {
             try {
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.avatar);
-                Glide.with(this).load(ava).diskCacheStrategy(DiskCacheStrategy.ALL).into(views.selfPage);
+                SetImagesGlide.setImageGlide(this, ava, views.avatar);
+                SetImagesGlide.setImageGlide(this, ava, views.selfPage);
             } catch (Exception e) {
                 Log.d("DoCallBack: ", e.getMessage());
             }
@@ -176,7 +176,7 @@ public class UserPage extends AppCompatActivity {
         }
 
         try {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, this, false);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this, false);
         } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
@@ -221,9 +221,7 @@ public class UserPage extends AppCompatActivity {
                 return true;
             case R.id.qr_link:
                 views.cardViewQr.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(() -> {
-                    views.cardViewQr.setVisibility(View.GONE);
-                }, 10000L);
+                new Handler().postDelayed(() -> views.cardViewQr.setVisibility(View.GONE), 10000L);
                 return true;
             case R.id.log_out:
                 DeleteApplicationCache.deleteCache(getApplicationContext());
@@ -249,30 +247,31 @@ public class UserPage extends AppCompatActivity {
 
     @SuppressLint({"SetTextI18n", "ResourceType"})
     private void setInfo() {
-        views.login.setText(UserPage.userPage.getLogin());
+        Resources.setText(UserPage.userPage.getLogin(), views.login);
 
-        if (UserPage.userPage.getNickName().equals("")) views.nick.setVisibility(View.GONE);
-        else views.nick.setText(UserPage.userPage.getNickName());
+        if (UserPage.userPage.getNickName().equals(""))
+            Resources.setVisibility(View.GONE, views.nick);
+        else Resources.setText(UserPage.userPage.getNickName(), views.nick);
 
-        if (UserPage.userPage.getSurname().equals("")) views.surname.setVisibility(View.GONE);
-        else views.surname.setText(UserPage.userPage.getSurname());
+        if (UserPage.userPage.getSurname().equals(""))
+            Resources.setVisibility(View.GONE, views.surname);
+        else Resources.setText(UserPage.userPage.getSurname(), views.surname);
 
         if (UserPage.userPage.getDescription().equals(""))
-            views.description.setVisibility(View.GONE);
-        else views.description.setText(UserPage.userPage.getDescription());
+            Resources.setVisibility(View.GONE, views.description);
+        else Resources.setText(UserPage.userPage.getDescription(), views.description);
 
-        views.amountPosts.setText(Integer.toString(UserPage.userPage.getAmountPosts()));
-        views.followings.setText(Integer.toString(UserPage.userPage.getAmountSubscribing()));
-        views.followers.setText(Integer.toString(UserPage.userPage.getAmountSubscribers()));
-        views.email.setText(UserPage.userPage.getEmail());
+        Resources.setText(Integer.toString(UserPage.userPage.getAmountPosts()), views.amountPosts);
+        Resources.setText(Integer.toString(UserPage.userPage.getAmountSubscribing()), views.followings);
+        Resources.setText(Integer.toString(UserPage.userPage.getAmountSubscribers()), views.followers);
+        Resources.setText(UserPage.userPage.getEmail(), views.email);
 
-        views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
-        views.isEmailConfirmed.setTextColor(UserPage.userPage.isEmailConfirmed() ? getColor(R.color.success) : getColor(R.color.error));
-
-        views.birthday.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
+        Resources.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed), views.isEmailConfirmed);
+        Resources.setTextColor(UserPage.userPage.isEmailConfirmed() ? getColor(R.color.success) : getColor(R.color.error), views.isEmailConfirmed);
+        Resources.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()), views.birthday);
 
         if (UserPage.userPage.getLogin().equals(Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()))) {
-            views.subscribe.setVisibility(View.GONE);
+            Resources.setVisibility(View.GONE, views.subscribe);
         }
     }
 
@@ -280,7 +279,7 @@ public class UserPage extends AppCompatActivity {
         if (pagingView != null) {
             pagingView.notifyAdapterToClearAll();
         } else {
-            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, UserPage.this, false);
+            pagingView = new PagingAdapterPostsCells(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), UserPage.this, false);
         }
         views.swipeRefreshLayout.setRefreshing(false);
     }
@@ -318,7 +317,8 @@ public class UserPage extends AppCompatActivity {
             String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
             boolean isSubscribed = !Cache.loadBoolSP(this, CacheScopes.IS_SUBSCRIBED.toString());
             Cache.saveSP(this, CacheScopes.IS_SUBSCRIBED.toString(), isSubscribed);
-            views.subscribe.setText(!isSubscribed ? getResources().getString(R.string.subscribe_btn) : getResources().getString(R.string.unsubscribe_btn));
+            Resources.setText(!isSubscribed ? getResources().getString(R.string.subscribe_btn) : getResources().getString(R.string.unsubscribe_btn), views.subscribe);
+
             try {
                 JSONObject jsonObject = User.getJSONToSubscribe(login, UserPage.userPage.getLogin(), isSubscribed);
                 jsonObject.put("token", Cache.loadStringSP(this, CacheScopes.USER_TOKEN.toString()));
@@ -349,7 +349,7 @@ public class UserPage extends AppCompatActivity {
     
     @SuppressLint("SetTextI18n")
     private void setStringResources() {
-        views.birthday.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()));
-        views.isEmailConfirmed.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed));
+        Resources.setText(getResources().getString(R.string.birthday_hint) + ": " + DateFormatting.formatDate(UserPage.userPage.getBirthday()), views.birthday);
+        Resources.setText(UserPage.userPage.isEmailConfirmed() ? getString(R.string.confirmed) : getString(R.string.not_confirmed), views.isEmailConfirmed);
     }
 }
