@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.User;
 import com.example.instagram.DAOs.UsersLibrary;
 import com.example.instagram.R;
@@ -20,7 +22,6 @@ import com.example.instagram.services.CacheScopes;
 import com.example.instagram.services.DoCallBack;
 import com.example.instagram.services.Intents;
 import com.example.instagram.services.Resources;
-import com.example.instagram.services.SetImagesGlide;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,10 +55,15 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
         Cache.saveSP(activity, data.getLogin(), data.getLogin());
 
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView, data.getLogin()}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        String avaLink = Cache.loadStringSP(activity, data.getLogin() + ".ava");
+        if (!avaLink.equals("")) {
+            Glide.with(activity.getApplicationContext()).load(avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView, data.getLogin()}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
 

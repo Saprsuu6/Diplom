@@ -34,7 +34,6 @@ public class Registration extends AppCompatActivity {
         private final ImageView warning;
         private final CheckBox receiveEmail;
         private final CheckBox hideEmail;
-        private final CheckBox rememberMe;
         private final TextView emailName;
         private final TextView haveAnAccountLink;
 
@@ -43,7 +42,6 @@ public class Registration extends AppCompatActivity {
             singIn = findViewById(R.id.reg_log_in);
             receiveEmail = findViewById(R.id.receive_news_letters);
             hideEmail = findViewById(R.id.hide_email);
-            rememberMe = findViewById(R.id.remember_flag);
             haveAnAccountLink = findViewById(R.id.link_log_in);
             warning = findViewById(R.id.validation_error);
             emailName = findViewById(R.id.email_name);
@@ -60,7 +58,6 @@ public class Registration extends AppCompatActivity {
 
         views = new Views();
 
-        setRememberMe();
         setIntents();
         setListeners();
         UiVisibility.setUiVisibility(this);
@@ -72,14 +69,7 @@ public class Registration extends AppCompatActivity {
         }
     }
 
-    private void setRememberMe() {
-        boolean rememberMeFlag = Cache.loadBoolSP(this, "rememberMe");
-        views.rememberMe.setChecked(rememberMeFlag);
-    }
-
     private void setListeners() {
-        views.rememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> Cache.saveSP(this, "rememberMe", isChecked));
-
         views.fieldToEmail.addTextChangedListener(new Validator(views.fieldToEmail) {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override

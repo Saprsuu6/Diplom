@@ -83,7 +83,6 @@ public class PaginationViewPostsCells extends RecyclerView.Adapter<PaginationVie
                 cardView.setCardBackgroundColor(activity.getColor(R.color.transparent));
                 cardView.setCardElevation(0);
 
-
                 // region set media content
                 if (mime.contains(activity.getString(R.string.mime_image))) {
                     //set image

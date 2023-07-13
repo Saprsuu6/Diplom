@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Post;
 import com.example.instagram.DAOs.PostsLibrary;
 import com.example.instagram.R;
@@ -102,10 +104,15 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         }
         // endregion
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView, data.getPostId()}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        String avaLink = Cache.loadStringSP(activity, data.getAuthor()+".ava");
+        if (!avaLink.equals("")) {
+            Glide.with(activity.getApplicationContext()).load(avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.avaView);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView, data.getPostId()}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
         // region set like, save

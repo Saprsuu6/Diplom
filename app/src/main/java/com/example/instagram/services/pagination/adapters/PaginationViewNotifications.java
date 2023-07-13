@@ -19,6 +19,8 @@ import android.widget.VideoView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
 import com.example.instagram.DAOs.Notification;
 import com.example.instagram.DAOs.NotificationsLibrary;
@@ -71,10 +73,15 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
         Notification data = notificationsLibrary.getNotifications().get(position);
 
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getUser(), holder.userAvatar}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        String avaLink = Cache.loadStringSP(activity, data.getAuthor()+".ava");
+        if (!avaLink.equals("")) {
+            Glide.with(activity.getApplicationContext()).load(avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.userAvatar);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getUser(), holder.userAvatar}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
 
@@ -129,6 +136,14 @@ public class PaginationViewNotifications extends RecyclerView.Adapter<Pagination
         Resources.setEllipsize(TextUtils.TruncateAt.END, holder.comment);
         holder.comment.setOnClickListener(v -> {
             holder.comment.setMaxLines(holder.comment.getMaxLines() == 1 ? 100 : 1);
+        });
+
+        holder.userAvatar.setOnClickListener(v -> {
+            try {
+                new DoCallBack().setValues(() -> activity.startActivity(Intents.getSelfPage()), activity, new Object[]{data.getAuthor()}).sendToGetCurrentUser();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         holder.message.setOnClickListener(v -> {

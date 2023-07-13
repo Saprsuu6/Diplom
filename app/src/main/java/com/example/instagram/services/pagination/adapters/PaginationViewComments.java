@@ -14,6 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.instagram.DAOs.Comment;
 import com.example.instagram.DAOs.CommentsLibrary;
 import com.example.instagram.R;
@@ -57,10 +59,15 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
         Cache.saveSP(activity, data.getPostId(), data.getCommentId());
 
         // region send request to get avatar
-        try {
-            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        String avaLink = Cache.loadStringSP(activity, data.getAuthor()+".ava");
+        if (!avaLink.equals("")) {
+            Glide.with(activity.getApplicationContext()).load(avaLink).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.ava);
+        } else {
+            try {
+                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         // endregion
 

@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:autofillHints="Login"
-                android:hint="@string/login_hint_phone"
+                android:hint="@string/login_hint_username"
                 android:inputType="text"
                 tools:ignore="LabelFor" />
 

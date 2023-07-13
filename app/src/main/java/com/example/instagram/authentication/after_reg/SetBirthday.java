@@ -124,15 +124,17 @@ public class SetBirthday extends AppCompatActivity {
                             // delete unnecessary
                             Cache.deleteSP(this, CacheScopes.USER_PASSWORD.toString());
                             Cache.deleteSP(this, CacheScopes.USER_PASSWORD_REPEAT.toString());
-                        }, this, new Object[]{jsonObject}).sendToSinUp();
+                            startActivity(Intents.getAuthorisation());
+                            finish();
+                        }, this, new Object[]{jsonObject, (Runnable) () -> {
+                            Cache.deleteAppSP(SetBirthday.this);
+                            startActivity(Intents.getSetAvatar());
+                            RegistrationActivities.deleteActivities();
+                        }}).sendToSinUp();
 
                     } catch (JSONException | IOException e) {
                         throw new RuntimeException(e);
                     }
-
-                    Cache.deleteAppSP(SetBirthday.this);
-                    startActivity(Intents.getSetAvatar());
-                    RegistrationActivities.deleteActivities();
                 }
             } else {
                 Resources.getToast(this, this.getResources().getString(R.string.error_send_password1)).show();

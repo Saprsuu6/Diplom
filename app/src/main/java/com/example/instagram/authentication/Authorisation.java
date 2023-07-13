@@ -83,10 +83,6 @@ public class Authorisation extends AppCompatActivity {
         //endregion
         views = new Views();
 
-        // TODO delete someday
-        views.fieldForLogin.setText("Suslik");
-        views.fieldForPassword.setText("SusAdmin2929!");
-
         setIntents();
 
         try {

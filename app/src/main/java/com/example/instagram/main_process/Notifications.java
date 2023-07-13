@@ -13,6 +13,8 @@ import com.example.instagram.services.pagination.PaginationCurrentForAllNotifica
 import com.example.instagram.services.pagination.paging_views.PagingAdapterNotifications;
 import com.example.instagram.services.themes_and_backgrounds.ThemesBackgrounds;
 
+import org.json.JSONException;
+
 public class Notifications extends AppCompatActivity {
 
     private class Views {
@@ -47,6 +49,7 @@ public class Notifications extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ThemesBackgrounds.loadBackground(this, views.notificationsLayout);
+        pagingView = new PagingAdapterNotifications(findViewById(R.id.scroll_view), findViewById(R.id.recycler_view), findViewById(R.id.skeleton), this);
     }
 
     private void sendNewRequest() {

@@ -146,20 +146,22 @@ public class DoCallBack implements CallBack {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         String responseStr = response.body();
+                        Errors.registrationUser(activity, response.body()).show();
+
+                        if (responseStr.contains("1")) {
+                            if (runnable != null) runnable.run();
+                            return;
+                        }
 
                         // region get token from response
                         int indexFrom = responseStr.indexOf(":");
                         String token = responseStr.substring(indexFrom + 1).trim();
                         // endregion
 
-                        if (runnable != null) runnable.run();
-
                         // save token
                         Cache.saveSP(activity, CacheScopes.USER_TOKEN.toString(), token.trim());
-                        Errors.registrationUser(activity, response.body()).show();
+                        if (params[1] != null) ((Runnable) params[1]).run();
                     }
-
-
                 }
 
                 @Override
@@ -208,8 +210,6 @@ public class DoCallBack implements CallBack {
                             ((Handler) params[1]).postDelayed((Runnable) params[2], 5000L);
                         }
                     }
-
-
                 }
 
                 @Override
@@ -362,6 +362,8 @@ public class DoCallBack implements CallBack {
                     if (response.isSuccessful() && response.body() != null) {
                         String avaLink = response.body();
                         String link = GetMediaLink.getMediaLink(activity, avaLink);
+
+                        Cache.saveSP(activity, params[0].toString() + ".ava", link);
 
                         // if imageViews more then one
                         try {
