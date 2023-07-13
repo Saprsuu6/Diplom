@@ -57,15 +57,10 @@ public class PaginationViewComments extends RecyclerView.Adapter<PaginationViewC
         Cache.saveSP(activity, data.getPostId(), data.getCommentId());
 
         // region send request to get avatar
-        if (!commentId.equals("")) {
-            String authorAvatarFromCache = Cache.loadStringSP(activity, data.getPostId() + "." + "authorAvatar");
-            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.ava);
-        } else {
-            try {
-                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.ava}).sendToGetAvaImage();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
         // endregion
 

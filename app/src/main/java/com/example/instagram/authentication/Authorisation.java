@@ -21,7 +21,6 @@ import androidx.appcompat.widget.TooltipCompat;
 
 import com.example.instagram.DAOs.User;
 import com.example.instagram.R;
-import com.example.instagram.authentication.after_reg.SetPassword;
 import com.example.instagram.main_process.NewsLine;
 import com.example.instagram.services.Animation;
 import com.example.instagram.services.Cache;
@@ -229,7 +228,8 @@ public class Authorisation extends AppCompatActivity {
 
         // forgot password
         views.linkForgotPassword.setOnClickListener(v -> {
-            if (!Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString()).equals("")) {
+            String login = Cache.loadStringSP(this, CacheScopes.USER_LOGIN.toString());
+            if (!login.equals("")) {
                 try {
                     JSONObject jsonObject = User.getJSONLogin(views.fieldForLogin.getText().toString().trim());
                     // send code to restore password

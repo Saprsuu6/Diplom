@@ -54,21 +54,10 @@ public class PaginationViewUsers extends RecyclerView.Adapter<PaginationViewUser
         Cache.saveSP(activity, data.getLogin(), data.getLogin());
 
         // region send request to get avatar
-        if (!userLogin.equals("")) {
-            String authorAvatarFromCache = null;
-            try {
-                authorAvatarFromCache = Cache.loadStringSP(activity, data.getLogin() + "." + "authorAvatar");
-            }
-            catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.avaView);
-        } else {
-            try {
-                new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView, data.getLogin()}).sendToGetAvaImage();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            new DoCallBack().setValues(null, activity, new Object[]{data.getLogin(), holder.avaView, data.getLogin()}).sendToGetAvaImage();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
         // endregion
 

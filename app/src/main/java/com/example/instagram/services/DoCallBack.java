@@ -363,12 +363,6 @@ public class DoCallBack implements CallBack {
                         String avaLink = response.body();
                         String link = GetMediaLink.getMediaLink(activity, avaLink);
 
-                        try {
-                            Cache.saveSP(activity, params[2].toString() + "." + "authorAvatar", link);
-                        } catch (Exception e) {
-                            System.out.println(e.getMessage());
-                        }
-
                         // if imageViews more then one
                         try {
                             Glide.with(activity.getApplicationContext()).load(link).diskCacheStrategy(DiskCacheStrategy.ALL).into((ImageView) params[1]);

@@ -102,16 +102,10 @@ public class PaginationViewPosts extends RecyclerView.Adapter<PaginationViewPost
         }
         // endregion
         // region send request to get avatar
-        if (!postId.equals("")) {
-            String authorAvatarFromCache = Cache.loadStringSP(activity, data.getPostId() + "." + "authorAvatar");
-            SetImagesGlide.setImageGlide(activity, authorAvatarFromCache, holder.avaView);
-        } else {
-            try {
-                new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView, data.getPostId()}).sendToGetAvaImage();
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-            Cache.saveSP(activity, data.getPostId() + "." + "authorAvatar", link);
+        try {
+            new DoCallBack().setValues(null, activity, new Object[]{data.getAuthor(), holder.avaView, data.getPostId()}).sendToGetAvaImage();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
         // endregion
         // region set like, save
